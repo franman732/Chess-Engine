@@ -20,7 +20,13 @@ def get_color(board, index):
     else:
         return 1
 
-def determine_pawn_moves(board, moves, start):
+def determine_capturable(board, end, color):
+    if get_color(board(end)) != color:
+        return True
+    else:
+        return False
+
+def determine_pawn_moves(board, moves, start): #Pawn is done. First section includes forwards movements, second section includes capture moves
     color = get_color(board, start)
     if color == 0:
         if ((1 == start // 8) and board(start + 16) == 0 and board(start + 8) == 0):
@@ -29,29 +35,70 @@ def determine_pawn_moves(board, moves, start):
         elif board(start + 8) == 0:
             moves.append(start, start + 8)
 
-        if 
+        if determine_capturable(board, (start + 7), color):
+            moves.append(start, start + 7)
+        elif determine_capturable(board, (start + 7), color):
+            moves.append(start, start + 9)
+
     elif color == 1:
-        if ((start // 8 == 6 and color == 1)) and board(start - 16) == 0 and board(start - 8) == 0:
+        if ((start // 8 == 6)) and board(start - 16) == 0 and board(start - 8) == 0:
             moves.append(start, start - 16)
             moves.append(start, start - 8)
         elif board(start - 8) == 0: 
             moves.append(start, start - 8)
-    elif 
+
+        if determine_capturable(board, (start + 7), color):
+            moves.append(start, start + 7)
+        elif determine_capturable(board, (start + 9), color):
+            moves.append(start, start + 9)
+
 
 def determine_rook_moves(board, moves, start):
+    color = get_color(board, start)
     col = start % 8 
-    while col >= 0:
-        if moves.append(start, start - 1)
+    counter = 1 #counter is just a temporary variable to keep track of changes to checked position so we can compare against the piece on the square.
+    while (col != 0 and board(start - counter) == 0):
+        moves.append(start, start - counter)
+        counter += 1
         col -= 1
 
+    if (col == 0 and determine_capturable(board, (start - counter), color) if board(start - counter) != 0 else True):
+        moves.append(start, start - counter)
+
+
     col = start % 8 
-    while col <= 8:
-        moves.append(start, start + 1)
+    counter = 1
+    while (col != 8 and board(start + counter) == 0):
+        moves.append(start, start + counter)
+        counter += 1
         col += 1
+    
+    if (col == 8 and determine_capturable(board, (start + counter), color) if board(start + counter) != 0 else True):
+        moves.append(start, start + counter)
+
+
 
     row = start // 8
-    while row >= 0:
-        moves.append()
+    counter = 1
+    while (row != 0 and board(start - (counter * 8)) == 0):
+        moves.append(start, start - (8 * counter))
+        counter += 1
+        row -= 1
+
+    if (row == 0 and determine_capturable(board, (start - (8 * counter)), color) if board(start - (8 * counter)) != 0 else True):
+        moves.append(start, start - (8 * counter))
+
+    
+    row = start // 8
+    counter = 1
+    while (row != 8 and board(start + (counter * 8)) == 0):
+        moves.append(start, start + (8 * counter))
+        counter += 1
+        row += 1
+
+    if (row == 8 and determine_capturable(board, (start + (8 * counter)), color) if board(start + (8 * counter)) != 0 else True):
+        moves.append(start, start + (8 * counter))
+        
 
 def determine_knight_moves(board, moves, start):
     return

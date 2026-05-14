@@ -12,6 +12,10 @@ board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bo
                  17, 18, 19, 20, 21, 22, 23, 24,
                  25, 26, 27, 28, 29, 30, 31, 32])
 
+knight_moves = [6, 10, 15, 17, -6, -10, -15, -17]
+
+ROOK_DIRECTIONS = [-1, 1, -8, 8]
+
 def get_color(board, index):
     if board[index] == 0:
         return -1
@@ -30,97 +34,101 @@ def determine_pawn_moves(board, moves, start): #Pawn is done. First section incl
     color = get_color(board, start)
     if color == 0:
         if ((1 == start // 8) and board(start + 16) == 0 and board(start + 8) == 0):
-            moves.append(start, start + 16)
-            moves.append(start, start + 8)
+            moves.append((start, start + 16))
+            moves.append((start, start + 8))
         elif board(start + 8) == 0:
-            moves.append(start, start + 8)
+            moves.append((start, start + 8))
 
         if determine_capturable(board, (start + 7), color):
-            moves.append(start, start + 7)
+            moves.append((start, start + 7))
         elif determine_capturable(board, (start + 7), color):
-            moves.append(start, start + 9)
+            moves.append((start, start + 9))
 
     elif color == 1:
         if ((start // 8 == 6)) and board(start - 16) == 0 and board(start - 8) == 0:
-            moves.append(start, start - 16)
-            moves.append(start, start - 8)
+            moves.append((start, start - 16))
+            moves.append((start, start - 8))
         elif board(start - 8) == 0: 
-            moves.append(start, start - 8)
+            moves.append((start, start - 8))
 
         if determine_capturable(board, (start + 7), color):
-            moves.append(start, start + 7)
+            moves.append((start, start + 7))
         elif determine_capturable(board, (start + 9), color):
-            moves.append(start, start + 9)
-
+            moves.append((start, start + 9))
 
 def determine_rook_moves(board, moves, start):
     color = get_color(board, start)
-    col = start % 8 
-    counter = 1 #counter is just a temporary variable to keep track of changes to checked position so we can compare against the piece on the square.
-    while (col != 0 and board(start - counter) == 0):
-        moves.append(start, start - counter)
-        counter += 1
-        col -= 1
 
-    if (col == 0 and determine_capturable(board, (start - counter), color) if board(start - counter) != 0 else True):
-        moves.append(start, start - counter)
+    for direction in ROOK_DIRECTIONS:
+        current = start
 
+        while True:
+            next_square = current + direction
 
-    col = start % 8 
-    counter = 1
-    while (col != 8 and board(start + counter) == 0):
-        moves.append(start, start + counter)
-        counter += 1
-        col += 1
-    
-    if (col == 8 and determine_capturable(board, (start + counter), color) if board(start + counter) != 0 else True):
-        moves.append(start, start + counter)
+            if not is_valid_rook_step(current, next_square, direction):
+                break
 
+            piece = board[next_square]
 
+            if piece == 0:
+                moves.append((start, next_square))
+            else:
+                if get_color(piece) != color:
+                    moves.append((start, next_square))
+                break
 
-    row = start // 8
-    counter = 1
-    while (row != 0 and board(start - (counter * 8)) == 0):
-        moves.append(start, start - (8 * counter))
-        counter += 1
-        row -= 1
+            current = next_square
 
-    if (row == 0 and determine_capturable(board, (start - (8 * counter)), color) if board(start - (8 * counter)) != 0 else True):
-        moves.append(start, start - (8 * counter))
+def is_valid_rook_step(current, next_square, direction):
+    if next_square < 0 or next_square >= 64:
+        return False
 
-    
-    row = start // 8
-    counter = 1
-    while (row != 8 and board(start + (counter * 8)) == 0):
-        moves.append(start, start + (8 * counter))
-        counter += 1
-        row += 1
+    current_row = current // 8
+    current_col = current % 8
 
-    if (row == 8 and determine_capturable(board, (start + (8 * counter)), color) if board(start + (8 * counter)) != 0 else True):
-        moves.append(start, start + (8 * counter))
+    next_row = next_square // 8
+    next_col = next_square % 8
+
+    if direction == -1 or direction == 1:
+        return current_row == next_row
+
+    if direction == -8 or direction == 8:
+        return current_col == next_col
+
+    return False
         
+def is_valid_knight_move(start, target):
+    if target < 0 or target >= 64:
+        return False
+
+    start_file = start % 8
+    target_file = target % 8
+
+    diff = abs(start_file - target_file)
+
+    return diff in (1, 2)
 
 def determine_knight_moves(board, moves, start):
     color = get_color(board, start)
-    if get_color(board[start - 6]) != color:
-        moves.append(start, start - 6)
-    if get_color(board(start - 10)) != color:
-        moves.append(start, start - 10)
-    if get_color(board(start - 15)) != color:
-        moves.append(start, start - 15)
-    if get_color(board(start - 17)) != color:
-        moves.append(start, start - 17)
-    if get_color(board(start + 6)) != color:
-        moves.append(start, start + 6)
-    if get_color(board(start + 10)) != color:
-        moves.append(start, start + 10)
-    if get_color(board(start + 15)) != color:
-        moves.append(start, start + 15)
-    if get_color(board(start + 17)) != color:
-        moves.append(start, start + 17)
+
+    for offset in knight_moves:
+        target = start + offset
+
+        if not is_valid_knight_move(start, target):
+            continue
+
+        piece = board[target]
+        target_color = get_color(piece)
+
+        if target_color != color:
+            moves.append((start, target))
 
 def determine_bishop_moves(board, moves, start):
-    return
+    col = start % 8
+    row = start // 8
+
+    counter = 1
+    while ((col != 8 and row != 8) and 
 
 def determine_queen_moves(board, moves, start):
     return

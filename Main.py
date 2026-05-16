@@ -19,13 +19,16 @@ ROOK_DIRECTIONS = [-1, 1, -8, 8]
 def get_color(board, index):
     if board[index] == 0:
         return -1
-    if pieces[board(index)].lower == pieces[board(index)]:
+    if pieces[board[index]].lower() == pieces[board[index]]:
         return 0
     else:
         return 1
 
 def determine_capturable(board, end, color):
-    if get_color(board(end)) != color:
+    if end < 0 or end > 63:
+        return False
+    
+    if -1 != get_color(board, end) != color:
         return True
     else:
         return False
@@ -33,10 +36,10 @@ def determine_capturable(board, end, color):
 def determine_pawn_moves(board, moves, start): #Pawn is done. First section includes forwards movements, second section includes capture moves
     color = get_color(board, start)
     if color == 0:
-        if ((1 == start // 8) and board(start + 16) == 0 and board(start + 8) == 0):
+        if ((1 == start // 8) and board[start + 16] == 0 and board[start + 8] == 0):
             moves.append((start, start + 16))
             moves.append((start, start + 8))
-        elif board(start + 8) == 0:
+        elif board[start + 8] == 0:
             moves.append((start, start + 8))
 
         if determine_capturable(board, (start + 7), color):
@@ -45,10 +48,10 @@ def determine_pawn_moves(board, moves, start): #Pawn is done. First section incl
             moves.append((start, start + 9))
 
     elif color == 1:
-        if ((start // 8 == 6)) and board(start - 16) == 0 and board(start - 8) == 0:
+        if ((start // 8 == 6)) and board[start - 16] == 0 and board[start - 8] == 0:
             moves.append((start, start - 16))
             moves.append((start, start - 8))
-        elif board(start - 8) == 0: 
+        elif board[start - 8] == 0: 
             moves.append((start, start - 8))
 
         if determine_capturable(board, (start + 7), color):
@@ -73,7 +76,7 @@ def determine_rook_moves(board, moves, start):
             if piece == 0:
                 moves.append((start, next_square))
             else:
-                if get_color(piece) != color:
+                if get_color(board, next_square) != color:
                     moves.append((start, next_square))
                 break
 
@@ -118,41 +121,94 @@ def determine_knight_moves(board, moves, start):
             continue
 
         piece = board[target]
-        target_color = get_color(piece)
+        target_color = get_color(board, target)
 
         if target_color != color:
             moves.append((start, target))
 
-def determine_bishop_moves(board, moves, start):
-    col = start % 8
-    row = start // 8
+def determine_bishop_moves(board, moves, start_pos):
+    color = get_color(board, start_pos)
 
-    counter = 1
-    while ((col != 8 and row != 8) and 
+    # 4 diagonal directions: up-left, up-right, down-left, down-right
+    directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
-def determine_queen_moves(board, moves, start):
-    return
+    row = start_pos // 8
+    col = start_pos % 8
 
-def determine_king_moves(board, moves, start):
-    return
+    for dr, dc in directions:
+        r, c = row + dr, col + dc
+
+        while 0 <= r < 8 and 0 <= c < 8:
+            idx = r * 8 + c
+
+            # empty square
+            if board[idx] == 0:
+                moves.append((start_pos, idx))
+
+            else:
+                # occupied square -> check capture
+                if determine_capturable(board, idx, color):
+                    moves.append((start_pos, idx))
+
+                # stop sliding in this direction no matter what
+                break
+
+            r += dr
+            c += dc
+
+def determine_queen_moves(board, moves, start_pos):
+    # just reuse rook + bishop logic
+    determine_bishop_moves(board, moves, start_pos)
+    determine_rook_moves(board, moves, start_pos)
+
+def determine_king_moves(board, moves, start_pos):
+    color = get_color(board, start_pos)
+
+    directions = [
+        (-1, -1), (-1, 0), (-1, 1),
+        (0, -1),          (0, 1),
+        (1, -1),  (1, 0), (1, 1)
+    ]
+
+    row = start_pos // 8
+    col = start_pos % 8
+
+    for dr, dc in directions:
+        r = row + dr
+        c = col + dc
+
+        if 0 <= r < 8 and 0 <= c < 8:
+            idx = r * 8 + c
+            piece = board[idx]
+
+            # empty square
+            if piece == 0:
+                moves.append((start_pos, idx))
+
+            # enemy piece
+            elif determine_capturable(board, idx, color):
+                moves.append((start_pos, idx))
 
 def create_psudo_moves(board): # takes a board state, and returns all possible moves, legal and illegal, given that position
     moves = [] #(start_position, end_position) position is by index number 
     for i, value in enumerate(board):
-        if pieces[value].lower == "pawn":
+        if pieces[value].lower() == "pawn":
             determine_pawn_moves(board, moves, i)
 
-        elif pieces[value].lower == "rook":
+        elif pieces[value].lower() == "rook":
             determine_rook_moves(board, moves, i)
 
-        elif pieces[value].lower == "knight":
+        elif pieces[value].lower() == "knight":
             determine_knight_moves(board, moves, i)
 
-        elif pieces[value].lower == "bishop":
+        elif pieces[value].lower() == "bishop":
             determine_bishop_moves(board, moves, i)
 
-        elif pieces[value].lower == "queen":
+        elif pieces[value].lower() == "queen":
             determine_queen_moves(board, moves, i)
 
-        elif pieces[value].lower == "king":
+        elif pieces[value].lower() == "king":
             determine_king_moves(board, moves, i)
+    print(moves)
+
+create_psudo_moves(board)

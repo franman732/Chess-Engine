@@ -4,12 +4,12 @@ pieces = {0:"no", 1:"pawn", 2:"pawn", 3:"pawn", 4:"pawn", 5:"pawn", 6:"pawn", 7:
           17:"PAWN", 18:"PAWN", 19:"PAWN", 20:"PAWN", 21:"PAWN", 22:"PAWN", 23:"PAWN", 24:"PAWN", 25:"ROOK", 26:"KNIGHT", 27:"BISHOP", 28:"QUEEN", 29:"KING", 30:"BISHOP", 31:"KNIGHT", 32:"ROOK"} #Black is 0, white is 1
 
 board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
-                 1, 2, 3, 4, 5, 6, 7, 8,
+                 1, 2, 3, 0, 5, 6, 7, 8,
                  0, 0, 0, 0, 0, 0, 0, 0,
+                 0, 0, 0, 4, 0, 0, 0, 0,
+                 0, 0, 0, 0, 20, 0, 0, 0,
                  0, 0, 0, 0, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0,
-                 17, 18, 19, 20, 21, 22, 23, 24,
+                 17, 18, 19, 0, 21, 22, 23, 24,
                  25, 26, 27, 28, 29, 30, 31, 32])
 
 knight_moves = [6, 10, 15, 17, -6, -10, -15, -17]
@@ -44,7 +44,7 @@ def determine_pawn_moves(board, moves, start): #Pawn is done. First section incl
 
         if determine_capturable(board, (start + 7), color):
             moves.append((start, start + 7))
-        elif determine_capturable(board, (start + 7), color):
+        elif determine_capturable(board, (start + 9), color):
             moves.append((start, start + 9))
 
     elif color == 1:
@@ -54,10 +54,10 @@ def determine_pawn_moves(board, moves, start): #Pawn is done. First section incl
         elif board[start - 8] == 0: 
             moves.append((start, start - 8))
 
-        if determine_capturable(board, (start + 7), color):
-            moves.append((start, start + 7))
-        elif determine_capturable(board, (start + 9), color):
-            moves.append((start, start + 9))
+        if determine_capturable(board, (start - 7), color):
+            moves.append((start, start - 7))
+        elif determine_capturable(board, (start - 9), color):
+            moves.append((start, start - 9))
 
 def determine_rook_moves(board, moves, start):
     color = get_color(board, start)

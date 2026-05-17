@@ -3,11 +3,13 @@ import numpy as np
 pieces = {0:"no", 1:"pawn", 2:"pawn", 3:"pawn", 4:"pawn", 5:"pawn", 6:"pawn", 7:"pawn", 8:"pawn", 9:"rook", 10:"knight", 11:"bishop", 12:"queen", 13:"king", 14:"bishop", 15:"knight", 16:"rook", #lowercase is black, capital is white
           17:"PAWN", 18:"PAWN", 19:"PAWN", 20:"PAWN", 21:"PAWN", 22:"PAWN", 23:"PAWN", 24:"PAWN", 25:"ROOK", 26:"KNIGHT", 27:"BISHOP", 28:"QUEEN", 29:"KING", 30:"BISHOP", 31:"KNIGHT", 32:"ROOK"} #Black is 0, white is 1
 
+piece_values = {"pawn": 1, "bishop": 3, "knight": 3, "rook": 5, "queen": 9}
+
 board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
                  1, 2, 3, 0, 5, 6, 7, 8,
-                 0, 0, 0, 0, 0, 0, 0, 0,
-                 0, 0, 0, 4, 0, 0, 0, 0,
                  0, 0, 0, 0, 20, 0, 0, 0,
+                 0, 0, 0, 4, 0, 0, 0, 0,
+                 0, 0, 0, 0, 0, 0, 0, 0,
                  0, 0, 0, 0, 0, 0, 0, 0,
                  17, 18, 19, 0, 21, 22, 23, 24,
                  25, 26, 27, 28, 29, 30, 31, 32])
@@ -42,10 +44,8 @@ def determine_pawn_moves(board, moves, start): #Pawn is done. First section incl
         elif board[start + 8] == 0:
             moves.append((start, start + 8))
 
-        if determine_capturable(board, (start + 7), color):
-            moves.append((start, start + 7))
-        elif determine_capturable(board, (start + 9), color):
-            moves.append((start, start + 9))
+        moves.append((start, start + 7))
+        moves.append((start, start + 9))
 
     elif color == 1:
         if ((start // 8 == 6)) and board[start - 16] == 0 and board[start - 8] == 0:
@@ -54,10 +54,8 @@ def determine_pawn_moves(board, moves, start): #Pawn is done. First section incl
         elif board[start - 8] == 0: 
             moves.append((start, start - 8))
 
-        if determine_capturable(board, (start - 7), color):
-            moves.append((start, start - 7))
-        elif determine_capturable(board, (start - 9), color):
-            moves.append((start, start - 9))
+        moves.append((start, start - 7))
+        moves.append((start, start - 9))
 
 def determine_rook_moves(board, moves, start):
     color = get_color(board, start)
@@ -189,26 +187,101 @@ def determine_king_moves(board, moves, start_pos):
             elif determine_capturable(board, idx, color):
                 moves.append((start_pos, idx))
 
-def create_psudo_moves(board): # takes a board state, and returns all possible moves, legal and illegal, given that position
+def create_psudo_moves(board, color): # takes a board state, and returns all possible moves, legal and illegal, given that position
     moves = [] #(start_position, end_position) position is by index number 
     for i, value in enumerate(board):
-        if pieces[value].lower() == "pawn":
-            determine_pawn_moves(board, moves, i)
+        if get_color(board, i) == color:
+            if pieces[value].lower() == "pawn":
+                determine_pawn_moves(board, moves, i)
 
-        elif pieces[value].lower() == "rook":
-            determine_rook_moves(board, moves, i)
+            elif pieces[value].lower() == "rook":
+                determine_rook_moves(board, moves, i)
 
-        elif pieces[value].lower() == "knight":
-            determine_knight_moves(board, moves, i)
+            elif pieces[value].lower() == "knight":
+                determine_knight_moves(board, moves, i)
 
-        elif pieces[value].lower() == "bishop":
-            determine_bishop_moves(board, moves, i)
+            elif pieces[value].lower() == "bishop":
+                determine_bishop_moves(board, moves, i)
 
-        elif pieces[value].lower() == "queen":
-            determine_queen_moves(board, moves, i)
+            elif pieces[value].lower() == "queen":
+                determine_queen_moves(board, moves, i)
 
-        elif pieces[value].lower() == "king":
-            determine_king_moves(board, moves, i)
-    print(moves)
+            elif pieces[value].lower() == "king":
+                determine_king_moves(board, moves, i)
+    return moves
 
-create_psudo_moves(board)
+def make_move(board, move):
+    start, end = move
+
+    new_board = board.copy()
+
+    new_board[end] = new_board[start]
+    new_board[start] = 0
+
+    return new_board
+
+def find_king(board, color):
+    for i, piece in enumerate(board):
+        if piece == 0:
+            continue
+
+        name = pieces[piece].lower()
+
+        if name == "king":
+            if get_color(board, i) == color:
+                return i
+
+    return -1
+
+def is_square_attacked(board, square, enemy_color):
+    enemy_moves = create_psudo_moves(board, enemy_color)
+
+    for start, end in enemy_moves:
+        if end == square:
+            return True
+    
+    return False
+
+def determine_pawn_legality(board, move):
+    start, end = move
+    start_col = start % 8
+    end_col = end % 8
+
+    if abs(start_col - end_col) != 0:
+        if  -1 != get_color(board, end) != get_color(board, start):
+            return True
+    else:
+        return True
+
+    return False
+
+def determine_legal_moves(board, all_moves):
+    legal_moves = []
+
+    for move in all_moves:
+        start, end = move
+
+        moving_color = get_color(board, start)
+
+        # make temporary board
+        temp_board = make_move(board, move)
+
+        # find own king after move
+        king_square = find_king(temp_board, moving_color)
+
+        # enemy color
+        enemy_color = 1 if moving_color == 0 else 0
+
+        # if king NOT attacked then legal
+        if not is_square_attacked(temp_board, king_square, enemy_color):
+            if pieces[board[start]].lower() == "pawn":
+                if determine_pawn_legality(board, move):
+                    legal_moves.append(move)
+            else:
+                legal_moves.append(move)
+
+    return legal_moves
+
+
+all_moves = create_psudo_moves(board, 0)
+print(determine_legal_moves(board, all_moves))

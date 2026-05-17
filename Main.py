@@ -6,7 +6,7 @@ pieces = {0:"no", 1:"pawn", 2:"pawn", 3:"pawn", 4:"pawn", 5:"pawn", 6:"pawn", 7:
 piece_values = {"pawn": 1, "bishop": 3, "knight": 3, "rook": 5, "queen": 9}
 
 board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
-                 1, 2, 3, 0, 5, 6, 7, 8,
+                 1, 2, 3, 0, 0, 6, 7, 8,
                  0, 0, 0, 0, 20, 0, 0, 0,
                  0, 0, 0, 4, 0, 0, 0, 0,
                  0, 0, 0, 0, 0, 0, 0, 0,
@@ -35,27 +35,44 @@ def determine_capturable(board, end, color):
     else:
         return False
 
-def determine_pawn_moves(board, moves, start): #Pawn is done. First section includes forwards movements, second section includes capture moves
+def determine_pawn_moves(board, moves, start, ignore_pawn_forwards = False): #Pawn is done. First section includes forwards movements, second section includes capture moves
     color = get_color(board, start)
     if color == 0:
-        if ((1 == start // 8) and board[start + 16] == 0 and board[start + 8] == 0):
-            moves.append((start, start + 16))
-            moves.append((start, start + 8))
-        elif board[start + 8] == 0:
-            moves.append((start, start + 8))
-
-        moves.append((start, start + 7))
-        moves.append((start, start + 9))
+        if not ignore_pawn_forwards: # WHen ignore_pawn_forwards is true, we want to ignore these moves
+            if ((1 == start // 8) and board[start + 16] == 0 and board[start + 8] == 0):
+                moves.append((start, start + 16))
+                moves.append((start, start + 8))
+            elif board[start + 8] == 0:
+                moves.append((start, start + 8))
+        
+        if is_valid_pawn_move(start, start + 7):
+            moves.append((start, start + 7))
+        if is_valid_pawn_move(start, start + 9):
+            moves.append((start, start + 9))
 
     elif color == 1:
-        if ((start // 8 == 6)) and board[start - 16] == 0 and board[start - 8] == 0:
-            moves.append((start, start - 16))
-            moves.append((start, start - 8))
-        elif board[start - 8] == 0: 
-            moves.append((start, start - 8))
+        if not ignore_pawn_forwards: # WHen ignore_pawn_forwards is true, we want to ignore these moves
+            if ((start // 8 == 6)) and board[start - 16] == 0 and board[start - 8] == 0:
+                moves.append((start, start - 16))
+                moves.append((start, start - 8))
+            elif board[start - 8] == 0: 
+                moves.append((start, start - 8))
 
-        moves.append((start, start - 7))
-        moves.append((start, start - 9))
+        if is_valid_pawn_move(start, start - 7):
+            moves.append((start, start - 7))
+        if is_valid_pawn_move(start, start - 9):
+            moves.append((start, start - 9))
+
+def is_valid_pawn_move(start, target):
+    if target < 0 or target >= 64:
+        return False
+
+    start_file = start % 8
+    target_file = target % 8
+
+    diff = abs(start_file - target_file)
+
+    return diff in (0, 1)
 
 def determine_rook_moves(board, moves, start):
     color = get_color(board, start)
@@ -187,12 +204,12 @@ def determine_king_moves(board, moves, start_pos):
             elif determine_capturable(board, idx, color):
                 moves.append((start_pos, idx))
 
-def create_psudo_moves(board, color): # takes a board state, and returns all possible moves, legal and illegal, given that position
+def create_psudo_moves(board, color, ignore_pawn_forwards): # takes a board state, and returns all possible moves, legal and illegal, given that position
     moves = [] #(start_position, end_position) position is by index number 
     for i, value in enumerate(board):
         if get_color(board, i) == color:
             if pieces[value].lower() == "pawn":
-                determine_pawn_moves(board, moves, i)
+                determine_pawn_moves(board, moves, i, ignore_pawn_forwards) #ignore_pawn_forwards is for ignoring them when determining 
 
             elif pieces[value].lower() == "rook":
                 determine_rook_moves(board, moves, i)
@@ -218,6 +235,12 @@ def make_move(board, move):
     new_board[end] = new_board[start]
     new_board[start] = 0
 
+    if pieces[new_board[end]].lower() == "pawn": # If it is a pawn promotion, turn it into a queen
+        if end // 8 == 0:
+            new_board[end] = "QUEEN"
+        elif end // 8 == 7:
+            new_board[end] = "queen"
+
     return new_board
 
 def find_king(board, color):
@@ -234,7 +257,7 @@ def find_king(board, color):
     return -1
 
 def is_square_attacked(board, square, enemy_color):
-    enemy_moves = create_psudo_moves(board, enemy_color)
+    enemy_moves = create_psudo_moves(board, enemy_color, True) # True makes create_psudo_moves ignore forward moves for the pawn
 
     for start, end in enemy_moves:
         if end == square:
@@ -250,10 +273,10 @@ def determine_pawn_legality(board, move):
     if abs(start_col - end_col) != 0:
         if  -1 != get_color(board, end) != get_color(board, start):
             return True
+        else:
+            return False
     else:
         return True
-
-    return False
 
 def determine_legal_moves(board, all_moves):
     legal_moves = []
@@ -283,5 +306,5 @@ def determine_legal_moves(board, all_moves):
     return legal_moves
 
 
-all_moves = create_psudo_moves(board, 0)
+all_moves = create_psudo_moves(board, 0, False)
 print(determine_legal_moves(board, all_moves))

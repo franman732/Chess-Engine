@@ -1,9 +1,10 @@
-import numpy as np
+import numpy as np # THis is intended to maximize white, minimize black. Be able to set turn so it doesnt matter, and always set urself as white.
 
 pieces = {0:"no", 1:"pawn", 2:"pawn", 3:"pawn", 4:"pawn", 5:"pawn", 6:"pawn", 7:"pawn", 8:"pawn", 9:"rook", 10:"knight", 11:"bishop", 12:"queen", 13:"king", 14:"bishop", 15:"knight", 16:"rook", #lowercase is black, capital is white
           17:"PAWN", 18:"PAWN", 19:"PAWN", 20:"PAWN", 21:"PAWN", 22:"PAWN", 23:"PAWN", 24:"PAWN", 25:"ROOK", 26:"KNIGHT", 27:"BISHOP", 28:"QUEEN", 29:"KING", 30:"BISHOP", 31:"KNIGHT", 32:"ROOK"} #Black is 0, white is 1
 
-piece_values = {"pawn": 1, "bishop": 3, "knight": 3, "rook": 5, "queen": 9}
+piece_values = [0, 100, 100, 100, 100, 100, 100, 100, 100, 500, 320, 330, 900, 20000, 330, 320, 500, -100, -100, -100, -100, -100, -100, -100, -100, -500, -320, -330, -900, -20000, -330, -320, -500]
+
 
 board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
                  1, 2, 3, 0, 0, 6, 7, 8,
@@ -13,6 +14,64 @@ board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bo
                  0, 0, 0, 0, 0, 0, 0, 0,
                  17, 18, 19, 0, 21, 22, 23, 24,
                  25, 26, 27, 28, 29, 30, 31, 32])
+
+p_t = [
+     0,   0,   0,   0,   0,   0,   0,   0,
+    50,  50,  50,  50,  50,  50,  50,  50,
+    10,  10,  20,  30,  30,  20,  10,  10,
+     5,   5,  10,  25,  25,  10,   5,   5,
+     0,   0,   0,  20,  20,   0,   0,   0,
+     5,  -5, -10,   0,   0, -10,  -5,   5,
+     5,  10,  10, -20, -20,  10,  10,   5,
+     0,   0,   0,   0,   0,   0,   0,   0
+]
+
+b_t = [
+    -20, -10, -10, -10, -10, -10, -10, -20,
+    -10,   5,   0,   0,   0,   0,   5, -10,
+    -10,  10,  10,  10,  10,  10,  10, -10,
+    -10,   0,  10,  10,  10,  10,   0, -10,
+    -10,   5,   5,  10,  10,   5,   5, -10,
+    -10,   0,   5,  10,  10,   5,   0, -10,
+    -10,   0,   0,   0,   0,   0,   0, -10,
+    -20, -10, -10, -10, -10, -10, -10, -20
+]
+
+r_t = [
+     0,   0,   5,  10,  10,   5,   0,   0,
+    -5,   0,   0,   0,   0,   0,   0,  -5,
+    -5,   0,   0,   0,   0,   0,   0,  -5,
+    -5,   0,   0,   0,   0,   0,   0,  -5,
+    -5,   0,   0,   0,   0,   0,   0,  -5,
+    -5,   0,   0,   0,   0,   0,   0,  -5,
+     5,  10,  10,  10,  10,  10,  10,   5,
+     0,   0,   0,   0,   0,   0,   0,   0
+]
+
+q_t = [
+    -20, -10, -10,  -5,  -5, -10, -10, -20,
+    -10,   0,   0,   0,   0,   5,   0, -10,
+    -10,   0,   5,   5,   5,   5,   5, -10,
+     -5,   0,   5,   5,   5,   5,   0,  -5,
+      0,   0,   5,   5,   5,   5,   0,  -5,
+    -10,   5,   5,   5,   5,   5,   0, -10,
+    -10,   0,   5,   0,   0,   0,   0, -10,
+    -20, -10, -10,  -5,  -5, -10, -10, -20
+]
+
+k_t = [
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -20, -30, -30, -40, -40, -30, -30, -20,
+    -10, -20, -20, -20, -20, -20, -20, -10,
+     20,  20,   0,   0,   0,   0,  20,  20,
+     20,  30,  10,   0,   0,  10,  30,  20
+]
+
+pst = [0, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, k_t, b_t, q_t, k_t, b_t, k_t, r_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, k_t, b_t, q_t, k_t, b_t, k_t, r_t]
+# list that contains all the Piece-Square Tables for quick lookup in evaluation function
 
 knight_moves = [6, 10, 15, 17, -6, -10, -15, -17]
 
@@ -305,6 +364,37 @@ def determine_legal_moves(board, all_moves):
 
     return legal_moves
 
+def evaluate_board(board): #For evaluation, to determine my side I want to maximize my evaluation. For other side, I want to minimize my evaluation. Black should minimize, white should maximize
+    eval = 0
+    pieces = []
+    white_bishops = 0
+    black_bishops = 0
+    
+    for i, piece in enumerate(board):
+        if piece == 0:
+            continue
+        
+        eval += piece_values[piece] # Part of eval based on material
 
-all_moves = create_psudo_moves(board, 0, False)
-print(determine_legal_moves(board, all_moves))
+        is_white = piece >= 17
+
+        table_index = i if is_white else 63 - i
+        eval += pst[piece][table_index] if is_white else -pst[piece][table_index] # PST table valuation gets swapped for black pieces
+
+        if piece in (27, 30):
+            white_bishops += 1
+        elif piece in (11, 14):
+            black_bishops += 1
+
+    if white_bishops >= 2:
+        eval += 50
+    
+    if black_bishops >= 2:
+        eval -= 50
+
+    return eval
+
+print(evaluate_board(board)) #evaluatoin is behaving weirdly. White pieces should increase evaluation, however they end up decreasing it somehow.
+
+"""all_moves = create_psudo_moves(board, 0, False)
+print(determine_legal_moves(board, all_moves))"""

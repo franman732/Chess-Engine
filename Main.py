@@ -70,6 +70,17 @@ k_t = [
      20,  30,  10,   0,   0,  10,  30,  20
 ]
 
+kn_t = [
+    -50, -40, -30, -30, -30, -30, -40, -50,
+    -40, -20,   0,   5,   5,   0, -20, -40,
+    -30,   5,  10,  15,  15,  10,   5, -30,
+    -30,   0,  15,  20,  20,  15,   0, -30,
+    -30,   5,  15,  20,  20,  15,   5, -30,
+    -30,   0,  10,  15,  15,  10,   0, -30,
+    -40, -20,   0,   5,   5,   0, -20, -40,
+    -50, -40, -30, -30, -30, -30, -40, -50
+]
+
 pst = [0, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, kn_t, b_t, q_t, k_t, b_t, kn_t, r_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, kn_t, b_t, q_t, k_t, b_t, kn_t, r_t]
 # list that contains all the Piece-Square Tables for quick lookup in evaluation function
 

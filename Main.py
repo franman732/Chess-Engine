@@ -70,12 +70,20 @@ k_t = [
      20,  30,  10,   0,   0,  10,  30,  20
 ]
 
-pst = [0, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, k_t, b_t, q_t, k_t, b_t, k_t, r_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, k_t, b_t, q_t, k_t, b_t, k_t, r_t]
+pst = [0, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, kn_t, b_t, q_t, k_t, b_t, kn_t, r_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, kn_t, b_t, q_t, k_t, b_t, kn_t, r_t]
 # list that contains all the Piece-Square Tables for quick lookup in evaluation function
+
+initial_castle_rights = {0: True, 1: True, 2: True, 3: True}
 
 knight_moves = [6, 10, 15, 17, -6, -10, -15, -17]
 
 ROOK_DIRECTIONS = [-1, 1, -8, 8]
+
+class Position:
+    def __init__(self, board, side_to_move, castle_rights):
+        self.board = board
+        self.side_to_move = side_to_move
+        self.castle_rights = castle_rights
 
 def get_color(board, index):
     if board[index] == 0:
@@ -235,8 +243,9 @@ def determine_queen_moves(board, moves, start_pos):
     determine_bishop_moves(board, moves, start_pos)
     determine_rook_moves(board, moves, start_pos)
 
-def determine_king_moves(board, moves, start_pos):
+def determine_king_moves(board, moves, start_pos, castle_rights):
     color = get_color(board, start_pos)
+    psudo_moves = None
 
     directions = [
         (-1, -1), (-1, 0), (-1, 1),
@@ -263,7 +272,46 @@ def determine_king_moves(board, moves, start_pos):
             elif determine_capturable(board, idx, color):
                 moves.append((start_pos, idx))
 
-def create_psudo_moves(board, color, ignore_pawn_forwards): # takes a board state, and returns all possible moves, legal and illegal, given that position
+    if castle_rights != None:
+        if color == 0: # Black is 0, white is 1
+            if castle_rights[0]: # kingside
+                if board[5] == 0 and board[6] == 0:
+                    if board[7] == 16:
+                        psudo_moves = create_pseudo_moves(board, 1, True, None)
+                        if (not is_square_attacked(board, 4, 1, psudo_moves) and
+                            not is_square_attacked(board, 5, 1, psudo_moves) and
+                            not is_square_attacked(board, 6, 1, psudo_moves)):
+                            moves.append((4, 6, 0))
+
+            if castle_rights[1]: # queenside
+                if board[1] == 0 and board[2] == 0 and board[3] == 0:
+                    if board[0] == 9:
+                        psudo_moves = create_pseudo_moves(board, 1, True, None) if psudo_moves == None else psudo_moves
+                        if (not is_square_attacked(board, 4, 1, psudo_moves) and
+                            not is_square_attacked(board, 3, 1, psudo_moves) and
+                            not is_square_attacked(board, 2, 1, psudo_moves)):
+                            moves.append((4, 2, 1))
+                            
+        elif color == 1:
+            if castle_rights[2]: # kingside
+                if board[61] == 0 and board[62] == 0:
+                    if board[63] == 32:
+                        psudo_moves = create_pseudo_moves(board, 0, True, None)
+                        if (not is_square_attacked(board, 60, 0, psudo_moves) and
+                            not is_square_attacked(board, 61, 0, psudo_moves) and
+                            not is_square_attacked(board, 62, 0, psudo_moves)):
+                            moves.append((60, 62, 2))
+
+            if castle_rights[3]: # queenside
+                if board[59] == 0 and board[58] == 0 and board[57] == 0:
+                    if board[56] == 25:
+                        psudo_moves = create_pseudo_moves(board, 0, True, None) if psudo_moves == None else psudo_moves
+                        if (not is_square_attacked(board, 60, 0, psudo_moves) and
+                            not is_square_attacked(board, 59, 0, psudo_moves) and
+                            not is_square_attacked(board, 58, 0, psudo_moves)):
+                            moves.append((60, 58, 3))
+
+def create_pseudo_moves(board, color, ignore_pawn_forwards, castle_rights): # takes a board state, and returns all possible moves, legal and illegal, given that position; ALso, returns only legal castle moves... whoops
     moves = [] #(start_position, end_position) position is by index number 
     for i, value in enumerate(board):
         if get_color(board, i) == color:
@@ -283,24 +331,73 @@ def create_psudo_moves(board, color, ignore_pawn_forwards): # takes a board stat
                 determine_queen_moves(board, moves, i)
 
             elif pieces[value].lower() == "king":
-                determine_king_moves(board, moves, i)
+                determine_king_moves(board, moves, i, castle_rights)
     return moves
 
-def make_move(board, move):
-    start, end = move
+def make_move(position, move): # all determination of whether a move is legal should be done before make_move. Make_move simply returns a board with the move made, and is used to determine if a move puts a king in check or not.
+    start, end, *extra = move
+    castle_rights = position.castle_rights.copy()
 
-    new_board = board.copy()
+    new_board = position.board.copy()
 
-    new_board[end] = new_board[start]
-    new_board[start] = 0
+    if extra == []:
 
-    if pieces[new_board[end]].lower() == "pawn": # If it is a pawn promotion, turn it into a queen
-        if end // 8 == 0:
-            new_board[end] = "QUEEN"
-        elif end // 8 == 7:
-            new_board[end] = "queen"
+        moved_piece = new_board[start]
+        end_piece = new_board[end]
 
-    return new_board
+        new_board[end] = moved_piece
+        new_board[start] = 0
+        
+        if pieces[moved_piece].lower() == "pawn": # If it is a pawn promotion, turn it into a queen
+            if end // 8 == 0:
+                new_board[end] = 28
+            elif end // 8 == 7:
+                new_board[end] = 12
+
+        if (moved_piece == 9 and start == 0) or end_piece == 9: # If queenside Rook
+            castle_rights[1] = False
+        elif (moved_piece == 16 and start == 7) or end_piece == 16: # If kingside rook
+            castle_rights[0] = False
+        elif moved_piece == 13 and start == 4: # If king
+            castle_rights[0] = castle_rights[1] = False # This section is entirely for black pieces
+
+        elif (moved_piece == 25 and start == 56) or end_piece == 25: # If queenside rook
+            castle_rights[3] = False
+        elif (moved_piece == 32 and start == 63) or end_piece == 32:
+            castle_rights[2] = False
+        elif moved_piece == 29 and start == 60:
+            castle_rights[2] = castle_rights[3] = False
+
+
+    else:
+        metadata = extra[0] # for castle moves, start and end refer to king position. flags: 0 = black_kingside, 1 = black_queenside, 2 = white_kingside, 3 = white_queenside
+        
+        new_board[end] = new_board[start]
+        new_board[start] = 0
+
+        if metadata == 0:
+            new_board[5] = new_board[7]
+            new_board[7] = 0
+            castle_rights[0] = castle_rights[1] = False
+
+        elif metadata == 1:
+            new_board[3] = new_board[0]
+            new_board[0] = 0
+            castle_rights[0] = castle_rights[1] = False
+
+        elif metadata == 2:
+            new_board[61] = new_board[63]
+            new_board[63] = 0
+            castle_rights[2] = castle_rights[3] = False
+
+        elif metadata == 3:
+            new_board[59] = new_board[56]
+            new_board[56] = 0
+            castle_rights[2] = castle_rights[3] = False
+
+    new_side = 1 - position.side_to_move     
+
+    return Position(new_board, new_side, castle_rights)
 
 def find_king(board, color):
     for i, piece in enumerate(board):
@@ -315,17 +412,17 @@ def find_king(board, color):
 
     return -1
 
-def is_square_attacked(board, square, enemy_color):
-    enemy_moves = create_psudo_moves(board, enemy_color, True) # True makes create_psudo_moves ignore forward moves for the pawn
+def is_square_attacked(board, square, enemy_color, moves = None):
+    enemy_moves = create_pseudo_moves(board, enemy_color, True) if moves is None else moves # True makes create_pseudo_moves ignore forward moves for the pawn
 
-    for start, end in enemy_moves:
+    for start, end, *extra in enemy_moves:
         if end == square:
             return True
     
     return False
 
-def determine_pawn_legality(board, move):
-    start, end = move
+def determine_pawn_legality(board, move): # This just makes sure that the pawn move does not go across the board
+    start, end, *extra = move
     start_col = start % 8
     end_col = end % 8
 
@@ -337,16 +434,17 @@ def determine_pawn_legality(board, move):
     else:
         return True
 
-def determine_legal_moves(board, all_moves):
+def determine_legal_moves(position, all_moves): #Takes a board and psudo moves for that board, and returns a complete set of legal moves for that board.
     legal_moves = []
+    board = position.board
 
     for move in all_moves:
-        start, end = move
+        start, end, *extra = move
 
         moving_color = get_color(board, start)
 
         # make temporary board
-        temp_board = make_move(board, move)
+        temp_board = make_move(position, move).board
 
         # find own king after move
         king_square = find_king(temp_board, moving_color)
@@ -366,7 +464,6 @@ def determine_legal_moves(board, all_moves):
 
 def evaluate_board(board): #For evaluation, to determine my side I want to maximize my evaluation. For other side, I want to minimize my evaluation. Black should minimize, white should maximize
     eval = 0
-    pieces = []
     white_bishops = 0
     black_bishops = 0
     
@@ -396,5 +493,11 @@ def evaluate_board(board): #For evaluation, to determine my side I want to maxim
 
 print(evaluate_board(board)) #evaluatoin is behaving weirdly. White pieces should increase evaluation, however they end up decreasing it somehow.
 
-"""all_moves = create_psudo_moves(board, 0, False)
+
+# use make_move to create a board. Evaluate board takes a current board state and returns the evaluation. determine legal moves takes psudo moves and returns all legal moves
+# pipeline would be start with initial board, produce all possible moves then convert to all legal moves using make_move, then make every legal move using make_move and evaluate them, and then start branching, and when a castle move is
+# made, update the passed position object's castle_legal property to false.
+# Also remember, if king or rook is moved, invalidate castle_legal properties for that object.
+
+"""all_moves = create_pseudo_moves(Position, 0, False)
 print(determine_legal_moves(board, all_moves))"""

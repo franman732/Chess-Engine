@@ -1,8 +1,27 @@
-Engine is meant to be played from the white perspective. Play as if you are white, and change turn to black if it is your opponents turn, or white if it is yours.
+# Chess Engine
 
-Ways for evaluation:
- - Material
- - Bishop pair
- - Pawn piece square table
- - Center control
- - King safety (lightly)
+A chess engine being developed from scratch to explore search algorithms, evaluation systems, and performance optimization techniques.
+
+## Current Features
+- Move generation
+- Legal move validation
+- Board state management
+
+## In Progress
+- Evaluation function
+
+## Planned Features
+- Minmax searching
+- Alpha-beta pruning
+- Transposition tables
+- Bitboard representation
+- C++ rewrite for performance optimization
+- GUI/web frontend
+
+## Goals
+This project is intended to deepen understanding of:
+- Algorithms
+- Game-tree search
+- Low-level optimization
+- Bit manipulation
+- Software architecture

@@ -10,6 +10,14 @@ phase_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2, 0, 0, 0, 0, 0
 
 moves_set = {}
 
+king_numbers = np.array([13, 29])
+pawn_numbers = np.array([1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23, 24])
+rook_numbers = np.array([9, 16, 25, 32])
+bishop_numbers = np.array([11, 14, 27, 30])
+queen_numbers = np.array([12, 28])
+king_numbers = np.array([29, 13])
+
+
 board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
                  1, 2, 3, 0, 0, 6, 7, 8,
                  0, 0, 0, 0, 0, 0, 0, 0,
@@ -196,38 +204,38 @@ def determine_capturable(board, end, color):
 def determine_pawn_moves(board, moves, start, produce_attack_map = False, attack_map = ()): #Pawn is done. First section includes forwards movements, second section includes capture moves
     color = get_color(board, start)
     if color == 0:
-        if not produce_attack_map:
-            if ((1 == start // 8) and board[start + 16] == 0 and board[start + 8] == 0):
-                moves.append((start, start + 16))
-                moves.append((start, start + 8))
-            elif board[start + 8] == 0:
-                moves.append((start, start + 8))
+        if ((1 == start // 8) and board[start + 16] == 0 and board[start + 8] == 0):
+            moves.append((start, start + 16))
+            moves.append((start, start + 8))
+        elif board[start + 8] == 0:
+            moves.append((start, start + 8))
         
-        if is_valid_pawn_move(start, start + 7):
+        if is_valid_pawn_move(start, start + 7) and determine_capturable(board, start + 7, color):
             moves.append((start, start + 7))
-            if produce_attack_map:
-                attack_map[start + 7] = 1
-        if is_valid_pawn_move(start, start + 9):
+        if is_valid_pawn_move(start, start + 9) and determine_capturable(board, start + 9, color):
             moves.append((start, start + 9))
-            if produce_attack_map:
-                attack_map[start + 9] = 1
+        
+        if produce_attack_map:
+            attack_map[start + 7] = 1
+        if produce_attack_map:
+            attack_map[start + 9] = 1
 
     elif color == 1:
-        if not produce_attack_map:
-            if ((start // 8 == 6)) and board[start - 16] == 0 and board[start - 8] == 0:
-                moves.append((start, start - 16))
-                moves.append((start, start - 8))
-            elif board[start - 8] == 0: 
-                moves.append((start, start - 8))
+        if ((start // 8 == 6)) and board[start - 16] == 0 and board[start - 8] == 0:
+            moves.append((start, start - 16))
+            moves.append((start, start - 8))
+        elif board[start - 8] == 0: 
+            moves.append((start, start - 8))
 
-        if is_valid_pawn_move(start, start - 7):
+        if is_valid_pawn_move(start, start - 7) and determine_capturable(board, start - 7, color):
             moves.append((start, start - 7))
-            if produce_attack_map:
-                attack_map[start - 7] = 1
-        if is_valid_pawn_move(start, start - 9):
+        if is_valid_pawn_move(start, start - 9) and determine_capturable(board, start - 9, color):
             moves.append((start, start - 9))
-            if produce_attack_map:
-                attack_map[start - 9] = 1
+
+        if produce_attack_map:
+            attack_map[start - 7] = 1
+        if produce_attack_map:
+            attack_map[start - 9] = 1
 
 def is_valid_pawn_move(start, target):
     if target < 0 or target >= 64:
@@ -261,8 +269,8 @@ def determine_rook_moves(board, moves, start, create_attack_map = False, attack_
             else:
                 if get_color(board, next_square) != color:
                     moves.append((start, next_square))
-                    if create_attack_map:
-                        attack_map[next_square] = 1
+                if create_attack_map:
+                    attack_map[next_square] = 1
                 break
 
             current = next_square
@@ -310,8 +318,8 @@ def determine_knight_moves(board, moves, start, create_attack_map = False, attac
 
         if target_color != color:
             moves.append((start, target))
-            if create_attack_map:
-                attack_map[target] = 1
+        if create_attack_map:
+            attack_map[target] = 1
 
 def determine_bishop_moves(board, moves, start_pos, create_attack_map = False, attack_map = ()):
     color = get_color(board, start_pos)
@@ -338,8 +346,8 @@ def determine_bishop_moves(board, moves, start_pos, create_attack_map = False, a
                 # occupied square -> check capture
                 if determine_capturable(board, idx, color):
                     moves.append((start_pos, idx))
-                    if create_attack_map:
-                        attack_map[idx] = 1
+                if create_attack_map:
+                    attack_map[idx] = 1
 
                 # stop sliding in this direction no matter what
                 break
@@ -382,8 +390,8 @@ def determine_king_moves(board, moves, start_pos, castle_rights, create_attack_m
             # enemy piece
             elif determine_capturable(board, idx, color):
                 moves.append((start_pos, idx))
-                if create_attack_map:
-                    attack_map[idx] = 1
+            if create_attack_map:
+                attack_map[idx] = 1
 
     if castle_rights != None and not create_attack_map:
         if color == 0: # Black is 0, white is 1
@@ -474,8 +482,9 @@ def create_pseudo_moves(board, color, castle_rights, produce_attack_map): # take
 def make_move(position, move): # all determination of whether a move is legal should be done before make_move. Make_move simply returns a board with the move made, and is used to determine if a move puts a king in check or not.
     start, end, *extra = move
     castle_rights = position.castle_rights.copy()
-
-    new_board = position.board.copy()
+    undo = [position.board[end], position.castle_rights.copy(), position.side_to_move]
+    
+    new_board = position.board
 
     if extra == []:
 
@@ -532,8 +541,6 @@ def make_move(position, move): # all determination of whether a move is legal sh
             new_board[56] = 0
             castle_rights[2] = castle_rights[3] = False
 
-    undo = [position.board[end], position.castle_rights.copy(), position.side_to_move]
-    
     position.side_to_move = 1 - position.side_to_move
     position.board = new_board
     position.castle_rights = castle_rights
@@ -553,10 +560,41 @@ def find_king(board, color):
 
     return -1
 
-def is_square_attacked(square, attack_map):
-    if attack_map[square] == 1:
+def is_square_attacked(square, board):
+    color = get_color(board, square)
+
+    # 4 diagonal directions: up-left, up-right, down-left, down-right
+    directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+
+    row = square // 8
+    col = square % 8
+
+    for dr, dc in directions:
+        r, c = row + dr, col + dc
+
+        while 0 <= r < 8 and 0 <= c < 8:
+            idx = r * 8 + c
+
+            # empty square
+            if board[idx] == 0:
+                continue
+
+            else:
+                # occupied square -> check capture
+                if determine_capturable(board, idx, color): #if capturable, it means the piece of the opposite color.
+                    if board[idx]
+                if create_attack_map:
+                    attack_map[idx] = 1
+
+                # stop sliding in this direction no matter what
+                break
+
+            r += dr
+            c += dc
+    
+    """if attack_map[square] == 1:
         return True
-    return False
+    return False"""
 
 def determine_pawn_legality(board, move): # This just makes sure that the pawn move does not go across the board
     start, end, *extra = move
@@ -573,36 +611,44 @@ def determine_pawn_legality(board, move): # This just makes sure that the pawn m
 
 def determine_legal_moves(position, all_moves): #Takes a board and psudo moves for that board, and returns a complete set of legal moves for that board.
     legal_moves = [] # In the call to this function, all_moves contains all moves, including pawns moving forward
-    board = position.board
+    board = position.board.copy()
     castle_rights = position.castle_rights
     moving_color = position.side_to_move
 
+    king_square = find_king(board, moving_color)
+
     for move in all_moves:
+
         start, end, *extra = move
 
         temp_position, undo = make_move(position, move)
 
-        # make temporary board
         temp_board = temp_position.board
 
-        # find own king after move
-        king_square = find_king(temp_board, moving_color)
+        enemy_color = 1 - moving_color
 
-        moves, attack_map = create_pseudo_moves(temp_board, 0, castle_rights, True)
+        moves, attack_map = create_pseudo_moves(
+            temp_board,
+            enemy_color,
+            empty_castle_rights,
+            True
+        )
 
-        # enemy color
-        enemy_color = 1 if moving_color == 0 else 0
+        # if king moved, use new square
+        if np.any(king_numbers == board[start]):
+            check_square = end
+        else:
+            check_square = king_square
 
-        # if king NOT attacked then legal
-        if not is_square_attacked(king_square, attack_map):
-            if pieces[board[start]].lower() == "pawn":
+        if not is_square_attacked(check_square, attack_map):
+
+            if np.any(pawn_numbers == board[start]):
                 if determine_pawn_legality(board, move):
                     legal_moves.append(move)
             else:
                 legal_moves.append(move)
 
-        position.board = board.copy()
-        position.castle_rights = castle_rights.copy()
+        undo_move(temp_position, move, undo)
 
     return legal_moves
 
@@ -690,7 +736,7 @@ def recurse(position, depth, alpha, beta, maximizing):
         True
     )
 
-    legal_moves = determine_legal_moves(position, all_moves, attack_map)
+    legal_moves = determine_legal_moves(position, all_moves)
 
     if maximizing:
 
@@ -755,7 +801,7 @@ def find_best_move(position, depth):
         True
     )
 
-    legal_moves = determine_legal_moves(position, all_moves, attack_map)
+    legal_moves = determine_legal_moves(position, all_moves)
 
     best_move = None
 
@@ -813,16 +859,16 @@ position = Position(
     initial_castle_rights
 )
 
-"""best_move = find_best_move(position, 4)
+best_move = find_best_move(position, 4)
 
-print(best_move)"""
+print(best_move)
 
 
 
-print(evaluate_board(board)) #evaluatoin is behaving weirdly. White pieces should increase evaluation, however they end up decreasing it somehow.
+"""print(evaluate_board(board)) #evaluatoin is behaving weirdly. White pieces should increase evaluation, however they end up decreasing it somehow.
 Position = Position(board, 0, initial_castle_rights)
 
 a = create_pseudo_moves(Position.board, 0, Position.castle_rights, False)
 
-print(determine_legal_moves(Position, a))
+print(determine_legal_moves(Position, a))"""
 

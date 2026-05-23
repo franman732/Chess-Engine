@@ -10,13 +10,16 @@ phase_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2, 0, 0, 0, 0, 0
 
 moves_set = {}
 
-king_numbers = np.array([13, 29])
-pawn_numbers = np.array([1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23, 24])
-rook_numbers = np.array([9, 16, 25, 32])
-bishop_numbers = np.array([11, 14, 27, 30])
-queen_numbers = np.array([12, 28])
-king_numbers = np.array([29, 13])
+king_numbers = {13, 29}
+pawn_numbers = {1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23, 24}
+rook_numbers = {9, 16, 25, 32}
+bishop_numbers = {11, 14, 27, 30}
+queen_numbers = {12, 28}
+knight_numbers = {10, 15, 26, 31}
 
+
+black_numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
+white_numbers = {17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32}
 
 board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
                  1, 2, 3, 0, 0, 6, 7, 8,
@@ -167,11 +170,6 @@ Epst = [0, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ekn_t, Eb_t, Eq
 initial_castle_rights = {0: True, 1: True, 2: True, 3: True}
 empty_castle_rights = {0: False, 1: False, 2: False, 3: False}
 
-
-knight_moves = [6, 10, 15, 17, -6, -10, -15, -17]
-
-ROOK_DIRECTIONS = [-1, 1, -8, 8]
-
 class Position:
     def __init__(self, board, side_to_move, castle_rights):
         self.board = board
@@ -187,10 +185,8 @@ class Undo:
 def get_color(board, index):
     if board[index] == 0:
         return -1
-    if pieces[board[index]].lower() == pieces[board[index]]:
-        return 0
-    else:
-        return 1
+    
+    return 0 if board[index] <= 16 else 1
 
 def determine_capturable(board, end, color):
     if end < 0 or end > 63:
@@ -251,7 +247,7 @@ def is_valid_pawn_move(start, target):
 def determine_rook_moves(board, moves, start, create_attack_map = False, attack_map = ()):
     color = get_color(board, start)
 
-    for direction in ROOK_DIRECTIONS:
+    for direction in [-1, 1, -8, 8]:
         current = start
 
         while True:
@@ -307,7 +303,7 @@ def is_valid_knight_move(start, target):
 def determine_knight_moves(board, moves, start, create_attack_map = False, attack_map = ()):
     color = get_color(board, start)
 
-    for offset in knight_moves:
+    for offset in [6, 10, 15, 17, -6, -10, -15, -17]:
         target = start + offset
 
         if not is_valid_knight_move(start, target):
@@ -398,38 +394,34 @@ def determine_king_moves(board, moves, start_pos, castle_rights, create_attack_m
             if castle_rights[0]: # kingside
                 if board[5] == 0 and board[6] == 0:
                     if board[7] == 16:
-                        psudo_moves = create_pseudo_moves(board, 1, None, False)
-                        if (not is_square_attacked(board, 4, 1, psudo_moves) and
-                            not is_square_attacked(board, 5, 1, psudo_moves) and
-                            not is_square_attacked(board, 6, 1, psudo_moves)):
+                        if (not is_square_attacked(4, board, 0) and
+                            not is_square_attacked(5, board, 0) and
+                            not is_square_attacked(6, board, 0)):
                             moves.append((4, 6, 0))
 
             if castle_rights[1]: # queenside
                 if board[1] == 0 and board[2] == 0 and board[3] == 0:
                     if board[0] == 9:
-                        psudo_moves = create_pseudo_moves(board, 1, None, False) if psudo_moves == None else psudo_moves
-                        if (not is_square_attacked(board, 4, 1, psudo_moves) and
-                            not is_square_attacked(board, 3, 1, psudo_moves) and
-                            not is_square_attacked(board, 2, 1, psudo_moves)):
+                        if (not is_square_attacked(4, board, 0) and
+                            not is_square_attacked(3, board, 0) and
+                            not is_square_attacked(2, board, 0)):
                             moves.append((4, 2, 1))
                             
         elif color == 1:
             if castle_rights[2]: # kingside
                 if board[61] == 0 and board[62] == 0:
                     if board[63] == 32:
-                        psudo_moves = create_pseudo_moves(board, 0, None, False)
-                        if (not is_square_attacked(board, 60, 0, psudo_moves) and
-                            not is_square_attacked(board, 61, 0, psudo_moves) and
-                            not is_square_attacked(board, 62, 0, psudo_moves)):
+                        if (not is_square_attacked(60, board, 1) and
+                            not is_square_attacked(61, board, 1) and
+                            not is_square_attacked(62, board, 1)):
                             moves.append((60, 62, 2))
 
             if castle_rights[3]: # queenside
                 if board[59] == 0 and board[58] == 0 and board[57] == 0:
                     if board[56] == 25:
-                        psudo_moves = create_pseudo_moves(board, 0, None, False) if psudo_moves == None else psudo_moves
-                        if (not is_square_attacked(board, 60, 0, psudo_moves) and
-                            not is_square_attacked(board, 59, 0, psudo_moves) and
-                            not is_square_attacked(board, 58, 0, psudo_moves)):
+                        if (not is_square_attacked(60, board, 1) and
+                            not is_square_attacked(59, board, 1) and
+                            not is_square_attacked(58, board, 1)):
                             moves.append((60, 58, 3))
 
 def create_pseudo_moves(board, color, castle_rights, produce_attack_map): # takes a board state, and returns all possible moves, legal and illegal, given that position; ALso, returns only legal castle moves... whoops
@@ -560,9 +552,7 @@ def find_king(board, color):
 
     return -1
 
-def is_square_attacked(square, board):
-    color = get_color(board, square)
-
+def is_square_attacked(square, board, color): # color of the side that wants to move to that square; IE the side that needs the square to not be attacked.
     # 4 diagonal directions: up-left, up-right, down-left, down-right
     directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
@@ -577,20 +567,67 @@ def is_square_attacked(square, board):
 
             # empty square
             if board[idx] == 0:
+                r += dr
+                c += dc
                 continue
 
             else:
                 # occupied square -> check capture
-                if determine_capturable(board, idx, color): #if capturable, it means the piece of the opposite color.
-                    if board[idx]
-                if create_attack_map:
-                    attack_map[idx] = 1
+                enemy_color = get_color(board, idx)
+                if enemy_color != color: #if capturable, it means the piece of the opposite color.
+                    if (board[idx] in bishop_numbers) or (board[idx] in queen_numbers):
+                        return True
+                    if (board[idx] in pawn_numbers):
+                        if enemy_color == 0 and (r - row) == 1:
+                            return True
+                        if enemy_color == 1 and (r - row) == -1:
+                            return True
+                    if (board[idx] in king_numbers) and (r - row) in (-1, 1):
+                        return True
 
                 # stop sliding in this direction no matter what
                 break
 
-            r += dr
-            c += dc
+
+    for direction in [-1, 1, -8, 8]:
+        current = square
+        step = 0
+
+        while True:
+            step += 1
+            next_square = current + direction
+
+            if not is_valid_rook_step(current, next_square, direction):
+                break
+
+            piece = board[next_square]
+
+            if piece == 0:
+                current = next_square
+                continue
+            else:
+                if get_color(board, next_square) != color:
+                    if (board[next_square] in rook_numbers) or (board[next_square] in queen_numbers):
+                        return True
+                    if (board[next_square] in king_numbers) and step == 1:
+                        return True
+                break
+
+
+    for change in [6, 10, 15, 17, -6, -10, -15, -17]:
+        target = square + change
+
+        if not is_valid_knight_move(square, target):
+            continue
+
+        piece = board[target]
+        target_color = get_color(board, target)
+
+        if target_color != color:
+            if piece in knight_numbers:
+                return True
+        
+    return False
     
     """if attack_map[square] == 1:
         return True
@@ -635,14 +672,14 @@ def determine_legal_moves(position, all_moves): #Takes a board and psudo moves f
         )
 
         # if king moved, use new square
-        if np.any(king_numbers == board[start]):
+        if board[start] in king_numbers:
             check_square = end
         else:
             check_square = king_square
 
-        if not is_square_attacked(check_square, attack_map):
+        if not is_square_attacked(check_square, board, moving_color):
 
-            if np.any(pawn_numbers == board[start]):
+            if board[start] in pawn_numbers:
                 if determine_pawn_legality(board, move):
                     legal_moves.append(move)
             else:

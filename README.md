@@ -5,13 +5,13 @@ A chess engine being developed from scratch to explore search algorithms, evalua
 - Move generation
 - Legal move validation
 - Board state management
-
-## In Progress
 - Evaluation function
 
-## Planned Features
+## In Progress
 - Minmax search
 - Alpha-beta pruning
+
+## Planned Features
 - Transposition tables
 - Bitboard representation
 - C++ rewrite for performance optimization

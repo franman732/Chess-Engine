@@ -3,8 +3,10 @@ import numpy as np # THis is intended to maximize white, minimize black. Be able
 pieces = {0:"no", 1:"pawn", 2:"pawn", 3:"pawn", 4:"pawn", 5:"pawn", 6:"pawn", 7:"pawn", 8:"pawn", 9:"rook", 10:"knight", 11:"bishop", 12:"queen", 13:"king", 14:"bishop", 15:"knight", 16:"rook", #lowercase is black, capital is white
           17:"PAWN", 18:"PAWN", 19:"PAWN", 20:"PAWN", 21:"PAWN", 22:"PAWN", 23:"PAWN", 24:"PAWN", 25:"ROOK", 26:"KNIGHT", 27:"BISHOP", 28:"QUEEN", 29:"KING", 30:"BISHOP", 31:"KNIGHT", 32:"ROOK"} #Black is 0, white is 1
 
-piece_values = [0, -100, -100, -100, -100, -100, -100, -100, -100, -500, -320, -330, -900, -20000, -330, -320, -500, 100, 100, 100, 100, 100, 100, 100, 100, 500, 320, 330, 900, 20000, 330, 320, 500]
+Opiece_values = [0, -100, -100, -100, -100, -100, -100, -100, -100, -500, -320, -330, -900, -20000, -330, -320, -500, 100, 100, 100, 100, 100, 100, 100, 100, 500, 320, 330, 900, 20000, 330, 320, 500]
+Epiece_values = [0, -120, -120, -120, -120, -120, -120, -120, -120, -520, -300, -340, -900, -20000, -340, -300, -520, 120, 120, 120, 120, 120, 120, 120, 120, 520, 300, 340, 900, 20000, 340, 300, 520]
 
+phase_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2]
 
 board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
                  1, 2, 3, 0, 0, 6, 7, 8,
@@ -15,7 +17,7 @@ board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bo
                  17, 18, 19, 0, 21, 22, 23, 24,
                  25, 26, 27, 28, 29, 30, 31, 32])
 
-p_t = [
+Op_t = [
      0,   0,   0,   0,   0,   0,   0,   0,
     50,  50,  50,  50,  50,  50,  50,  50,
     10,  10,  20,  30,  30,  20,  10,  10,
@@ -26,7 +28,7 @@ p_t = [
      0,   0,   0,   0,   0,   0,   0,   0
 ]
 
-b_t = [
+Ob_t = [
     -20, -10, -10, -10, -10, -10, -10, -20,
     -10,   5,   0,   0,   0,   0,   5, -10,
     -10,  10,  10,  10,  10,  10,  10, -10,
@@ -37,7 +39,7 @@ b_t = [
     -20, -10, -10, -10, -10, -10, -10, -20
 ]
 
-r_t = [
+Or_t = [
      0,   0,   5,  10,  10,   5,   0,   0,
     -5,   0,   0,   0,   0,   0,   0,  -5,
     -5,   0,   0,   0,   0,   0,   0,  -5,
@@ -48,7 +50,7 @@ r_t = [
      0,   0,   0,   0,   0,   0,   0,   0
 ]
 
-q_t = [
+Oq_t = [
     -20, -10, -10,  -5,  -5, -10, -10, -20,
     -10,   0,   0,   0,   0,   5,   0, -10,
     -10,   0,   5,   5,   5,   5,   5, -10,
@@ -59,7 +61,7 @@ q_t = [
     -20, -10, -10,  -5,  -5, -10, -10, -20
 ]
 
-k_t = [
+Ok_t = [
     -30, -40, -40, -50, -50, -40, -40, -30,
     -30, -40, -40, -50, -50, -40, -40, -30,
     -30, -40, -40, -50, -50, -40, -40, -30,
@@ -70,7 +72,7 @@ k_t = [
      20,  30,  10,   0,   0,  10,  30,  20
 ]
 
-kn_t = [
+Okn_t = [
     -50, -40, -30, -30, -30, -30, -40, -50,
     -40, -20,   0,   5,   5,   0, -20, -40,
     -30,   5,  10,  15,  15,  10,   5, -30,
@@ -81,7 +83,75 @@ kn_t = [
     -50, -40, -30, -30, -30, -30, -40, -50
 ]
 
-pst = [0, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, kn_t, b_t, q_t, k_t, b_t, kn_t, r_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, p_t, r_t, kn_t, b_t, q_t, k_t, b_t, kn_t, r_t]
+
+Ep_t = [
+     0,   0,   0,   0,   0,   0,   0,   0,
+    80,  80,  80,  80,  80,  80,  80,  80,
+    50,  50,  50,  50,  50,  50,  50,  50,
+    30,  30,  30,  40,  40,  30,  30,  30,
+    20,  20,  20,  35,  35,  20,  20,  20,
+    10,  10,  10,  25,  25,  10,  10,  10,
+    10,  10,  10,  10,  10,  10,  10,  10,
+     0,   0,   0,   0,   0,   0,   0,   0
+]
+
+Ekn_t = [
+   -50, -40, -30, -30, -30, -30, -40, -50,
+   -40, -20,   0,   0,   0,   0, -20, -40,
+   -30,   0,  10,  15,  15,  10,   0, -30,
+   -30,   5,  15,  20,  20,  15,   5, -30,
+   -30,   5,  15,  20,  20,  15,   5, -30,
+   -30,   0,  10,  15,  15,  10,   0, -30,
+   -40, -20,   0,   0,   0,   0, -20, -40,
+   -50, -40, -30, -30, -30, -30, -40, -50
+]
+
+Eb_t = [
+   -20, -10, -10, -10, -10, -10, -10, -20,
+   -10,   5,   5,   5,   5,   5,   5, -10,
+   -10,  10,  10,  10,  10,  10,  10, -10,
+   -10,  10,  10,  15,  15,  10,  10, -10,
+   -10,   5,  10,  15,  15,  10,   5, -10,
+   -10,   5,   5,  10,  10,   5,   5, -10,
+   -10,   0,   0,   5,   5,   0,   0, -10,
+   -20, -10, -10, -10, -10, -10, -10, -20
+]
+
+Er_t = [
+     0,   5,  10,  15,  15,  10,   5,   0,
+     5,  10,  15,  20,  20,  15,  10,   5,
+     0,   5,  10,  15,  15,  10,   5,   0,
+     0,   5,  10,  15,  15,  10,   5,   0,
+     0,   5,  10,  15,  15,  10,   5,   0,
+     0,   5,  10,  15,  15,  10,   5,   0,
+    10,  20,  20,  25,  25,  20,  20,  10,
+     0,   5,  10,  15,  15,  10,   5,   0
+]
+
+Eq_t= [
+   -10,  -5,  -5,   0,   0,  -5,  -5, -10,
+    -5,   5,   5,   5,   5,   5,   5,  -5,
+    -5,   5,  10,  10,  10,  10,   5,  -5,
+     0,   5,  10,  15,  15,  10,   5,   0,
+     0,   5,  10,  15,  15,  10,   5,   0,
+    -5,   5,  10,  10,  10,  10,   5,  -5,
+    -5,   5,   5,   5,   5,   5,   5,  -5,
+   -10,  -5,  -5,   0,   0,  -5,  -5, -10
+]
+
+Ek_t = [
+   -50, -40, -30, -20, -20, -30, -40, -50,
+   -30, -20, -10,   0,   0, -10, -20, -30,
+   -20, -10,  10,  20,  20,  10, -10, -20,
+   -10,   0,  20,  30,  30,  20,   0, -10,
+   -10,   0,  20,  30,  30,  20,   0, -10,
+   -20, -10,  10,  20,  20,  10, -10, -20,
+   -30, -20, -10,   0,   0, -10, -20, -30,
+   -50, -40, -30, -20, -20, -30, -40, -50
+]
+
+Opst = [0, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Or_t, Okn_t, Ob_t, Oq_t, Ok_t, Ob_t, Okn_t, Or_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Or_t, Okn_t, Ob_t, Oq_t, Ok_t, Ob_t, Okn_t, Or_t]
+Epst = [0, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t]
 # list that contains all the Piece-Square Tables for quick lookup in evaluation function
 
 initial_castle_rights = {0: True, 1: True, 2: True, 3: True}
@@ -481,32 +551,61 @@ def determine_legal_moves(position, all_moves): #Takes a board and psudo moves f
 
     return legal_moves
 
-def evaluate_board(board): #For evaluation, to determine my side I want to maximize my evaluation. For other side, I want to minimize my evaluation. Black should minimize, white should maximize
-    eval = 0
+def evaluate_board(board):
+
+    Og_eval = 0
+    eg_eval = 0
+    phase = 0
+
     white_bishops = 0
     black_bishops = 0
-    
+
     for i, piece in enumerate(board):
+
         if piece == 0:
             continue
-        
-        eval += piece_values[piece] # Part of eval based on material
 
         is_white = piece >= 17
 
-        table_index = i if is_white else 63 - i
-        eval += pst[piece][table_index] if is_white else -pst[piece][table_index] # PST table valuation gets swapped for black pieces
+        table_index = 63 - i if is_white else i
 
+        # Material
+        Og_eval += Opiece_values[piece]
+        eg_eval += Epiece_values[piece]
+
+        # PST
+        Og_eval += Opst[piece][table_index]
+        eg_eval += Epst[piece][table_index]
+
+
+        print("Piece: ", piece, " Opst: ", Opst[piece][table_index], " Epst: ", Epst[piece][table_index], " OPIECE: ", Opiece_values[piece], " Epiece: ", Epiece_values[piece])
+        # Game phase
+        phase += phase_values[piece]
+
+        # Bishop pair
         if piece in (27, 30):
             white_bishops += 1
         elif piece in (11, 14):
             black_bishops += 1
 
+    # Bishop pair bonuses
     if white_bishops >= 2:
-        eval += 50
-    
+        Og_eval += 50
+        eg_eval += 50
+
     if black_bishops >= 2:
-        eval -= 50
+        Og_eval -= 50
+        eg_eval -= 50
+
+    # Clamp phase
+    if phase > 24:
+        phase = 24
+
+    # Tapered interpolation
+    eval = (
+        Og_eval * phase +
+        eg_eval * (24 - phase)
+    ) // 24
 
     return eval
 

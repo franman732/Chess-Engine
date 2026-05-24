@@ -6,10 +6,11 @@ A chess engine being developed from scratch to explore search algorithms, evalua
 - Legal move validation
 - Board state management
 - Evaluation function
-
-## In Progress
 - Minmax search
 - Alpha-beta pruning
+
+## In Progress
+- Move ordering
 
 ## Planned Features
 - Transposition tables

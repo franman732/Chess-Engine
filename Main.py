@@ -1,4 +1,5 @@
 import numpy as np # THis is intended to maximize white, minimize black. Be able to set turn so it doesnt matter, and always set urself as white.
+import random
 
 #lowercase is black, capital is white ; Black is 0, white is 1
 
@@ -172,11 +173,16 @@ empty_castle_rights = {0: False, 1: False, 2: False, 3: False}
 MAX_DEPTH = 64
 killer_moves = [[None, None] for _ in range(MAX_DEPTH)]
 
+ZOBRIST = [[random.getrandbits(64) for _ in range(64)] for _ in range(33)]
+ZOBRIST_SIDE = random.getrandbits(64)
+TT = {}
+
 class Position:
-    def __init__(self, board, side_to_move, castle_rights):
+    def __init__(self, board, side_to_move, castle_rights, hash):
         self.board = board
         self.side_to_move = side_to_move
         self.castle_rights = castle_rights
+        self.hash = hash
 
 class Undo:
     def __init__(self, captured_piece, old_side_to_move, old_castle_rights):
@@ -425,10 +431,28 @@ def create_pseudo_moves(board, color, castle_rights): # takes a board state, and
                 determine_king_moves(board, moves, i, castle_rights)
     return moves
 
+def compute_hash(board, side_to_move):
+    h = 0
+    for i, piece in enumerate(board):
+        if piece != 0:
+            h ^= ZOBRIST[piece][i]
+
+    if side_to_move == 1:
+        h ^= ZOBRIST_SIDE
+
+    return h
+
+def update_hash(h, piece, start, end, side_to_move):
+    h ^= ZOBRIST[piece][start]
+    h ^= ZOBRIST[piece][end]
+    h ^= ZOBRIST_SIDE
+
+    return h
+
 def make_move(position, move): # all determination of whether a move is legal should be done before make_move. Make_move simply returns a board with the move made, and is used to determine if a move puts a king in check or not.
     start, end, *extra = move
     castle_rights = position.castle_rights.copy()
-    undo = [position.board[end], position.castle_rights.copy(), position.side_to_move]
+    undo = [position.board[end], position.castle_rights.copy(), position.side_to_move, position.hash]
     
     new_board = position.board
 
@@ -436,6 +460,14 @@ def make_move(position, move): # all determination of whether a move is legal sh
 
         moved_piece = new_board[start]
         end_piece = new_board[end]
+
+        position.hash ^= ZOBRIST[moved_piece][start]
+        position.hash ^= ZOBRIST[moved_piece][end]
+
+        if end_piece != 0:
+            position.hash ^= ZOBRIST[end_piece][end]
+
+        position.hash ^= ZOBRIST_SIDE
 
         new_board[end] = moved_piece
         new_board[start] = 0
@@ -734,9 +766,30 @@ def undo_move(position, move, undo_info):
  
     position.side_to_move = undo_info[2]
 
+    position.hash = undo_info[3]
+
 
 
 def recurse(position, depth, alpha, beta, maximizing):
+    best_move = None
+
+    alpha_orig = alpha
+    beta_orig = beta
+    entry = TT.get(position.hash)
+
+    if entry is not None:
+        entry_depth, entry_score, entry_flag, entry_move = entry
+
+        if entry_depth >= depth:
+            if entry_flag == "EXACT":
+                return entry_score
+            elif entry_flag == "LOWER":
+                alpha = max(alpha, entry_score)
+            elif entry_flag == "UPPER":
+                beta = min(beta, entry_score)
+
+            if alpha >= beta:
+                return entry_score
 
     if depth == 0:
         return evaluate_board(position.board)
@@ -755,6 +808,8 @@ def recurse(position, depth, alpha, beta, maximizing):
         best = -99999999
 
         for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
+            start, end = move
+            captured_piece = position.board[end]
 
             temp_position, undo_info = make_move(position, move)
 
@@ -768,7 +823,9 @@ def recurse(position, depth, alpha, beta, maximizing):
 
             undo_move(position, move, undo_info)
 
-            best = max(best, score)
+            if score > best:
+                best = score
+                best_move = move
 
             alpha = max(alpha, score)
 
@@ -776,7 +833,7 @@ def recurse(position, depth, alpha, beta, maximizing):
                 # store killer move (only if it's quiet)
                 start, end, *extra = move
 
-                if position.board[end] == 0 and not (start in pawn_numbers and (end // 8 in (0,7))):  # quiet move
+                if captured_piece == 0 and not (position.board[start] in pawn_numbers and (end // 8 in (0,7))):  # quiet move
                     if move != killer_moves[depth][0]:
                         killer_moves[depth][1] = killer_moves[depth][0]
                         killer_moves[depth][0] = move
@@ -784,13 +841,13 @@ def recurse(position, depth, alpha, beta, maximizing):
                 
                 break
 
-        return best
-
     else:
 
         best = 99999999
 
         for scor, move in scored_moves:
+            start, end = move
+            captured_piece = position.board[end]
 
             temp_position, undo_info = make_move(position, move)
 
@@ -804,7 +861,9 @@ def recurse(position, depth, alpha, beta, maximizing):
 
             undo_move(position, move, undo_info)
 
-            best = min(best, score)
+            if score < best:
+                best = score
+                best_move = move
 
             beta = min(beta, score)
 
@@ -812,7 +871,7 @@ def recurse(position, depth, alpha, beta, maximizing):
                 # store killer move (only if it's quiet)
                 start, end, *extra = move
 
-                if position.board[end] == 0 and not (start in pawn_numbers and (end // 8 in (0,7))):  # quiet move
+                if captured_piece == 0 and not (position.board[start] in pawn_numbers and (end // 8 in (0,7))):  # quiet move
                     if move != killer_moves[depth][0]:
                         killer_moves[depth][1] = killer_moves[depth][0]
                         killer_moves[depth][0] = move
@@ -820,7 +879,16 @@ def recurse(position, depth, alpha, beta, maximizing):
                 
                 break
 
-        return best
+    flag = "EXACT"
+
+    if best <= alpha_orig:
+        flag = "UPPER"
+    elif best >= beta_orig:
+        flag = "LOWER"  
+    
+    TT[position.hash] = (depth, best, flag, best_move)
+    
+    return best
 
 def find_best_move(position, depth):
 
@@ -886,7 +954,8 @@ def find_best_move(position, depth):
 position = Position(
     board,
     1,
-    initial_castle_rights
+    initial_castle_rights,
+    compute_hash(board, 1)
 )
 
 best_move = find_best_move(position, 4)

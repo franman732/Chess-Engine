@@ -169,6 +169,9 @@ Epst = [0, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ekn_t, Eb_t, Eq
 initial_castle_rights = {0: True, 1: True, 2: True, 3: True}
 empty_castle_rights = {0: False, 1: False, 2: False, 3: False}
 
+MAX_DEPTH = 64
+killer_moves = [[None, None] for _ in range(MAX_DEPTH)]
+
 class Position:
     def __init__(self, board, side_to_move, castle_rights):
         self.board = board
@@ -591,7 +594,7 @@ def determine_pawn_legality(board, move): # This just makes sure that the pawn m
     else:
         return True
 
-def determine_legal_moves(position, all_moves): #Takes a board and psudo moves for that board, and returns a complete set of legal moves for that board.
+def determine_legal_moves(position, all_moves): #Takes a board and psudo moves for that board, and returns a complete set of legal moves for that board
     legal_moves = [] # In the call to this function, all_moves contains all moves, including pawns moving forward
     board = position.board.copy()
     moving_color = position.side_to_move
@@ -623,6 +626,43 @@ def determine_legal_moves(position, all_moves): #Takes a board and psudo moves f
         undo_move(temp_position, move, undo)
 
     return legal_moves
+
+def score_move(position, move, depth):
+
+    start, end, *extra = move
+
+    attacker = position.board[start]
+    victim = position.board[end]
+
+    score = 0
+
+    # captures first
+    if victim != 0:
+        score += 10 * abs(Opiece_values[victim])
+        score -= abs(Opiece_values[attacker])
+
+    # promotions
+    if attacker in pawn_numbers:
+        if end // 8 == 0 or end // 8 == 7:
+            score += 900
+
+    # killer moves
+    if move == killer_moves[depth][0]:
+        score += 8000
+    elif move == killer_moves[depth][1]:
+        score += 7000
+
+    return score
+
+def create_scored_moves(position, legal_moves, depth):
+    scored_moves = []
+    
+    for move in legal_moves:
+        score = score_move(position, move, depth)
+        scored_moves.append((score, move))
+
+    scored_moves.sort(reverse=True)
+    return scored_moves
 
 def evaluate_board(board):
 
@@ -708,12 +748,13 @@ def recurse(position, depth, alpha, beta, maximizing):
     )
 
     legal_moves = determine_legal_moves(position, all_moves)
+    scored_moves = create_scored_moves(position, legal_moves, depth)
 
     if maximizing:
 
         best = -99999999
 
-        for move in legal_moves:
+        for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
 
             temp_position, undo_info = make_move(position, move)
 
@@ -732,6 +773,15 @@ def recurse(position, depth, alpha, beta, maximizing):
             alpha = max(alpha, score)
 
             if beta <= alpha:
+                # store killer move (only if it's quiet)
+                start, end, *extra = move
+
+                if position.board[end] == 0 and not (start in pawn_numbers and (end // 8 in (0,7))):  # quiet move
+                    if move != killer_moves[depth][0]:
+                        killer_moves[depth][1] = killer_moves[depth][0]
+                        killer_moves[depth][0] = move
+
+                
                 break
 
         return best
@@ -740,7 +790,7 @@ def recurse(position, depth, alpha, beta, maximizing):
 
         best = 99999999
 
-        for move in legal_moves:
+        for scor, move in scored_moves:
 
             temp_position, undo_info = make_move(position, move)
 
@@ -759,6 +809,15 @@ def recurse(position, depth, alpha, beta, maximizing):
             beta = min(beta, score)
 
             if beta <= alpha:
+                # store killer move (only if it's quiet)
+                start, end, *extra = move
+
+                if position.board[end] == 0 and not (start in pawn_numbers and (end // 8 in (0,7))):  # quiet move
+                    if move != killer_moves[depth][0]:
+                        killer_moves[depth][1] = killer_moves[depth][0]
+                        killer_moves[depth][0] = move
+
+                
                 break
 
         return best
@@ -772,6 +831,7 @@ def find_best_move(position, depth):
     )
 
     legal_moves = determine_legal_moves(position, all_moves)
+    scored_moves = create_scored_moves(position, legal_moves, depth)
 
     best_move = None
 
@@ -780,7 +840,7 @@ def find_best_move(position, depth):
 
         best_eval = -99999999
 
-        for move in legal_moves:
+        for scor, move in scored_moves:
 
             temp_position, undo_info = make_move(position, move)
 
@@ -799,11 +859,11 @@ def find_best_move(position, depth):
                 best_move = move
 
     else:
-        # BLACK MINIMIZES
+        # BLACK MINIMIZES   
 
         best_eval = 99999999
 
-        for move in legal_moves:
+        for scor, move in scored_moves:
 
             temp_position, undo_info = make_move(position, move)
 

@@ -6,20 +6,16 @@ import random
 Opiece_values = [0, -100, -100, -100, -100, -100, -100, -100, -100, -500, -320, -330, -900, -20000, -330, -320, -500, 100, 100, 100, 100, 100, 100, 100, 100, 500, 320, 330, 900, 20000, 330, 320, 500]
 Epiece_values = [0, -120, -120, -120, -120, -120, -120, -120, -120, -520, -300, -340, -900, -20000, -340, -300, -520, 120, 120, 120, 120, 120, 120, 120, 120, 520, 300, 340, 900, 20000, 340, 300, 520]
 
-phase_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2]
+PHASE_VALUES = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2]
 
 moves_set = {}
 
-king_numbers = {13, 29}
-pawn_numbers = {1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23, 24}
-rook_numbers = {9, 16, 25, 32}
-bishop_numbers = {11, 14, 27, 30}
-queen_numbers = {12, 28}
-knight_numbers = {10, 15, 26, 31}
-
-
-black_numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
-white_numbers = {17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32}
+KING_NUMBERS = {13, 29}
+PAWN_NUMBERS = {1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23, 24}
+ROOK_NUMBERS = {9, 16, 25, 32}
+BISHOP_NUMBERS = {11, 14, 27, 30}
+QUEEN_NUMBERS = {12, 28}
+KNIGHT_NUMBERS = {10, 15, 26, 31}
 
 board = np.array([9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
                  1, 2, 3, 0, 0, 6, 7, 8,
@@ -412,22 +408,22 @@ def create_pseudo_moves(board, color, castle_rights): # takes a board state, and
     moves = [] #(start_position, end_position) position is by index number 
     for i, value in enumerate(board):
         if get_color(board, i) == color:
-            if value in pawn_numbers:
+            if value in PAWN_NUMBERS:
                 determine_pawn_moves(board, moves, i) #ignore_pawn_forwards is for ignoring them when determining attacked squares
 
-            elif value in rook_numbers:
+            elif value in ROOK_NUMBERS:
                 determine_rook_moves(board, moves, i)
 
-            elif value in knight_numbers:
+            elif value in KNIGHT_NUMBERS:
                 determine_knight_moves(board, moves, i)
 
-            elif value in bishop_numbers:
+            elif value in BISHOP_NUMBERS:
                 determine_bishop_moves(board, moves, i)
 
-            elif value in queen_numbers:
+            elif value in QUEEN_NUMBERS:
                 determine_queen_moves(board, moves, i)
 
-            elif value in king_numbers:
+            elif value in KING_NUMBERS:
                 determine_king_moves(board, moves, i, castle_rights)
     return moves
 
@@ -472,11 +468,15 @@ def make_move(position, move): # all determination of whether a move is legal sh
         new_board[end] = moved_piece
         new_board[start] = 0
         
-        if moved_piece in pawn_numbers: # If it is a pawn promotion, turn it into a queen
+        if moved_piece in PAWN_NUMBERS: # If it is a pawn promotion, turn it into a queen
             if end // 8 == 0:
                 new_board[end] = 28
+                position.hash ^= ZOBRIST[moved_piece][end]
+                position.hash ^= ZOBRIST[28][end]
             elif end // 8 == 7:
                 new_board[end] = 12
+                position.hash ^= ZOBRIST[moved_piece][end]
+                position.hash ^= ZOBRIST[12][end]
 
         if (moved_piece == 9 and start == 0) or end_piece == 9: # If queenside Rook
             castle_rights[1] = False
@@ -530,7 +530,7 @@ def find_king(board, color):
         if piece == 0:
             continue
 
-        if piece in king_numbers:
+        if piece in KING_NUMBERS:
             if get_color(board, i) == color:
                 return i
 
@@ -559,14 +559,14 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
                 # occupied square -> check capture
                 enemy_color = get_color(board, idx)
                 if enemy_color != color: #if capturable, it means the piece of the opposite color.
-                    if (board[idx] in bishop_numbers) or (board[idx] in queen_numbers):
+                    if (board[idx] in BISHOP_NUMBERS) or (board[idx] in QUEEN_NUMBERS):
                         return True
-                    if (board[idx] in pawn_numbers):
+                    if (board[idx] in PAWN_NUMBERS):
                         if enemy_color == 0 and (r - row) == 1:
                             return True
                         if enemy_color == 1 and (r - row) == -1:
                             return True
-                    if (board[idx] in king_numbers) and (r - row) in (-1, 1):
+                    if (board[idx] in KING_NUMBERS) and (r - row) in (-1, 1):
                         return True
 
                 # stop sliding in this direction no matter what
@@ -591,9 +591,9 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
                 continue
             else:
                 if get_color(board, next_square) != color:
-                    if (board[next_square] in rook_numbers) or (board[next_square] in queen_numbers):
+                    if (board[next_square] in ROOK_NUMBERS) or (board[next_square] in QUEEN_NUMBERS):
                         return True
-                    if (board[next_square] in king_numbers) and step == 1:
+                    if (board[next_square] in KING_NUMBERS) and step == 1:
                         return True
                 break
 
@@ -608,7 +608,7 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
         target_color = get_color(board, target)
 
         if target_color != color:
-            if piece in knight_numbers:
+            if piece in KNIGHT_NUMBERS:
                 return True
         
     return False
@@ -628,7 +628,7 @@ def determine_pawn_legality(board, move): # This just makes sure that the pawn m
 
 def determine_legal_moves(position, all_moves): #Takes a board and psudo moves for that board, and returns a complete set of legal moves for that board
     legal_moves = [] # In the call to this function, all_moves contains all moves, including pawns moving forward
-    board = position.board.copy()
+    board = position.board
     moving_color = position.side_to_move
 
     king_square = find_king(board, moving_color)
@@ -642,14 +642,14 @@ def determine_legal_moves(position, all_moves): #Takes a board and psudo moves f
         temp_board = temp_position.board
 
         # if king moved, use new square
-        if board[start] in king_numbers:
+        if board[start] in KING_NUMBERS:
             check_square = end
         else:
             check_square = king_square
 
         if not is_square_attacked(check_square, temp_board, moving_color):
 
-            if board[start] in pawn_numbers:
+            if board[start] in PAWN_NUMBERS:
                 if determine_pawn_legality(board, move):
                     legal_moves.append(move)
             else:
@@ -674,7 +674,7 @@ def score_move(position, move, depth):
         score -= abs(Opiece_values[attacker])
 
     # promotions
-    if attacker in pawn_numbers:
+    if attacker in PAWN_NUMBERS:
         if end // 8 == 0 or end // 8 == 7:
             score += 900
 
@@ -724,7 +724,7 @@ def evaluate_board(board):
 
 
         # Game phase
-        phase += phase_values[piece]
+        phase += PHASE_VALUES[piece]
 
         # Bishop pair
         if piece in (27, 30):
@@ -808,7 +808,7 @@ def recurse(position, depth, alpha, beta, maximizing):
         best = -99999999
 
         for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
-            start, end = move
+            start, end, *extra = move
             captured_piece = position.board[end]
 
             temp_position, undo_info = make_move(position, move)
@@ -833,7 +833,7 @@ def recurse(position, depth, alpha, beta, maximizing):
                 # store killer move (only if it's quiet)
                 start, end, *extra = move
 
-                if captured_piece == 0 and not (position.board[start] in pawn_numbers and (end // 8 in (0,7))):  # quiet move
+                if captured_piece == 0 and not (position.board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
                     if move != killer_moves[depth][0]:
                         killer_moves[depth][1] = killer_moves[depth][0]
                         killer_moves[depth][0] = move
@@ -846,7 +846,7 @@ def recurse(position, depth, alpha, beta, maximizing):
         best = 99999999
 
         for scor, move in scored_moves:
-            start, end = move
+            start, end, *extra = move
             captured_piece = position.board[end]
 
             temp_position, undo_info = make_move(position, move)
@@ -871,7 +871,7 @@ def recurse(position, depth, alpha, beta, maximizing):
                 # store killer move (only if it's quiet)
                 start, end, *extra = move
 
-                if captured_piece == 0 and not (position.board[start] in pawn_numbers and (end // 8 in (0,7))):  # quiet move
+                if captured_piece == 0 and not (position.board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
                     if move != killer_moves[depth][0]:
                         killer_moves[depth][1] = killer_moves[depth][0]
                         killer_moves[depth][0] = move
@@ -913,7 +913,7 @@ def find_best_move(position, depth):
             temp_position, undo_info = make_move(position, move)
 
             evaluation = recurse(
-                position,
+                temp_position,
                 depth - 1,
                 -99999999,
                 99999999,
@@ -936,7 +936,7 @@ def find_best_move(position, depth):
             temp_position, undo_info = make_move(position, move)
 
             evaluation = recurse(
-                position,
+                temp_position,
                 depth - 1,
                 -99999999,
                 99999999,

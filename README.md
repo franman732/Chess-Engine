@@ -8,7 +8,7 @@ A chess engine being developed from scratch to explore search algorithms, evalua
 - Evaluation function
 - Minmax search
 - Alpha-beta pruning
-- Move ordering
+- Move ordering: captures, promotions, killer moves, 
 
 ## In Progress
 - Transposition tables

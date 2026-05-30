@@ -164,31 +164,38 @@ Ek_t = [
 ]
 
 Opst = [0, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Or_t, Okn_t, Ob_t, Oq_t, Ok_t, Ob_t, Okn_t, Or_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Or_t, Okn_t, Ob_t, Oq_t, Ok_t, Ob_t, Okn_t, Or_t]
-Epst = [0, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t]
+Epst = [0, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Er_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Er_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t]
 # list that contains all the Piece-Square Tables for quick lookup in evaluation function
 
-initial_castle_rights = {0: True, 1: True, 2: True, 3: True}
-empty_castle_rights = {0: False, 1: False, 2: False, 3: False}
+WK = 4
+WQ = 8
+BK = 1
+BQ = 2 # These are for bitwise changes of castle_rights
+initial_castle_rights = BK | BQ | WK | WQ
 
 MAX_DEPTH = 64
 killer_moves = [[None, None] for _ in range(MAX_DEPTH)]
 
+history = [[0] * 64 for _ in range(64)]
+
 ZOBRIST = [[random.getrandbits(64) for _ in range(64)] for _ in range(33)]
 ZOBRIST_SIDE = random.getrandbits(64)
 ZOBRIST_CASTLE = {
-    0: random.getrandbits(64),
-    1: random.getrandbits(64),
-    2: random.getrandbits(64),
-    3: random.getrandbits(64),
+    BK: random.getrandbits(64),
+    BQ: random.getrandbits(64),
+    WK: random.getrandbits(64),
+    WQ: random.getrandbits(64),
 }
 TT = {}
 
 class Position:
-    def __init__(self, board, side_to_move, castle_rights, hash):
+    def __init__(self, board, side_to_move, castle_rights, hash, black_king, white_king):
         self.board = board
         self.side_to_move = side_to_move
         self.castle_rights = castle_rights
         self.hash = hash
+        self.black_king = black_king
+        self.white_king = white_king
 
 def get_color(board, index):
     if board[index] == 0:
@@ -373,9 +380,9 @@ def determine_king_moves(board, moves, start_pos, castle_rights):
             elif determine_capturable(board, idx, color):
                 moves.append((start_pos, idx, -1))
 
-    if castle_rights != None:
+    if castle_rights != 0:
         if color == 0: # Black is 0, white is 1
-            if castle_rights[0]: # kingside
+            if castle_rights & BK: # kingside
                 if board[5] == 0 and board[6] == 0:
                     if board[7] == 16:
                         if (not is_square_attacked(4, board, 0) and
@@ -383,7 +390,7 @@ def determine_king_moves(board, moves, start_pos, castle_rights):
                             not is_square_attacked(6, board, 0)):
                             moves.append((4, 6, 0))
 
-            if castle_rights[1]: # queenside
+            if castle_rights & BQ: # queenside
                 if board[1] == 0 and board[2] == 0 and board[3] == 0:
                     if board[0] == 9:
                         if (not is_square_attacked(4, board, 0) and
@@ -392,7 +399,7 @@ def determine_king_moves(board, moves, start_pos, castle_rights):
                             moves.append((4, 2, 1))
                             
         elif color == 1:
-            if castle_rights[2]: # kingside
+            if castle_rights & WK: # kingside
                 if board[61] == 0 and board[62] == 0:
                     if board[63] == 32:
                         if (not is_square_attacked(60, board, 1) and
@@ -400,7 +407,7 @@ def determine_king_moves(board, moves, start_pos, castle_rights):
                             not is_square_attacked(62, board, 1)):
                             moves.append((60, 62, 2))
 
-            if castle_rights[3]: # queenside
+            if castle_rights & WQ: # queenside
                 if board[59] == 0 and board[58] == 0 and board[57] == 0:
                     if board[56] == 25:
                         if (not is_square_attacked(60, board, 1) and
@@ -441,29 +448,45 @@ def compute_hash(board, side_to_move, castle):
     if side_to_move == 1:
         h ^= ZOBRIST_SIDE
 
-    for k, allowed in castle.items():
-        if allowed:
-            h ^= ZOBRIST_CASTLE[k]
+    if castle & WK:
+        h ^= ZOBRIST_CASTLE[WK]
+
+    if castle & WQ:
+        h ^= ZOBRIST_CASTLE[WQ]
+
+    if castle & BK:
+        h ^= ZOBRIST_CASTLE[BK]
+
+    if castle & BQ:
+        h ^= ZOBRIST_CASTLE[BQ]
 
     return h
 
 def make_move(position, move): # all determination of whether a move is legal should be done before make_move. Make_move simply returns a board with the move made, and is used to determine if a move puts a king in check or not.
     start, end, extra = move
-    castle_rights = position.castle_rights.copy()
-    undo = [position.board[end], position.castle_rights.copy(), position.side_to_move, position.hash, -1]
-    
+    castle_rights = position.castle_rights
+    undo = [position.board[end], position.castle_rights, position.side_to_move, position.hash, -1]
+    hash = position.hash
+
     new_board = position.board
+    moved_piece = new_board[start]
+
+
+    if moved_piece == 13:
+        position.black_king = end
+
+    elif moved_piece == 29:
+        position.white_king = end
 
     if extra == -1:
-        moved_piece = new_board[start]
         end_piece = new_board[end]
 
-        position.hash ^= ZOBRIST[moved_piece][start] ^ ZOBRIST[moved_piece][end]
+        hash ^= ZOBRIST[moved_piece][start] ^ ZOBRIST[moved_piece][end]
 
         if end_piece != 0:
-            position.hash ^= ZOBRIST[end_piece][end]
+            hash ^= ZOBRIST[end_piece][end]
 
-        position.hash ^= ZOBRIST_SIDE
+        hash ^= ZOBRIST_SIDE
 
         new_board[end] = moved_piece
         new_board[start] = 0
@@ -471,88 +494,88 @@ def make_move(position, move): # all determination of whether a move is legal sh
         if moved_piece in PAWN_NUMBERS: # If it is a pawn promotion, turn it into a queen; extra = 4 means white promotion, 5 means black promotion
             if end // 8 == 0:
                 new_board[end] = 28 
-                position.hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[28][end]
+                hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[28][end]
                 undo[4] = moved_piece
             elif end // 8 == 7:
                 new_board[end] = 12
-                position.hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[12][end]
+                hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[12][end]
                 undo[4] = moved_piece
 
 # This section changes castle rights based on moves to the rook or king
-        if ((moved_piece == 9 and start == 0) or end_piece == 9) and castle_rights[1] == True: # If queenside Rook
-            castle_rights[1] = False
-            position.hash ^= ZOBRIST_CASTLE[1]
-        elif ((moved_piece == 16 and start == 7) or end_piece == 16) and castle_rights[0] == True: # If kingside rook
-            castle_rights[0] = False
-            position.hash ^= ZOBRIST_CASTLE[0]
-        elif (moved_piece == 13 and start == 4) and (castle_rights[0] == True or castle_rights[1] == True): # If king
-            if castle_rights[0] == True:
-                position.hash ^= ZOBRIST_CASTLE[0] 
-            if castle_rights[1] == True:
-                position.hash ^= ZOBRIST_CASTLE[1]
-            castle_rights[0] = castle_rights[1] = False # This section is entirely for black pieces
+        if ((moved_piece == 9 and start == 0) or end_piece == 9) and castle_rights & BQ: # If queenside Rook
+            castle_rights &= ~BQ
+            hash ^= ZOBRIST_CASTLE[BQ]
+        elif ((moved_piece == 16 and start == 7) or end_piece == 16) and castle_rights & BK: # If kingside rook
+            castle_rights &= ~BK
+            hash ^= ZOBRIST_CASTLE[BK]
+        elif (moved_piece == 13 and start == 4) and (castle_rights & BK or castle_rights & BQ): # If king
+            if castle_rights & BK:
+                hash ^= ZOBRIST_CASTLE[BK]
+                castle_rights &= ~BK 
+            if castle_rights & BQ:
+                hash ^= ZOBRIST_CASTLE[BQ]
+                castle_rights &= ~BQ  # This section is entirely for black pieces
 
-        elif ((moved_piece == 25 and start == 56) or end_piece == 25) and castle_rights[3] == True: # If queenside rook
-            castle_rights[3] = False
-            position.hash ^= ZOBRIST_CASTLE[3]
-        elif ((moved_piece == 32 and start == 63) or end_piece == 32) and castle_rights[2] == True:
-            castle_rights[2] = False
-            position.hash ^= ZOBRIST_CASTLE[2]
-        elif (moved_piece == 29 and start == 60) and (castle_rights[2] == True or castle_rights[3] == True):
-            if castle_rights[2] == True:
-                position.hash ^= ZOBRIST_CASTLE[2]
-            if castle_rights[3] == True:
-                position.hash ^= ZOBRIST_CASTLE[3]
-            castle_rights[2] = castle_rights[3] = False
+        elif ((moved_piece == 25 and start == 56) or end_piece == 25) and castle_rights & WQ: # If queenside rook
+            castle_rights &= ~WQ
+            hash ^= ZOBRIST_CASTLE[WQ]
+        elif ((moved_piece == 32 and start == 63) or end_piece == 32) and castle_rights & WK:
+            castle_rights &= ~WK
+            hash ^= ZOBRIST_CASTLE[WK]
+        elif (moved_piece == 29 and start == 60) and (castle_rights & WK or castle_rights & WQ):
+            if castle_rights & WK:
+                hash ^= ZOBRIST_CASTLE[WK]
+                castle_rights &= ~WK
+            if castle_rights & WQ:
+                hash ^= ZOBRIST_CASTLE[WQ]
+                castle_rights &= ~WQ
 
 
     else: # This section changes castle rights and the board state based on actual castle moves
         metadata = extra # for castle moves, start and end refer to king position. flags: 0 = black_kingside, 1 = black_queenside, 2 = white_kingside, 3 = white_queenside
 
-        position.hash ^= ZOBRIST[new_board[start]][start] ^ ZOBRIST[new_board[start]][end]
+        hash ^= ZOBRIST[new_board[start]][start] ^ ZOBRIST[new_board[start]][end]
 
-        new_board[end] = new_board[start]
+        new_board[end] = moved_piece
         new_board[start] = 0
 
-        position.hash ^= ZOBRIST_SIDE
+        hash ^= ZOBRIST_SIDE
 
         if metadata == 0:
-            position.hash ^= ZOBRIST[16][7] ^ ZOBRIST[16][5] 
+            hash ^= ZOBRIST[16][7] ^ ZOBRIST[16][5] 
             
             new_board[5] = new_board[7]
             new_board[7] = 0
-            castle_rights[0] = castle_rights[1] = False
-            position.hash ^= ZOBRIST_CASTLE[0] ^ ZOBRIST_CASTLE[1]
+            castle_rights &= ~BQ & ~BK
+            hash ^= ZOBRIST_CASTLE[BQ] ^ ZOBRIST_CASTLE[BK]
 
         elif metadata == 1:
-            position.hash ^= ZOBRIST[9][0] ^ ZOBRIST[9][3]
+            hash ^= ZOBRIST[9][0] ^ ZOBRIST[9][3]
 
             new_board[3] = new_board[0]
             new_board[0] = 0
-            castle_rights[0] = castle_rights[1] = False
-            position.hash ^= ZOBRIST_CASTLE[0] ^ ZOBRIST_CASTLE[1]
+            castle_rights &= ~BQ & ~BK
+            hash ^= ZOBRIST_CASTLE[BQ] ^ ZOBRIST_CASTLE[BK]
 
         elif metadata == 2:
-            position.hash ^= ZOBRIST[32][63] ^ ZOBRIST[32][61]
+            hash ^= ZOBRIST[32][63] ^ ZOBRIST[32][61]
 
             new_board[61] = new_board[63]
             new_board[63] = 0
-            castle_rights[2] = castle_rights[3] = False
-            position.hash ^= ZOBRIST_CASTLE[2] ^ ZOBRIST_CASTLE[3]
+            castle_rights &= ~WQ & ~WK
+            hash ^= ZOBRIST_CASTLE[WQ] ^ ZOBRIST_CASTLE[WK]
 
         elif metadata == 3:
-            position.hash ^= ZOBRIST[25][56] ^ ZOBRIST[25][59]
+            hash ^= ZOBRIST[25][56] ^ ZOBRIST[25][59]
 
             new_board[59] = new_board[56]
             new_board[56] = 0
-            castle_rights[2] = castle_rights[3] = False
-            position.hash ^= ZOBRIST_CASTLE[2] ^ ZOBRIST_CASTLE[3]
+            castle_rights &= ~WQ & ~WK
+            hash ^= ZOBRIST_CASTLE[WQ] ^ ZOBRIST_CASTLE[WK]
 
     position.side_to_move = 1 - position.side_to_move
-    position.board = new_board
+    position.hash = hash
     position.castle_rights = castle_rights
-
-
 
     return position, undo
 
@@ -579,25 +602,26 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
 
         while 0 <= r < 8 and 0 <= c < 8:
             idx = r * 8 + c
+            value = board[idx]
 
             # empty square
-            if board[idx] == 0:
+            if value == 0:
                 r += dr
                 c += dc
                 continue
 
             else:
                 # occupied square -> check capture
-                enemy_color = get_color(board, idx)
+                enemy_color = 0 if value < 17 else 1
                 if enemy_color != color: #if capturable, it means the piece of the opposite color.
-                    if (board[idx] in BISHOP_NUMBERS) or (board[idx] in QUEEN_NUMBERS):
+                    if (value in BISHOP_NUMBERS) or (value in QUEEN_NUMBERS):
                         return True
-                    if (board[idx] in PAWN_NUMBERS):
-                        if enemy_color == 0 and (r - row) == 1:
+                    if (value in PAWN_NUMBERS):
+                        if enemy_color == 0 and (r - row) == -1:
                             return True
-                        if enemy_color == 1 and (r - row) == -1:
+                        if enemy_color == 1 and (r - row) == 1:
                             return True
-                    if (board[idx] in KING_NUMBERS) and (r - row) in (-1, 1):
+                    if (value in KING_NUMBERS) and (r - row) in (-1, 1):
                         return True
 
                 # stop sliding in this direction no matter what
@@ -622,9 +646,9 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
                 continue
             else:
                 if get_color(board, next_square) != color:
-                    if (board[next_square] in ROOK_NUMBERS) or (board[next_square] in QUEEN_NUMBERS):
+                    if (piece in ROOK_NUMBERS) or (piece in QUEEN_NUMBERS):
                         return True
-                    if (board[next_square] in KING_NUMBERS) and step == 1:
+                    if (piece in KING_NUMBERS) and step == 1:
                         return True
                 break
 
@@ -662,8 +686,6 @@ def determine_legal_moves(position, all_moves): #Takes a board and psudo moves f
     board = position.board
     moving_color = position.side_to_move
 
-    king_square = find_king(board, moving_color)
-
     for move in all_moves:
 
         start, end, extra = move
@@ -671,14 +693,14 @@ def determine_legal_moves(position, all_moves): #Takes a board and psudo moves f
         temp_position, undo = make_move(position, move)
 
         temp_board = temp_position.board
+        king_square = (
+            temp_position.white_king
+            if moving_color == 1
+            else temp_position.black_king
+        )
 
-        # if king moved, use new square
-        if board[start] in KING_NUMBERS:
-            check_square = end
-        else:
-            check_square = king_square
 
-        if not is_square_attacked(check_square, temp_board, moving_color):
+        if not is_square_attacked(king_square, temp_board, moving_color):
 
             if board[start] in PAWN_NUMBERS:
                 if determine_pawn_legality(board, move):
@@ -702,15 +724,19 @@ def score_move(position, move, depth, best_move):
     if move == best_move:
         score += 10000000
 
+    if victim == 0:
+        score += history[start][end]
+
     # captures first
     if victim != 0:
-        score += 10 * abs(Opiece_values[victim])
-        score -= abs(Opiece_values[attacker])
+        score += 10000
+        score += 10 * victim
+        score -= attacker
 
     # promotions
     if attacker in PAWN_NUMBERS:
         if end // 8 == 0 or end // 8 == 7:
-            score += 900
+            score += 100000
 
     # killer moves
     if move == killer_moves[depth][0]:
@@ -746,7 +772,7 @@ def evaluate_board(board):
 
         is_white = piece >= 17
 
-        table_index = 63 - i if is_white else i
+        table_index = i if is_white else 63 - i
 
         # Material
         Og_eval += Opiece_values[piece]
@@ -789,11 +815,12 @@ def evaluate_board(board):
 
 def undo_move(position, move, undo_info):
     start, end, extra = move
+    board = position.board
 
-    moved_piece = position.board[end]
+    moved_piece = board[end]
 
-    position.board[start] = moved_piece
-    position.board[end] = undo_info[0]
+    board[start] = moved_piece
+    board[end] = undo_info[0]
 
     position.castle_rights = undo_info[1]
  
@@ -801,35 +828,41 @@ def undo_move(position, move, undo_info):
 
     position.hash = undo_info[3]
 
+    if moved_piece == 13:
+        position.black_king = start
+
+    elif moved_piece == 29:
+        position.white_king = start
+
     if undo_info[4] != -1: # This is purely for undoing promotion moves 
-        position.board[start] = undo_info[4]
+        board[start] = undo_info[4]
 
     if extra != -1: 
         metadata = extra # for castle moves, start and end refer to king position. flags: 0 = black_kingside, 1 = black_queenside, 2 = white_kingside, 3 = white_queenside 
         
         if metadata == 0: 
-            position.board[7] = position.board[5] 
-            position.board[5] = 0 
+            board[7] = board[5] 
+            board[5] = 0 
         elif metadata == 1: 
-            position.board[0] = position.board[3] 
-            position.board[3] = 0 
+            board[0] = board[3] 
+            board[3] = 0 
         elif metadata == 2: 
-            position.board[63] = position.board[61] 
-            position.board[61] = 0 
+            board[63] = board[61] 
+            board[61] = 0 
         elif metadata == 3: 
-            position.board[56] = position.board[59] 
-            position.board[59] = 0
+            board[56] = board[59] 
+            board[59] = 0
 
 def recurse(position, depth, alpha, beta, maximizing):
     global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS
     NUMBER_OF_RECURSIONS += 1
     best_move = None
 
+    board = position.board
     alpha_orig = alpha
     beta_orig = beta
     entry_move = None
     entry = TT.get(position.hash)
-
 
     if entry is not None:  
         TT_LOOKUPS += 1
@@ -849,10 +882,10 @@ def recurse(position, depth, alpha, beta, maximizing):
                 return entry_score
 
     if depth == 0:
-        return evaluate_board(position.board)
+        return evaluate_board(board)
 
     all_moves = create_pseudo_moves(
-        position.board,
+        board,
         position.side_to_move,
         position.castle_rights,
     )
@@ -866,9 +899,9 @@ def recurse(position, depth, alpha, beta, maximizing):
 
         for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
             start, end, extra = move
-            captured_piece = position.board[end]
+            captured_piece = board[end]
 
-            temp_position, undo_info = make_move(position, move)
+            temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
 
             score = recurse(
                 temp_position,
@@ -878,7 +911,7 @@ def recurse(position, depth, alpha, beta, maximizing):
                 False
             )
 
-            undo_move(position, move, undo_info)
+            undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
             if score > best:
                 best = score
@@ -887,10 +920,12 @@ def recurse(position, depth, alpha, beta, maximizing):
             alpha = max(alpha, score)
 
             if beta <= alpha:
+                history[start][end] += depth * depth
+
                 # store killer move (only if it's quiet)
                 start, end, extra = move
 
-                if captured_piece == 0 and not (position.board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
                     if move != killer_moves[depth][0]:
                         killer_moves[depth][1] = killer_moves[depth][0]
                         killer_moves[depth][0] = move
@@ -904,10 +939,9 @@ def recurse(position, depth, alpha, beta, maximizing):
 
         for scor, move in scored_moves:
             start, end, extra = move
-            captured_piece = position.board[end]
+            captured_piece = board[end]
 
             temp_position, undo_info = make_move(position, move)
-
             score = recurse(
                 temp_position,
                 depth - 1,
@@ -925,10 +959,12 @@ def recurse(position, depth, alpha, beta, maximizing):
             beta = min(beta, score)
 
             if beta <= alpha:
+                history[start][end] += depth * depth
+
                 # store killer move (only if it's quiet)
                 start, end, extra = move
 
-                if captured_piece == 0 and not (position.board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
                     if move != killer_moves[depth][0]:
                         killer_moves[depth][1] = killer_moves[depth][0]
                         killer_moves[depth][0] = move
@@ -948,12 +984,13 @@ def recurse(position, depth, alpha, beta, maximizing):
     
     return best
 
-def find_best_move(position, depth):
+def find_best_move(position, depth, starting_color):
     entry_move = None
+    side = position.side_to_move
 
     all_moves = create_pseudo_moves(
         position.board,
-        position.side_to_move,
+        side,
         position.castle_rights,
     )
 
@@ -962,7 +999,7 @@ def find_best_move(position, depth):
 
     best_move = None
 
-    if position.side_to_move == 1:
+    if side == 1:
         # WHITE MAXIMIZES
 
         best_eval = -99999999
@@ -970,6 +1007,7 @@ def find_best_move(position, depth):
         for scor, move in scored_moves:
 
             temp_position, undo_info = make_move(position, move)
+
 
             evaluation = recurse(
                 temp_position,
@@ -1014,10 +1052,12 @@ position = Position(
     board,
     1,
     initial_castle_rights,
-    compute_hash(board, 1, initial_castle_rights)
+    compute_hash(board, 1, initial_castle_rights),
+    find_king(board, 0),
+    find_king(board, 1)
 )
 
-best_move = find_best_move(position, 6)
+best_move = find_best_move(position, 6, 0)
 
 print(best_move)
 

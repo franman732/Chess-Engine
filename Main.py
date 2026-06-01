@@ -722,7 +722,7 @@ def score_move(position, move, depth, best_move):
 
     # Transposition board
     if move == best_move:
-        score += 10000000
+        score += 0
 
     if victim == 0:
         score += history[start][end]
@@ -855,10 +855,12 @@ def undo_move(position, move, undo_info):
 
 def recurse(position, depth, alpha, beta, maximizing):
     global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS
-    NUMBER_OF_RECURSIONS += 1
-    best_move = None
-
     board = position.board
+    NUMBER_OF_RECURSIONS += 1
+    if depth == 0:
+        return evaluate_board(board)
+
+    best_move = None
     alpha_orig = alpha
     beta_orig = beta
     entry_move = None
@@ -880,9 +882,6 @@ def recurse(position, depth, alpha, beta, maximizing):
             if alpha >= beta:
                 TT_HITS += 1
                 return entry_score
-
-    if depth == 0:
-        return evaluate_board(board)
 
     all_moves = create_pseudo_moves(
         board,
@@ -979,12 +978,15 @@ def recurse(position, depth, alpha, beta, maximizing):
     elif best >= beta_orig:
         flag = "LOWER"  
 
-    if entry is None or entry[0] < depth:
+    if entry is None or entry[0] < depth or (entry[0] == depth and flag == "EXACT"):
         TT[position.hash] = (depth, best, flag, best_move)
     
     return best
 
-def find_best_move(position, depth, starting_color):
+def find_best_move(position, depth, starting_move):
+    alpha = -99999999
+    beta = 99999999
+    turn = 0
     entry_move = None
     side = position.side_to_move
 
@@ -996,6 +998,8 @@ def find_best_move(position, depth, starting_color):
 
     legal_moves = determine_legal_moves(position, all_moves)
     scored_moves = create_scored_moves(position, legal_moves, depth, entry_move)
+    if starting_move is not None:
+        scored_moves.insert(0, (10**9,   starting_move))
 
     best_move = None
 
@@ -1004,7 +1008,10 @@ def find_best_move(position, depth, starting_color):
 
         best_eval = -99999999
 
-        for scor, move in scored_moves:
+        for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
+            if turn == 0:
+                print("FIRST MOVE: ", move)
+                turn += 1
 
             temp_position, undo_info = make_move(position, move)
 
@@ -1012,8 +1019,8 @@ def find_best_move(position, depth, starting_color):
             evaluation = recurse(
                 temp_position,
                 depth - 1,
-                -99999999,
-                99999999,
+                alpha,
+                beta,
                 False
             )
 
@@ -1023,20 +1030,32 @@ def find_best_move(position, depth, starting_color):
                 best_eval = evaluation
                 best_move = move
 
+            alpha = max(alpha, evaluation)
+
+            if beta <= alpha:
+                history[start][end] += depth * depth
+
+                # store killer move (only if it's quiet)
+                start, end, extra = move
+
+                if board[end] == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                    if move != killer_moves[depth][0]:
+                        killer_moves[depth][1] = killer_moves[depth][0]
+                        killer_moves[depth][0] = move
+
     else:
         # BLACK MINIMIZES   
 
         best_eval = 99999999
 
-        for scor, move in scored_moves:
-
+        for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
             temp_position, undo_info = make_move(position, move)
 
             evaluation = recurse(
                 temp_position,
                 depth - 1,
-                -99999999,
-                99999999,
+                alpha,
+                beta,
                 True
             )
 
@@ -1045,6 +1064,19 @@ def find_best_move(position, depth, starting_color):
             if evaluation < best_eval:
                 best_eval = evaluation
                 best_move = move
+
+            beta = min(beta, evaluation)
+
+            if beta <= alpha:
+                history[start][end] += depth * depth
+
+                # store killer move (only if it's quiet)
+                start, end, extra = move
+
+                if board[end] == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                    if move != killer_moves[depth][0]:
+                        killer_moves[depth][1] = killer_moves[depth][0]
+                        killer_moves[depth][0] = move
 
     return best_move
 
@@ -1056,10 +1088,13 @@ position = Position(
     find_king(board, 0),
     find_king(board, 1)
 )
+previous_best_move = None
 
-best_move = find_best_move(position, 6, 0)
+for i in range(1, 8):
+    previous_best_move = find_best_move(position, i, previous_best_move)
+    print("DEPTH: ", i, "MOVE: ", previous_best_move)
 
-print(best_move)
+print(previous_best_move)
 
 
 print("TTS HITS: ", TT_HITS, " TT LOOKUPS: ", TT_LOOKUPS, " RECURSIONS: ", NUMBER_OF_RECURSIONS, " ELEMENTS IN TT: ", len(TT.values()))

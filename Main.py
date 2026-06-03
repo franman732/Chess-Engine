@@ -917,7 +917,9 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
             False
             )
 
-            
+        position.side_to_move ^= 1
+        position.hash ^= ZOBRIST_SIDE
+
         if maximizing:
             if score >= beta:
                 return beta
@@ -925,8 +927,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
             if score <= alpha:
                 return alpha
         
-        position.side_to_move ^= 1
-        position.hash ^= ZOBRIST_SIDE
+
 
     all_moves = create_pseudo_moves(
         board,
@@ -964,7 +965,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
 
             alpha = max(alpha, score)
 
-            if beta <= alpha:
+            if beta <= score:
                 history[start][end] += depth * depth
 
                 # store killer move (only if it's quiet)
@@ -998,13 +999,17 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
 
             undo_move(position, move, undo_info)
 
+
+
+
+
             if score < best:
                 best = score
                 best_move = move
 
             beta = min(beta, score)
 
-            if beta <= alpha:
+            if score <= alpha:
                 history[start][end] += depth * depth
 
                 # store killer move (only if it's quiet)
@@ -1035,12 +1040,13 @@ def find_best_move(position, depth, starting_move):
     alpha = -99999999
     beta = 99999999
     turn = 0
-    side = position.side_to_move
+    side = position.side_to_move    
 
     alpha_orig = alpha
     beta_orig = beta
     entry_move = None
     entry = TT.get(position.hash)
+    num_pieces = position.pieces
 
     if entry is not None:  
         TT_LOOKUPS += 1
@@ -1059,6 +1065,30 @@ def find_best_move(position, depth, starting_move):
                 TT_HITS += 1
                 return entry_score
             
+
+    if (depth >= REDUCTION_FACTOR + 1 and not(is_square_attacked(position.white_king if position.side_to_move else position.black_king, board, position.side_to_move)) and num_pieces != 0):
+        position.side_to_move ^= 1
+        position.hash ^= ZOBRIST_SIDE
+        
+        score = recurse(
+            position,
+            depth - 1 - REDUCTION_FACTOR,
+            alpha,
+            beta,
+            not side,
+            False
+            )
+
+        position.side_to_move ^= 1
+        position.hash ^= ZOBRIST_SIDE
+
+        if side:
+            if score >= beta:
+                return beta
+        else:
+            if score <= alpha:
+                return alpha
+        
     all_moves = create_pseudo_moves(
         position.board,
         side,
@@ -1100,7 +1130,7 @@ def find_best_move(position, depth, starting_move):
 
             alpha = max(alpha, evaluation)
 
-            if beta <= alpha:
+            if beta <= evaluation:
                 history[start][end] += depth * depth
 
                 # store killer move (only if it's quiet)
@@ -1136,7 +1166,7 @@ def find_best_move(position, depth, starting_move):
 
             beta = min(beta, evaluation)
 
-            if beta <= alpha:
+            if evaluation <= alpha:
                 history[start][end] += depth * depth
 
                 # store killer move (only if it's quiet)

@@ -1,5 +1,6 @@
 import numpy as np # THis is intended to maximize white, minimize black. Be able to set turn so it doesnt matter, and always set urself as white.
 import random
+import time
 
 #lowercase is black, capital is white ; Black is 0, white is 1
 
@@ -162,6 +163,9 @@ Ek_t = [
    -30, -20, -10,   0,   0, -10, -20, -30,
    -50, -40, -30, -20, -20, -30, -40, -50
 ]
+
+PASSED_OPENING = [0, 5, 10, 20, 35, 60, 100, 0]
+PASSED_ENDGAME = [0, 10, 20, 40, 70, 120, 200, 0]
 
 Opst = [0, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Or_t, Okn_t, Ob_t, Oq_t, Ok_t, Ob_t, Okn_t, Or_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Or_t, Okn_t, Ob_t, Oq_t, Ok_t, Ob_t, Okn_t, Or_t]
 Epst = [0, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Er_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Er_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t]
@@ -772,6 +776,18 @@ def create_scored_moves(position, legal_moves, depth, entry_move):
     return scored_moves
 
 def evaluate_board(board):
+    white_pawns = [0,0,0,0,0,0,0,0]
+    black_pawns = [0,0,0,0,0,0,0,0]
+
+    white_stacked = 0
+    black_stacked = 0
+    white_isolated = 0
+    black_isolated = 0
+
+    opening_stacked = 15
+    ending_stacked = 10
+    opening_isolated = 15
+    ending_isolated = 10
 
     Og_eval = 0
     eg_eval = 0
@@ -802,10 +818,18 @@ def evaluate_board(board):
         phase += PHASE_VALUES[piece]
 
         # Bishop pair
-        if piece in (27, 30):
+        if piece == 27 or piece == 30:
             white_bishops += 1
-        elif piece in (11, 14):
+        elif piece == 11 or piece == 14:
             black_bishops += 1
+
+        if 0 < piece < 9:
+            file = i & 7
+            black_pawns[file] += 1
+
+        elif 16 < piece < 25:
+            file = i & 7
+            white_pawns[file] += 1
 
     # Bishop pair bonuses
     if white_bishops >= 2:
@@ -819,6 +843,43 @@ def evaluate_board(board):
     # Clamp phase
     if phase > 24:
         phase = 24
+
+    for file in range(8):
+
+        w = white_pawns[file]
+        b = black_pawns[file]
+
+        if w > 1:
+            white_stacked += w - 1
+
+        if b > 1:
+            black_stacked += b - 1
+
+        if w:
+            left = file > 0 and white_pawns[file - 1]
+            right = file < 7 and white_pawns[file + 1]
+
+            if not left and not right:
+                white_isolated += w
+
+        if b:
+            left = file > 0 and black_pawns[file - 1]
+            right = file < 7 and black_pawns[file + 1]
+
+            if not left and not right:
+                black_isolated += b
+
+    Og_eval -= white_isolated * opening_isolated
+    eg_eval -= white_isolated * ending_isolated
+
+    Og_eval += black_isolated * opening_isolated
+    eg_eval += black_isolated * ending_isolated
+
+    Og_eval -= white_stacked * opening_stacked
+    eg_eval -= white_stacked * ending_stacked
+
+    Og_eval += black_stacked * opening_stacked # Currently working on adding pawn structure values to evaluate board, such as passed pawns which can be implemented easily into current structure.
+    eg_eval += black_stacked * ending_stacked
 
     # Tapered interpolation
     eval = (
@@ -880,6 +941,7 @@ def count_non_pawn_or_king(board): # This just counts the number of non pawn and
     return pieces
 
 def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
+    found_legal_move = False
     global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS
     board = position.board
     NUMBER_OF_RECURSIONS += 1
@@ -955,18 +1017,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
         position.castle_rights,
     )
 
-    legal_moves = determine_legal_moves(position, all_moves)
-    scored_moves = create_scored_moves(position, legal_moves, depth, entry_move)
-
-    if len(legal_moves) == 0:
-        if maximizing:
-            if is_square_attacked(position.white_king, position.board, 1 if position.side_to_move else 0):
-                    return 999999999
-        else:
-            if is_square_attacked(position.black_king, position.board, 1 if position.side_to_move else 0):
-                    return -999999999
-        
-        return 0
+    scored_moves = create_scored_moves(position, all_moves, depth, entry_move)
 
     best = -99999999 if maximizing else 99999999
 
@@ -974,6 +1025,17 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
         start, end, extra = move
         captured_piece = board[end]
         temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
+
+        if not(temp_position.side_to_move): # We swap which side we look at because when the move made was done on blacks side, then temp_position side becomes white, since black moved. Swap to get the side that just moved to check if legal
+            if is_square_attacked(temp_position.white_king, temp_position.board, 1):
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                continue
+        else:
+            if is_square_attacked(temp_position.black_king, temp_position.board, 0):
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                continue
+
+        found_legal_move = True
 
         if first_move:
             score = recurse(
@@ -1090,6 +1152,14 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
 
                     break
                 
+    if not found_legal_move: # if legal_move is still false, meaning no legal moves were found
+        if maximizing and is_square_attacked(position.white_king, board, 1):
+            best = -99999999
+        elif not(maximizing) and is_square_attacked(position.black_king, board, 0):
+                best = -99999999
+        else:
+            best = 0
+    
     flag = "EXACT"
 
     if best <= alpha_orig:
@@ -1113,6 +1183,8 @@ def find_best_move(position, depth, starting_move):
     entry_move = None
     entry = TT.get(position.hash)
     first_move = True
+    board = position.board
+    found_legal_move = False
 
     if entry is not None:  
         TT_LOOKUPS += 1
@@ -1132,26 +1204,30 @@ def find_best_move(position, depth, starting_move):
                 return entry_move
             
     all_moves = create_pseudo_moves(
-        position.board,
+        board,
         side,
         position.castle_rights,
     )
 
-    legal_moves = determine_legal_moves(position, all_moves)
-
-    if len(legal_moves) == 0:
-        return 0
-
-    scored_moves = create_scored_moves(position, legal_moves, depth, starting_move)
-
+    scored_moves = create_scored_moves(position, all_moves, depth, starting_move)
     best_move = None
-
     best_eval = -99999999 if side else 99999999
 
     for _, move in scored_moves:
         start, end, extra = move
         captured_piece = board[end]
         temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
+
+        if not(temp_position.side_to_move): # We swap which side we look at because when the move made was done on blacks side, then temp_position side becomes white, since black moved. Swap to get the side that just moved to check if legal
+            if is_square_attacked(temp_position.white_king, temp_position.board, 1):
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                continue
+        else:
+            if is_square_attacked(temp_position.black_king, temp_position.board, 0):
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                continue
+
+        found_legal_move = True
 
         if first_move:
             score = recurse(
@@ -1269,6 +1345,14 @@ def find_best_move(position, depth, starting_move):
                     
                     break
 
+    if not found_legal_move: # if legal_move is still false, meaning no legal moves were found
+        if side and is_square_attacked(position.white_king, board, 1):
+            best_eval = -99999999
+        elif not(side) and is_square_attacked(position.black_king, board, 0):
+                best_eval = -99999999
+        else:
+            best_eval = 0
+
     flag = "EXACT"
 
     if best_eval <= alpha_orig:
@@ -1292,10 +1376,13 @@ position = Position(
 )
 previous_best_move = None
 
-for i in range(1, 8):
+start_time = time.perf_counter()
+for i in range(1, 9):
     previous_best_move = find_best_move(position, i, previous_best_move)
     print("DEPTH: ", i, "MOVE: ", previous_best_move)
+end_time = time.perf_counter()
 
+print("TIME TAKEN: ", end_time - start_time)
 print(previous_best_move)
 
 

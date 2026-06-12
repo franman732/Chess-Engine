@@ -1,5 +1,7 @@
 import numpy as np # THis is intended to maximize white, minimize black. Be able to set turn so it doesnt matter, and always set urself as white.
 import random
+import time
+import cProfile
 
 #lowercase is black, capital is white ; Black is 0, white is 1
 
@@ -163,6 +165,9 @@ Ek_t = [
    -50, -40, -30, -20, -20, -30, -40, -50
 ]
 
+PASSED_OPENING = [0, 5, 10, 20, 35, 60, 100, 0]
+PASSED_ENDGAME = [0, 10, 20, 40, 70, 120, 200, 0]
+
 Opst = [0, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Or_t, Okn_t, Ob_t, Oq_t, Ok_t, Ob_t, Okn_t, Or_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Op_t, Or_t, Okn_t, Ob_t, Oq_t, Ok_t, Ob_t, Okn_t, Or_t]
 Epst = [0, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Er_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Ep_t, Er_t, Ekn_t, Eb_t, Eq_t, Ek_t, Eb_t, Ekn_t, Er_t]
 # list that contains all the Piece-Square Tables for quick lookup in evaluation function
@@ -190,8 +195,16 @@ ZOBRIST_CASTLE = {
 }
 TT = {}
 
+OPENING_STACKED = 15
+ENDING_STACKED = 10
+OPENING_ISOLATED = 15
+ENDING_ISOLATED = 10
+
+PAWN_ZOBRIST = [[random.getrandbits(64) for _ in range(64)] for _ in range(25)]
+
+PH = {} # Pawn Hash
 class Position:
-    def __init__(self, board, side_to_move, castle_rights, hash, black_king, white_king, pieces):
+    def __init__(self, board, side_to_move, castle_rights, hash, black_king, white_king, pieces, opening_eval, closing_eval, phase, white_bishops, black_bishops, black_pawns, white_pawns, pawn_hash):
         self.board = board
         self.side_to_move = side_to_move
         self.castle_rights = castle_rights
@@ -200,23 +213,195 @@ class Position:
         self.white_king = white_king
         self.pieces = pieces
 
-def get_color(board, index):
-    if board[index] == 0:
-        return -1
-    
-    return 0 if board[index] <= 16 else 1
+        self.opening_eval = opening_eval
+        self.closing_eval = closing_eval
+        self.phase = phase
+        self.white_bishops = white_bishops
+        self.black_bishops = black_bishops
+        self.black_pawns = black_pawns
+        self.white_pawns = white_pawns
+        self.pawn_hash = pawn_hash
+
+    def update_evaluation(self, move, undo_info, final_move = False):
+        global ENDING_ISOLATED, OPENING_ISOLATED, ENDING_STACKED, OPENING_STACKED
+        white_stacked = 0
+        black_stacked = 0
+        white_isolated = 0
+        black_isolated = 0
+
+        pawn_o_eval = 0
+        pawn_e_eval = 0
+        phase = 0
+
+        board = self.board
+        O_eval = self.opening_eval
+        E_eval = self.closing_eval
+        phase = self.phase
+        if not(final_move):
+            start, end, extra = move
+            moved_piece = board[end]
+            white_pawns = self.white_pawns
+            black_pawns = self.black_pawns
+            captured_piece = undo_info[0]
+
+            is_white = moved_piece >= 17
+            start_table_index = start if is_white else 63 - start
+            end_table_index = end if is_white else 63 - end
+
+            captured_piece_table_index = end if not(is_white) else 63 - end # if capturing piece is white, then capturing piece is black. Thus, is_white must be flipped. 
+
+            O_eval -= Opst[moved_piece][start_table_index] # PST updating subtracting starting pst values
+            E_eval -= Epst[moved_piece][start_table_index]
+            O_eval += Opst[moved_piece][end_table_index] # PST updating adding ending pst values
+            E_eval += Epst[moved_piece][end_table_index]
+
+            if moved_piece in PAWN_NUMBERS:
+                row = end >> 3
+                if is_white and row == 0:
+                    O_eval -= Opst[moved_piece][end_table_index]
+                    E_eval -= Epst[moved_piece][end_table_index]
+                    O_eval -= Opiece_values[moved_piece]
+                    E_eval -= Epiece_values[moved_piece]
+
+
+                    O_eval += Opst[28][end_table_index]
+                    E_eval += Opst[28][end_table_index]
+                    O_eval += Opiece_values[28]
+                    E_eval += Epiece_values[28]
+
+                elif not(is_white) and row == 7:
+                    O_eval -= Opst[moved_piece][end_table_index]
+                    E_eval -= Epst[moved_piece][end_table_index]
+                    O_eval -= Opiece_values[moved_piece]
+                    E_eval -= Epiece_values[moved_piece]
+
+
+                    O_eval += Opst[12][end_table_index]
+                    E_eval += Epst[12][end_table_index]
+                    O_eval += Opiece_values[12]
+                    E_eval += Epiece_values[12]
+
+
+            if captured_piece != 0:
+                phase -= PHASE_VALUES[captured_piece] # Phase updating
+
+                O_eval -= Opst[captured_piece][captured_piece_table_index]
+                E_eval -= Epst[captured_piece][captured_piece_table_index]
+                O_eval -= Opiece_values[captured_piece]
+                E_eval -= Epiece_values[captured_piece]
+
+                if captured_piece == 27 or captured_piece == 30:
+                    self.white_bishops = False
+                elif captured_piece == 11 or captured_piece == 14:
+                    self.black_bishops = False
+
+            elif extra != -1:
+                if extra == 0: # Black kingside
+                    O_eval -= Opst[16][63 - 7]
+                    E_eval -= Epst[16][63 - 7]
+
+                    O_eval += Opst[16][63 - 5]
+                    E_eval += Epst[16][63 - 5]
+
+                elif extra == 1: # Black queenside
+                    O_eval -= Opst[9][63] # starting index for black rook in this case is index 0, so 63 - 0 is just 63.
+                    E_eval -= Epst[9][63]
+
+                    O_eval += Opst[9][63 - 3]
+                    E_eval += Epst[9][63 - 3]
+
+                elif extra == 2: # White kingside
+                    O_eval -= Opst[32][63]
+                    E_eval -= Epst[32][63]
+
+                    O_eval += Opst[32][61]
+                    E_eval += Epst[32][61]
+
+                elif extra == 3: # White Queenside
+                    O_eval -= Opst[25][56]
+                    E_eval -= Epst[25][56]
+
+                    O_eval += Opst[25][59]
+                    E_eval += Epst[25][59]
+
+            self.opening_eval = O_eval
+            self.closing_eval = E_eval
+
+        zobrist_evaluation = PH.get(self.pawn_hash, None)
+        if zobrist_evaluation == None:
+            pawn_Og_eval = 0
+            pawn_eg_eval = 0
+
+            for file in range(8):
+
+                w = white_pawns[file]
+                b = black_pawns[file]
+
+                if w > 1:
+                    white_stacked += w - 1
+
+                if b > 1:
+                    black_stacked += b - 1
+
+                if w:
+                    left = file > 0 and white_pawns[file - 1]
+                    right = file < 7 and white_pawns[file + 1]
+
+                    if not left and not right:
+                        white_isolated += w
+
+                if b:
+                    left = file > 0 and black_pawns[file - 1]
+                    right = file < 7 and black_pawns[file + 1]
+
+                    if not left and not right:
+                        black_isolated += b
+
+            pawn_Og_eval -= white_isolated * OPENING_ISOLATED
+            pawn_eg_eval -= white_isolated * ENDING_ISOLATED
+
+            pawn_Og_eval += black_isolated * OPENING_ISOLATED
+            pawn_eg_eval += black_isolated * ENDING_ISOLATED
+
+            pawn_Og_eval -= white_stacked * OPENING_STACKED
+            pawn_eg_eval -= white_stacked * ENDING_STACKED
+
+            pawn_Og_eval += black_stacked * OPENING_STACKED
+            pawn_eg_eval += black_stacked * ENDING_STACKED
+
+            O_eval += pawn_Og_eval
+            E_eval += pawn_eg_eval
+
+            PH[self.pawn_hash] = (pawn_Og_eval, pawn_eg_eval)
+        else:
+            pawn_o_eval, pawn_e_eval = zobrist_evaluation
+            O_eval += pawn_o_eval
+            E_eval += pawn_e_eval
+
+        if final_move:
+            eval = (
+                O_eval * phase +
+                E_eval * (24 - phase)
+            ) // 24
+
+            self.phase = phase
+            return eval
 
 def determine_capturable(board, end, color):
     if end < 0 or end > 63:
         return False
     
-    if -1 != get_color(board, end) != color:
+    piece = board[end]
+    piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
+
+    if -1 != piece_color != color:
         return True
     else:
         return False
 
 def determine_pawn_moves(board, moves, start): #Pawn is done. First section includes forwards movements, second section includes capture moves
-    color = get_color(board, start)
+    piece = board[start]
+    color = -1 if piece == 0 else 1 if piece >= 17 else 0
     if color == 0:
         if ((1 == start // 8) and board[start + 16] == 0 and board[start + 8] == 0):
             moves.append((start, start + 16, -1))
@@ -253,7 +438,8 @@ def is_valid_pawn_move(start, target):
     return diff in (0, 1)
 
 def determine_rook_moves(board, moves, start):
-    color = get_color(board, start)
+    piece = board[start]
+    color = -1 if piece == 0 else 1 if piece >= 17 else 0
 
     for direction in [-1, 1, -8, 8]:
         current = start
@@ -265,11 +451,12 @@ def determine_rook_moves(board, moves, start):
                 break
 
             piece = board[next_square]
+            piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
 
             if piece == 0:
                 moves.append((start, next_square, -1))
             else:
-                if get_color(board, next_square) != color:
+                if piece_color != color:
                     moves.append((start, next_square, -1))
                 break
 
@@ -305,7 +492,8 @@ def is_valid_knight_move(start, target):
     return diff in (1, 2)
 
 def determine_knight_moves(board, moves, start):
-    color = get_color(board, start)
+    piece = board[start]
+    color = -1 if piece == 0 else 1 if piece >= 17 else 0
 
     for offset in [6, 10, 15, 17, -6, -10, -15, -17]:
         target = start + offset
@@ -313,14 +501,15 @@ def determine_knight_moves(board, moves, start):
         if not is_valid_knight_move(start, target):
             continue
 
-        piece = board[target]
-        target_color = get_color(board, target)
+        target_piece = board[target]
+        target_color = -1 if target_piece == 0 else 1 if target_piece >= 17 else 0
 
         if target_color != color:
             moves.append((start, target, -1))
 
 def determine_bishop_moves(board, moves, start_pos):
-    color = get_color(board, start_pos)
+    piece = board[start_pos]
+    color = -1 if piece == 0 else 1 if piece >= 17 else 0
 
     # 4 diagonal directions: up-left, up-right, down-left, down-right
     directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
@@ -355,8 +544,8 @@ def determine_queen_moves(board, moves, start_pos):
     determine_rook_moves(board, moves, start_pos)
 
 def determine_king_moves(board, moves, start_pos, castle_rights):
-    color = get_color(board, start_pos)
-    psudo_moves = None
+    piece = board[start_pos]
+    color = -1 if piece == 0 else 1 if piece >= 17 else 0
 
     directions = [
         (-1, -1), (-1, 0), (-1, 1),
@@ -421,7 +610,9 @@ def determine_king_moves(board, moves, start_pos, castle_rights):
 def create_pseudo_moves(board, color, castle_rights): # takes a board state, and returns all possible moves, legal and illegal, given that position; ALso, returns only legal castle moves... whoops
     moves = [] #(start_position, end_position) position is by index number 
     for i, value in enumerate(board):
-        if get_color(board, i) == color:
+        piece = board[i]
+        piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
+        if piece_color == color:
             if value in PAWN_NUMBERS:
                 determine_pawn_moves(board, moves, i) #ignore_pawn_forwards is for ignoring them when determining attacked squares
 
@@ -466,24 +657,31 @@ def compute_hash(board, side_to_move, castle):
     return h
 
 def make_move(position, move): # all determination of whether a move is legal should be done before make_move. Make_move simply returns a board with the move made, and is used to determine if a move puts a king in check or not.
+    global OPENING_ISOLATED, ENDING_ISOLATED, OPENING_STACKED, ENDING_STACKED
     start, end, extra = move
     castle_rights = position.castle_rights
     num_pieces = position.pieces
-    undo = [position.board[end], position.castle_rights, position.side_to_move, position.hash, -1, num_pieces]
     hash = position.hash
-
+    pawn_hash = position.pawn_hash
     new_board = position.board
-    moved_piece = new_board[start]
+    side_to_move = position.side_to_move
+    black_pawns = position.black_pawns
+    white_pawns = position.white_pawns
+    change_white_pawns = []
+    change_black_pawns = [] # temporary placeholders to be changed later
 
+    undo = [new_board[end], castle_rights, side_to_move, hash, -1, num_pieces, [position.opening_eval, position.closing_eval, position.phase, position.white_bishops, position.black_bishops, change_white_pawns, change_black_pawns, position.pawn_hash]]
+
+    moved_piece = new_board[start]
+    end_piece = new_board[end]
 
     if moved_piece == 13:
         position.black_king = end
 
     elif moved_piece == 29:
         position.white_king = end
-
+        
     if extra == -1:
-        end_piece = new_board[end]
 
         hash ^= ZOBRIST[moved_piece][start] ^ ZOBRIST[moved_piece][end]
 
@@ -491,23 +689,56 @@ def make_move(position, move): # all determination of whether a move is legal sh
             hash ^= ZOBRIST[end_piece][end]
             if not(end_piece in PAWN_NUMBERS) and not(end_piece in KING_NUMBERS):
                 position.pieces -= 1  
+            elif end_piece in PAWN_NUMBERS:
+                pawn_hash ^= PAWN_ZOBRIST[end_piece][end]
+                column = end & 7
+                if side_to_move:
+                    undo[6][6] = [column, -1]
+                    black_pawns[column] -= 1
+                else:
+                    undo[6][5] = [column, -1]
+                    white_pawns[column] -= 1
+
+        if moved_piece in PAWN_NUMBERS:
+            pawn_hash ^= PAWN_ZOBRIST[moved_piece][start] ^ PAWN_ZOBRIST[moved_piece][end]
+            start_column = start & 7
+            end_column = end & 7
+            if side_to_move:
+                undo[6][5] = [start_column, end_column]
+                white_pawns[start_column] -= 1
+                white_pawns[end_column] += 1
+            else:
+                undo[6][6] = [start_column, end_column]
+                black_pawns[start_column] -= 1
+                black_pawns[end_column] += 1
+
+            if end >> 3 == 0: # THis part handles promotions for white
+                new_board[end] = 28 
+                hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[28][end]
+                undo[4] = moved_piece
+
+                if end_piece == 0:
+                    pawn_hash ^= PAWN_ZOBRIST[moved_piece][start]
+                    column = end & 7
+                    undo[6][5] = [column, -2]
+                    white_pawns[column] -= 1
+
+            elif end >> 3 == 7: # THIs part handles promoitions for black
+                new_board[end] = 12
+                hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[12][end]
+                undo[4] = moved_piece
+
+                if end_piece == 0:
+                    pawn_hash ^= PAWN_ZOBRIST[moved_piece][start]
+                    column = end & 7
+                    undo[6][6] = [column, -2]
+                    black_pawns[column] -= 1
 
         hash ^= ZOBRIST_SIDE
 
         new_board[end] = moved_piece
         new_board[start] = 0
         
-        if moved_piece in PAWN_NUMBERS: # If it is a pawn promotion, turn it into a queen; extra = 4 means white promotion, 5 means black promotion
-            if end // 8 == 0:
-                new_board[end] = 28 
-                hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[28][end]
-                undo[4] = moved_piece
-            elif end // 8 == 7:
-                new_board[end] = 12
-                hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[12][end]
-                undo[4] = moved_piece
-
-
 # This section changes castle rights based on moves to the rook or king
         if ((moved_piece == 9 and start == 0) or end_piece == 9) and castle_rights & BQ: # If queenside Rook
             castle_rights &= ~BQ
@@ -580,9 +811,10 @@ def make_move(position, move): # all determination of whether a move is legal sh
             castle_rights &= ~WQ & ~WK
             hash ^= ZOBRIST_CASTLE[WQ] ^ ZOBRIST_CASTLE[WK]
 
-    position.side_to_move = 1 - position.side_to_move
+    position.side_to_move = side_to_move ^ 1
     position.hash = hash
     position.castle_rights = castle_rights
+    position.pawn_hash = pawn_hash
 
     return position, undo
 
@@ -592,7 +824,8 @@ def find_king(board, color):
             continue
 
         if piece in KING_NUMBERS:
-            if get_color(board, i) == color:
+            piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
+            if piece_color == color:
                 return i
 
     return -1
@@ -652,7 +885,8 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
                 current = next_square
                 continue
             else:
-                if get_color(board, next_square) != color:
+                piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
+                if piece_color != color:
                     if (piece in ROOK_NUMBERS) or (piece in QUEEN_NUMBERS):
                         return True
                     if (piece in KING_NUMBERS) and step == 1:
@@ -667,7 +901,7 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
             continue
 
         piece = board[target]
-        target_color = get_color(board, target)
+        target_color = -1 if piece == 0 else 1 if piece >= 17 else 0
 
         if target_color != color:
             if piece in KNIGHT_NUMBERS:
@@ -681,7 +915,9 @@ def determine_pawn_legality(board, move): # This just makes sure that the pawn m
     end_col = end % 8
 
     if abs(start_col - end_col) != 0:
-        if  -1 != get_color(board, end) != get_color(board, start):
+        end_piece = board[end]
+        start_piece = board[start]
+        if  -1 != (-1 if end_piece == 0 else 1 if end_piece >= 17 else 0) != (-1 if start_piece == 0 else 1 if start_piece >= 17 else 0):
             return True
         else:
             return False
@@ -764,6 +1000,17 @@ def create_scored_moves(position, legal_moves, depth, entry_move):
     return scored_moves
 
 def evaluate_board(board):
+    global OPENING_ISOLATED, ENDING_ISOLATED, OPENING_STACKED, ENDING_STACKED
+    white_pawns = [0,0,0,0,0,0,0,0]
+    black_pawns = [0,0,0,0,0,0,0,0]
+
+    white_stacked = 0
+    black_stacked = 0
+    white_isolated = 0
+    black_isolated = 0
+
+    pawn_Og_eval = 0
+    pawn_eg_eval = 0
 
     Og_eval = 0
     eg_eval = 0
@@ -771,6 +1018,8 @@ def evaluate_board(board):
 
     white_bishops = 0
     black_bishops = 0
+
+    hash = 0
 
     for i, piece in enumerate(board):
 
@@ -794,10 +1043,20 @@ def evaluate_board(board):
         phase += PHASE_VALUES[piece]
 
         # Bishop pair
-        if piece in (27, 30):
+        if piece == 27 or piece == 30:
             white_bishops += 1
-        elif piece in (11, 14):
+        elif piece == 11 or piece == 14:
             black_bishops += 1
+
+        if 0 < piece < 9:
+            hash ^= PAWN_ZOBRIST[piece][i]
+            file = i & 7
+            black_pawns[file] += 1
+
+        elif 16 < piece < 25:
+            hash ^= PAWN_ZOBRIST[piece][i]
+            file = i & 7
+            white_pawns[file] += 1
 
     # Bishop pair bonuses
     if white_bishops >= 2:
@@ -812,13 +1071,47 @@ def evaluate_board(board):
     if phase > 24:
         phase = 24
 
-    # Tapered interpolation
-    eval = (
-        Og_eval * phase +
-        eg_eval * (24 - phase)
-    ) // 24
+    for file in range(8):
 
-    return eval
+        w = white_pawns[file]
+        b = black_pawns[file]
+
+        if w > 1:
+            white_stacked += w - 1
+
+        if b > 1:
+            black_stacked += b - 1
+
+        if w:
+            left = file > 0 and white_pawns[file - 1]
+            right = file < 7 and white_pawns[file + 1]
+
+            if not left and not right:
+                white_isolated += w
+
+        if b:
+            left = file > 0 and black_pawns[file - 1]
+            right = file < 7 and black_pawns[file + 1]
+
+            if not left and not right:
+                black_isolated += b
+
+    pawn_Og_eval -= white_isolated * OPENING_ISOLATED
+    pawn_eg_eval -= white_isolated * ENDING_ISOLATED
+
+    pawn_Og_eval += black_isolated * OPENING_ISOLATED
+    pawn_eg_eval += black_isolated * ENDING_ISOLATED
+
+    pawn_Og_eval -= white_stacked * OPENING_STACKED
+    pawn_eg_eval -= white_stacked * ENDING_STACKED
+
+    pawn_Og_eval += black_stacked * OPENING_STACKED # Currently working on adding pawn structure values to evaluate board, such as passed pawns which can be implemented easily into current structure.
+    pawn_eg_eval += black_stacked * ENDING_STACKED
+ # I separated pawn eval and regular eval so i could save pawn eval as a tuple in hash 
+
+    PH[hash] = (pawn_Og_eval, pawn_eg_eval)
+
+    return Og_eval, eg_eval, phase, white_bishops, black_bishops, white_pawns, black_pawns, hash
 
 def undo_move(position, move, undo_info):
     start, end, extra = move
@@ -844,7 +1137,35 @@ def undo_move(position, move, undo_info):
     if undo_info[4] != -1: # This is purely for undoing promotion moves 
         board[start] = undo_info[4]
 
-    position.num_piece = undo_info[5]
+    position.pieces = undo_info[5]
+
+    position.opening_eval = undo_info[6][0]
+    position.closing_eval = undo_info[6][1]
+    position.phase = undo_info[6][2]
+    position.white_bishops = undo_info[6][3]
+    position.black_bishops = undo_info[6][4]
+    change_white_pawns = undo_info[6][5]
+    change_black_pawns = undo_info[6][6]
+    position.pawn_hash = undo_info[6][7]
+
+    white_pawns = position.white_pawns
+    black_pawns = position.black_pawns
+
+    if change_white_pawns != []: # (start column, end column and identifier) if identifier = -1 captured piece -2 promotion anything else means its the actual ending file
+        start, end = change_white_pawns
+        if end >= 0:
+            white_pawns[end] -= 1
+            white_pawns[start] += 1
+        elif end == -1 or end == -2:
+            white_pawns[start] += 1
+
+    if change_black_pawns != []:
+        start, end = change_black_pawns
+        if end >= 0:
+            black_pawns[end] -= 1
+            black_pawns[start] += 1
+        elif end == -1 or end == -2:
+            black_pawns[start] += 1
 
     if extra != -1: 
         metadata = extra # for castle moves, start and end refer to king position. flags: 0 = black_kingside, 1 = black_queenside, 2 = white_kingside, 3 = white_queenside 
@@ -872,12 +1193,16 @@ def count_non_pawn_or_king(board): # This just counts the number of non pawn and
     return pieces
 
 def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
+    found_legal_move = False
     global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS
     board = position.board
     NUMBER_OF_RECURSIONS += 1
-    if depth == 0:
-        return evaluate_board(board)
 
+    if depth == 0:
+        eval = position.update_evaluation((), [], True)
+        return eval
+
+    first_move = True
     num_pieces = position.pieces
     best_move = None
     alpha_orig = alpha
@@ -908,13 +1233,23 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
         position.side_to_move ^= 1
         position.hash ^= ZOBRIST_SIDE
         
-        score = recurse(
-            position,
-            depth - 1 - REDUCTION_FACTOR,
-            alpha,
-            beta,
-            not maximizing,
-            False
+        if maximizing:
+            score = recurse(
+                position,
+                depth - 1 - REDUCTION_FACTOR,
+                beta - 1,
+                beta, 
+                maximizing ^ 1,
+                False
+                )
+        else:
+            score = recurse(
+                position,
+                depth - 1 - REDUCTION_FACTOR,
+                alpha,
+                alpha + 1,
+                maximizing ^ 1,
+                False
             )
 
         position.side_to_move ^= 1
@@ -935,93 +1270,150 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
         position.castle_rights,
     )
 
-    legal_moves = determine_legal_moves(position, all_moves)
-    scored_moves = create_scored_moves(position, legal_moves, depth, entry_move)
+    scored_moves = create_scored_moves(position, all_moves, depth, entry_move)
 
-    if maximizing:
+    best = -99999999 if maximizing else 99999999
 
-        best = -99999999
+    for _, move in scored_moves:
+        start, end, extra = move
+        captured_piece = board[end]
+        temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
 
-        for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
-            start, end, extra = move
-            captured_piece = board[end]
+        if not(temp_position.side_to_move): # We swap which side we look at because when the move made was done on blacks side, then temp_position side becomes white, since black moved. Swap to get the side that just moved to check if legal
+            if is_square_attacked(temp_position.white_king, temp_position.board, 1):
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                continue
+        else:
+            if is_square_attacked(temp_position.black_king, temp_position.board, 0):
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                continue
 
-            temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
+        position.update_evaluation(move, undo_info)
 
+        found_legal_move = True
+
+        if first_move:
             score = recurse(
                 temp_position,
-                depth - 1,
+                depth-1,
                 alpha,
                 beta,
-                0,
+                not maximizing,
                 allow_null_move
             )
+
+            first_move = False
+
+            if maximizing:
+                alpha = max(alpha, score)
+
+                if score > best:
+                    best = score
+                    best_move = move
+            else:
+                beta = min(beta, score)
+
+                if score < best:
+                    best = score
+                    best_move = move
 
             undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
-            if score > best:
-                best = score
-                best_move = move
-
-            alpha = max(alpha, score)
-
-            if beta <= score:
-                history[start][end] += depth * depth
-
-                # store killer move (only if it's quiet)
-                start, end, extra = move
-
-                if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
-                    if move != killer_moves[depth][0]:
-                        killer_moves[depth][1] = killer_moves[depth][0]
-                        killer_moves[depth][0] = move
-
-                
+            if alpha >= beta:
                 break
 
-    else:
+        else:
+            if maximizing:
+                score = recurse(
+                    temp_position,
+                    depth-1,
+                    alpha,
+                    alpha+1,
+                    False,
+                    allow_null_move
+                )
 
-        best = 99999999
+                if score > alpha_orig and score < beta:
+                    score = recurse(
+                        temp_position,
+                        depth-1,
+                        alpha,
+                        beta,
+                        False,
+                        allow_null_move
+                    )
 
-        for scor, move in scored_moves:
-            start, end, extra = move
-            captured_piece = board[end]
+                if score > best:
+                    best = score
+                    best_move = move
 
-            temp_position, undo_info = make_move(position, move)
-            score = recurse(
-                temp_position,
-                depth - 1,
-                alpha,
-                beta,
-                1,
-                allow_null_move
-            )
+                alpha = max(alpha, score)
 
-            undo_move(position, move, undo_info)
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
+                if beta <= alpha:
+                    # store killer move (only if it's quiet)
+                    start, end, extra = move
 
+                    history[start][end] += depth * depth
 
+                    if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                        if move != killer_moves[depth][0]:
+                            killer_moves[depth][1] = killer_moves[depth][0]
+                            killer_moves[depth][0] = move
 
+                    
+                    break
 
-            if score < best:
-                best = score
-                best_move = move
+            else:
+                score = recurse(
+                    temp_position,
+                    depth-1,
+                    beta-1,
+                    beta,
+                    True,
+                    allow_null_move
+                )
 
-            beta = min(beta, score)
-
-            if score <= alpha:
-                history[start][end] += depth * depth
-
-                # store killer move (only if it's quiet)
-                start, end, extra = move
-
-                if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
-                    if move != killer_moves[depth][0]:
-                        killer_moves[depth][1] = killer_moves[depth][0]
-                        killer_moves[depth][0] = move
+                if score < beta_orig and score > alpha:
+                    score = recurse(
+                        temp_position,
+                        depth-1,
+                        alpha,
+                        beta,
+                        True,
+                        allow_null_move
+                    )
 
                 
-                break
+                if score < best:
+                    best = score
+                    best_move = move
+
+                beta = min(beta, score)
+
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+
+                if beta <= alpha:
+                    # store killer move (only if it's quiet)
+                    start, end, extra = move
+
+                    history[start][end] += depth * depth
+
+                    if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                        if move != killer_moves[depth][0]:
+                            killer_moves[depth][1] = killer_moves[depth][0]
+                            killer_moves[depth][0] = move
+
+                    break
+                
+    if not found_legal_move: # if legal_move is still false, meaning no legal moves were found
+        if maximizing and is_square_attacked(position.white_king, board, 1):
+            best = -99999999
+        elif not(maximizing) and is_square_attacked(position.black_king, board, 0):
+                best = -99999999
+        else:
+            best = 0
     
     flag = "EXACT"
 
@@ -1030,7 +1422,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
     elif best >= beta_orig:
         flag = "LOWER"  
 
-    if entry is None or (entry[0] < depth and entry[2] != "EXACT") or (entry[0] == depth and flag == "EXACT"):
+    if entry is None or depth >= entry_depth:
         TT[position.hash] = (depth, best, flag, best_move)
     
     return best
@@ -1039,14 +1431,15 @@ def find_best_move(position, depth, starting_move):
     global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS
     alpha = -99999999
     beta = 99999999
-    turn = 0
     side = position.side_to_move    
 
     alpha_orig = alpha
     beta_orig = beta
     entry_move = None
     entry = TT.get(position.hash)
-    num_pieces = position.pieces
+    first_move = True
+    board = position.board
+    found_legal_move = False
 
     if entry is not None:  
         TT_LOOKUPS += 1
@@ -1055,7 +1448,7 @@ def find_best_move(position, depth, starting_move):
         if entry_depth >= depth:
             if entry_flag == "EXACT":
                 TT_HITS += 1
-                return entry_score
+                return entry_move
             elif entry_flag == "LOWER":
                 alpha = max(alpha, entry_score)
             elif entry_flag == "UPPER":
@@ -1063,119 +1456,157 @@ def find_best_move(position, depth, starting_move):
 
             if alpha >= beta:
                 TT_HITS += 1
-                return entry_score
+                return entry_move
             
-
-    if (depth >= REDUCTION_FACTOR + 1 and not(is_square_attacked(position.white_king if position.side_to_move else position.black_king, board, position.side_to_move)) and num_pieces != 0):
-        position.side_to_move ^= 1
-        position.hash ^= ZOBRIST_SIDE
-        
-        score = recurse(
-            position,
-            depth - 1 - REDUCTION_FACTOR,
-            alpha,
-            beta,
-            not side,
-            False
-            )
-
-        position.side_to_move ^= 1
-        position.hash ^= ZOBRIST_SIDE
-
-        if side:
-            if score >= beta:
-                return beta
-        else:
-            if score <= alpha:
-                return alpha
-        
     all_moves = create_pseudo_moves(
-        position.board,
+        board,
         side,
         position.castle_rights,
     )
 
-    legal_moves = determine_legal_moves(position, all_moves)
-    scored_moves = create_scored_moves(position, legal_moves, depth, starting_move)
-
+    scored_moves = create_scored_moves(position, all_moves, depth, starting_move)
     best_move = None
+    best_eval = -99999999 if side else 99999999
 
-    if side == 1:
-        # WHITE MAXIMIZES
+    for _, move in scored_moves:
+        start, end, extra = move
+        captured_piece = board[end]
+        temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
 
-        best_eval = -99999999
+        if not(temp_position.side_to_move): # We swap which side we look at because when the move made was done on blacks side, then temp_position side becomes white, since black moved. Swap to get the side that just moved to check if legal
+            if is_square_attacked(temp_position.white_king, temp_position.board, 1):
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                continue
+        else:
+            if is_square_attacked(temp_position.black_king, temp_position.board, 0):
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                continue
 
-        for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
-            if turn == 0:
-                print("FIRST MOVE: ", move)
-                turn += 1
+        found_legal_move = True
+        position.update_evaluation(move, undo_info)
 
-            temp_position, undo_info = make_move(position, move)
-
-
-            evaluation = recurse(
+        if first_move:
+            score = recurse(
                 temp_position,
-                depth - 1,
+                depth-1,
                 alpha,
                 beta,
-                0,
+                not side,
                 True
             )
 
-            undo_move(position, move, undo_info)
+            first_move = False
 
-            if evaluation > best_eval:
-                best_eval = evaluation
-                best_move = move
+            if side:
+                alpha = max(alpha, score)
 
-            alpha = max(alpha, evaluation)
+                if score > best_eval:
+                    best_eval = score
+                    best_move = move
+            else:
+                beta = min(beta, score)
 
-            if beta <= evaluation:
-                history[start][end] += depth * depth
+                if score < best_eval:
+                    best_eval = score
+                    best_move = move
 
-                # store killer move (only if it's quiet)
-                start, end, extra = move
+            undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
-                if board[end] == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
-                    if move != killer_moves[depth][0]:
-                        killer_moves[depth][1] = killer_moves[depth][0]
-                        killer_moves[depth][0] = move
+            if alpha >= beta:
+                break
 
-    else:
-        # BLACK MINIMIZES   
+        else:
+            if side:
+                score = recurse(
+                    temp_position,
+                    depth-1,
+                    alpha,
+                    alpha+1,
+                    False,
+                    True
+                )
 
-        best_eval = 99999999
+                if score > alpha_orig and score < beta:
+                    score = recurse(
+                        temp_position,
+                        depth-1,
+                        alpha,
+                        beta,
+                        False,
+                        True
+                    )
 
-        for scor, move in scored_moves: # scor so it doesnt mix with score for recursion
-            temp_position, undo_info = make_move(position, move)
+                if score > best_eval:
+                    best_eval = score
+                    best_move = move
 
-            evaluation = recurse(
-                temp_position,
-                depth - 1,
-                alpha,
-                beta,
-                1,
-                True
-            )
+                alpha = max(alpha, score)
 
-            undo_move(position, move, undo_info)
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
-            if evaluation < best_eval:
-                best_eval = evaluation
-                best_move = move
+                if beta <= alpha:
+                    # store killer move (only if it's quiet)
+                    start, end, extra = move
 
-            beta = min(beta, evaluation)
+                    history[start][end] += depth * depth
 
-            if evaluation <= alpha:
-                history[start][end] += depth * depth
+                    if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                        if move != killer_moves[depth][0]:
+                            killer_moves[depth][1] = killer_moves[depth][0]
+                            killer_moves[depth][0] = move
 
-                # store killer move (only if it's quiet)
-                start, end, extra = move
+                    
+                    break
 
-                if board[end] == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
-                    if move != killer_moves[depth][0]:
-                        killer_moves[depth][1] = killer_moves[depth][0]
-                        killer_moves[depth][0] = move
+            else:
+                score = recurse(
+                    temp_position,
+                    depth-1,
+                    beta-1,
+                    beta,
+                    True,
+                    True
+                )
+
+                if score < beta_orig and score > alpha:
+                    score = recurse(
+                        temp_position,
+                        depth-1,
+                        alpha,
+                        beta,
+                        True,
+                        True
+                    )
+
+                
+                if score < best_eval:
+                    best_eval = score
+                    best_move = move
+
+                beta = min(beta, score)
+
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+
+                if beta <= alpha:
+                    # store killer move (only if it's quiet)
+                    start, end, extra = move
+
+                    history[start][end] += depth * depth
+
+                    if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                        if move != killer_moves[depth][0]:
+                            killer_moves[depth][1] = killer_moves[depth][0]
+                            killer_moves[depth][0] = move
+
+                    break
+
+    if not found_legal_move: # if legal_move is still false, meaning no legal moves were found
+        if side and is_square_attacked(position.white_king, board, 1):
+            best_eval = -99999999
+        elif not(side) and is_square_attacked(position.black_king, board, 0):
+                best_eval = -99999999
+        else:
+            best_eval = 0
 
     flag = "EXACT"
 
@@ -1184,10 +1615,12 @@ def find_best_move(position, depth, starting_move):
     elif best_eval >= beta_orig:
         flag = "LOWER"  
 
-    if entry is None or (entry[0] < depth and entry[2] != "EXACT") or (entry[0] == depth and flag == "EXACT"):
+    if entry is None or depth >= entry_depth:
         TT[position.hash] = (depth, best_eval, flag, best_move)
 
     return best_move
+
+opening_eval, closing_eval, phase, white_bishops, black_bishops, white_pawns, black_pawns, pawn_hash = evaluate_board(board)
 
 position = Position(
     board,
@@ -1196,23 +1629,27 @@ position = Position(
     compute_hash(board, 1, initial_castle_rights),
     find_king(board, 0),
     find_king(board, 1),
-    count_non_pawn_or_king(board)
+    count_non_pawn_or_king(board),
+    
+    opening_eval,
+    closing_eval,
+    phase,
+    white_bishops == 2, 
+    black_bishops == 2,
+    black_pawns,
+    white_pawns,
+    pawn_hash
 )
 previous_best_move = None
 
-for i in range(1, 8):
+start_time = time.perf_counter()
+for i in range(1, 9):
     previous_best_move = find_best_move(position, i, previous_best_move)
     print("DEPTH: ", i, "MOVE: ", previous_best_move)
+end_time = time.perf_counter()
 
+print("TIME TAKEN: ", end_time - start_time)
 print(previous_best_move)
 
 
 print("TTS HITS: ", TT_HITS, " TT LOOKUPS: ", TT_LOOKUPS, " RECURSIONS: ", NUMBER_OF_RECURSIONS, " ELEMENTS IN TT: ", len(TT.values()))
-
-"""print(evaluate_board(board)) #evaluatoin is behaving weirdly. White pieces should increase evaluation, however they end up decreasing it somehow.
-Position = Position(board, 0, initial_castle_rights)
-
-a = create_pseudo_moves(Position.board, 0, Position.castle_rights, False)
-
-print(determine_legal_moves(Position, a))"""
-

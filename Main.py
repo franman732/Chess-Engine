@@ -12,12 +12,14 @@ PHASE_VALUES = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2, 0, 0, 0, 0, 0
 
 moves_set = {}
 
-KING_NUMBERS = {13, 29}
-PAWN_NUMBERS = {1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23, 24}
-ROOK_NUMBERS = {9, 16, 25, 32}
-BISHOP_NUMBERS = {11, 14, 27, 30}
-QUEEN_NUMBERS = {12, 28}
-KNIGHT_NUMBERS = {10, 15, 26, 31}
+PIECES = [0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2]
+
+KING_NUMBER = 6
+PAWN_NUMBER = 1
+ROOK_NUMBER = 2
+BISHOP_NUMBER = 4
+QUEEN_NUMBER = 5
+KNIGHT_NUMBER = 3
 
 TT_HITS = 0
 TT_LOOKUPS = 0
@@ -201,7 +203,6 @@ OPENING_ISOLATED = 15
 ENDING_ISOLATED = 10
 
 PAWN_ZOBRIST = [[random.getrandbits(64) for _ in range(64)] for _ in range(25)]
-
 PH = {} # Pawn Hash
 class Position:
     def __init__(self, board, side_to_move, castle_rights, hash, black_king, white_king, pieces, opening_eval, closing_eval, phase, white_bishops, black_bishops, black_pawns, white_pawns, pawn_hash):
@@ -255,7 +256,7 @@ class Position:
             O_eval += Opst[moved_piece][end_table_index] # PST updating adding ending pst values
             E_eval += Epst[moved_piece][end_table_index]
 
-            if moved_piece in PAWN_NUMBERS:
+            if PIECES[moved_piece] == PAWN_NUMBER:
                 row = end >> 3
                 if is_white and row == 0:
                     O_eval -= Opst[moved_piece][end_table_index]
@@ -613,22 +614,22 @@ def create_pseudo_moves(board, color, castle_rights): # takes a board state, and
         piece = board[i]
         piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
         if piece_color == color:
-            if value in PAWN_NUMBERS:
+            if  PIECES[value] == PAWN_NUMBER:
                 determine_pawn_moves(board, moves, i) #ignore_pawn_forwards is for ignoring them when determining attacked squares
 
-            elif value in ROOK_NUMBERS:
+            elif PIECES[value] == ROOK_NUMBER:
                 determine_rook_moves(board, moves, i)
 
-            elif value in KNIGHT_NUMBERS:
+            elif PIECES[value] == KNIGHT_NUMBER:
                 determine_knight_moves(board, moves, i)
 
-            elif value in BISHOP_NUMBERS:
+            elif PIECES[value] == BISHOP_NUMBER:
                 determine_bishop_moves(board, moves, i)
 
-            elif value in QUEEN_NUMBERS:
+            elif PIECES[value] == QUEEN_NUMBER:
                 determine_queen_moves(board, moves, i)
 
-            elif value in KING_NUMBERS:
+            elif PIECES[value] == KING_NUMBER:
                 determine_king_moves(board, moves, i, castle_rights)
     return moves
 
@@ -687,9 +688,9 @@ def make_move(position, move): # all determination of whether a move is legal sh
 
         if end_piece != 0:
             hash ^= ZOBRIST[end_piece][end]
-            if not(end_piece in PAWN_NUMBERS) and not(end_piece in KING_NUMBERS):
+            if not(PIECES[end_piece] == PAWN_NUMBER) and not(PIECES[end_piece] == KING_NUMBER):
                 position.pieces -= 1  
-            elif end_piece in PAWN_NUMBERS:
+            elif PIECES[end_piece] == PAWN_NUMBER:
                 pawn_hash ^= PAWN_ZOBRIST[end_piece][end]
                 column = end & 7
                 if side_to_move:
@@ -699,7 +700,7 @@ def make_move(position, move): # all determination of whether a move is legal sh
                     undo[6][5] = [column, -1]
                     white_pawns[column] -= 1
 
-        if moved_piece in PAWN_NUMBERS:
+        if PIECES[moved_piece] == PAWN_NUMBER:
             pawn_hash ^= PAWN_ZOBRIST[moved_piece][start] ^ PAWN_ZOBRIST[moved_piece][end]
             start_column = start & 7
             end_column = end & 7
@@ -823,7 +824,7 @@ def find_king(board, color):
         if piece == 0:
             continue
 
-        if piece in KING_NUMBERS:
+        if PIECES[piece] == KING_NUMBER:
             piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
             if piece_color == color:
                 return i
@@ -854,14 +855,15 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
                 # occupied square -> check capture
                 enemy_color = 0 if value < 17 else 1
                 if enemy_color != color: #if capturable, it means the piece of the opposite color.
-                    if (value in BISHOP_NUMBERS) or (value in QUEEN_NUMBERS):
+                    piece_number = PIECES[value]
+                    if (piece_number == BISHOP_NUMBER) or (piece_number == QUEEN_NUMBER):
                         return True
-                    if (value in PAWN_NUMBERS):
+                    if (piece_number == PAWN_NUMBER):
                         if enemy_color == 0 and (r - row) == -1:
                             return True
                         if enemy_color == 1 and (r - row) == 1:
                             return True
-                    if (value in KING_NUMBERS) and (r - row) in (-1, 1):
+                    if (piece_number == KING_NUMBER) and (r - row) in (-1, 1):
                         return True
 
                 # stop sliding in this direction no matter what
@@ -887,9 +889,10 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
             else:
                 piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
                 if piece_color != color:
-                    if (piece in ROOK_NUMBERS) or (piece in QUEEN_NUMBERS):
+                    piece_number = PIECES[piece]
+                    if (piece_number == ROOK_NUMBER) or (piece_number == QUEEN_NUMBER):
                         return True
-                    if (piece in KING_NUMBERS) and step == 1:
+                    if (piece_number == KING_NUMBER) and step == 1:
                         return True
                 break
 
@@ -904,7 +907,7 @@ def is_square_attacked(square, board, color): # color of the side that wants to 
         target_color = -1 if piece == 0 else 1 if piece >= 17 else 0
 
         if target_color != color:
-            if piece in KNIGHT_NUMBERS:
+            if PIECES[piece] == KNIGHT_NUMBER:
                 return True
         
     return False
@@ -945,7 +948,7 @@ def determine_legal_moves(position, all_moves): #Takes a board and psudo moves f
 
         if not is_square_attacked(king_square, temp_board, moving_color):
 
-            if board[start] in PAWN_NUMBERS:
+            if PIECES[board[start]] == PAWN_NUMBER:
                 if determine_pawn_legality(board, move):
                     legal_moves.append(move)
             else:
@@ -977,7 +980,7 @@ def score_move(position, move, depth, best_move):
         score -= attacker
 
     # promotions
-    if attacker in PAWN_NUMBERS:
+    if PIECES[attacker] == PAWN_NUMBER:
         if end // 8 == 0 or end // 8 == 7:
             score += 100000
 
@@ -1187,7 +1190,7 @@ def count_non_pawn_or_king(board): # This just counts the number of non pawn and
     pieces = 0
     
     for value in board:
-        if not(value in PAWN_NUMBERS) and not(value in KING_NUMBERS):
+        if not(PIECES[value] == PAWN_NUMBER) and not(PIECES[value] == KING_NUMBER):
             pieces += 1
 
     return pieces
@@ -1357,7 +1360,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
 
                     history[start][end] += depth * depth
 
-                    if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                    if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
                         if move != killer_moves[depth][0]:
                             killer_moves[depth][1] = killer_moves[depth][0]
                             killer_moves[depth][0] = move
@@ -1400,7 +1403,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
 
                     history[start][end] += depth * depth
 
-                    if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                    if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
                         if move != killer_moves[depth][0]:
                             killer_moves[depth][1] = killer_moves[depth][0]
                             killer_moves[depth][0] = move
@@ -1550,7 +1553,7 @@ def find_best_move(position, depth, starting_move):
 
                     history[start][end] += depth * depth
 
-                    if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                    if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
                         if move != killer_moves[depth][0]:
                             killer_moves[depth][1] = killer_moves[depth][0]
                             killer_moves[depth][0] = move
@@ -1593,7 +1596,7 @@ def find_best_move(position, depth, starting_move):
 
                     history[start][end] += depth * depth
 
-                    if captured_piece == 0 and not (board[start] in PAWN_NUMBERS and (end // 8 in (0,7))):  # quiet move
+                    if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
                         if move != killer_moves[depth][0]:
                             killer_moves[depth][1] = killer_moves[depth][0]
                             killer_moves[depth][0] = move

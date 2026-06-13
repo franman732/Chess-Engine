@@ -204,8 +204,9 @@ ENDING_ISOLATED = 10
 
 PAWN_ZOBRIST = [[random.getrandbits(64) for _ in range(64)] for _ in range(25)]
 PH = {} # Pawn Hash
+
 class Position:
-    def __init__(self, board, side_to_move, castle_rights, hash, black_king, white_king, pieces, opening_eval, closing_eval, phase, white_bishops, black_bishops, black_pawns, white_pawns, pawn_hash):
+    def __init__(self, board, side_to_move, castle_rights, hash, black_king, white_king, pieces, opening_eval, closing_eval, phase, white_bishops, black_bishops, black_pawns, white_pawns, pawn_hash, piece_locations):
         self.board = board
         self.side_to_move = side_to_move
         self.castle_rights = castle_rights
@@ -222,6 +223,8 @@ class Position:
         self.black_pawns = black_pawns
         self.white_pawns = white_pawns
         self.pawn_hash = pawn_hash
+
+        self.piece_locations = piece_locations
 
     def update_evaluation(self, move, undo_info, final_move = False):
         global ENDING_ISOLATED, OPENING_ISOLATED, ENDING_STACKED, OPENING_STACKED
@@ -608,11 +611,10 @@ def determine_king_moves(board, moves, start_pos, castle_rights):
                             not is_square_attacked(58, board, 1)):
                             moves.append((60, 58, 3))
 
-def create_pseudo_moves(board, color, castle_rights): # takes a board state, and returns all possible moves, legal and illegal, given that position; ALso, returns only legal castle moves... whoops
+def create_pseudo_moves(position, board, color, castle_rights): # takes a board state, and returns all possible moves, legal and illegal, given that position; ALso, returns only legal castle moves... whoops
     moves = [] #(start_position, end_position) position is by index number 
-    for i, value in enumerate(board):
-        piece = board[i]
-        piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
+    for i, value in position.piece_locations.items():
+        piece_color = -1 if value == 0 else 1 if value >= 17 else 0
         if piece_color == color:
             if  PIECES[value] == PAWN_NUMBER:
                 determine_pawn_moves(board, moves, i) #ignore_pawn_forwards is for ignoring them when determining attacked squares
@@ -668,6 +670,7 @@ def make_move(position, move): # all determination of whether a move is legal sh
     side_to_move = position.side_to_move
     black_pawns = position.black_pawns
     white_pawns = position.white_pawns
+    piece_positions = position.piece_locations
     change_white_pawns = []
     change_black_pawns = [] # temporary placeholders to be changed later
 
@@ -681,7 +684,10 @@ def make_move(position, move): # all determination of whether a move is legal sh
 
     elif moved_piece == 29:
         position.white_king = end
-        
+
+    del piece_positions[start]
+    piece_positions[end] = moved_piece
+
     if extra == -1:
 
         hash ^= ZOBRIST[moved_piece][start] ^ ZOBRIST[moved_piece][end]
@@ -700,6 +706,9 @@ def make_move(position, move): # all determination of whether a move is legal sh
                     undo[6][5] = [column, -1]
                     white_pawns[column] -= 1
 
+        new_board[end] = moved_piece
+        new_board[start] = 0
+
         if PIECES[moved_piece] == PAWN_NUMBER:
             pawn_hash ^= PAWN_ZOBRIST[moved_piece][start] ^ PAWN_ZOBRIST[moved_piece][end]
             start_column = start & 7
@@ -714,6 +723,8 @@ def make_move(position, move): # all determination of whether a move is legal sh
                 black_pawns[end_column] += 1
 
             if end >> 3 == 0: # THis part handles promotions for white
+                piece_positions[end] = 28
+
                 new_board[end] = 28 
                 hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[28][end]
                 undo[4] = moved_piece
@@ -725,6 +736,8 @@ def make_move(position, move): # all determination of whether a move is legal sh
                     white_pawns[column] -= 1
 
             elif end >> 3 == 7: # THIs part handles promoitions for black
+                piece_positions[end] = 12
+                
                 new_board[end] = 12
                 hash ^= ZOBRIST[moved_piece][end] ^ ZOBRIST[12][end]
                 undo[4] = moved_piece
@@ -736,9 +749,6 @@ def make_move(position, move): # all determination of whether a move is legal sh
                     black_pawns[column] -= 1
 
         hash ^= ZOBRIST_SIDE
-
-        new_board[end] = moved_piece
-        new_board[start] = 0
         
 # This section changes castle rights based on moves to the rook or king
         if ((moved_piece == 9 and start == 0) or end_piece == 9) and castle_rights & BQ: # If queenside Rook
@@ -783,6 +793,9 @@ def make_move(position, move): # all determination of whether a move is legal sh
         if metadata == 0:
             hash ^= ZOBRIST[16][7] ^ ZOBRIST[16][5] 
             
+            piece_positions[5] = new_board[7]
+            del piece_positions[7]
+
             new_board[5] = new_board[7]
             new_board[7] = 0
             castle_rights &= ~BQ & ~BK
@@ -790,6 +803,9 @@ def make_move(position, move): # all determination of whether a move is legal sh
 
         elif metadata == 1:
             hash ^= ZOBRIST[9][0] ^ ZOBRIST[9][3]
+            
+            piece_positions[3] = new_board[0]
+            del piece_positions[0]
 
             new_board[3] = new_board[0]
             new_board[0] = 0
@@ -798,6 +814,9 @@ def make_move(position, move): # all determination of whether a move is legal sh
 
         elif metadata == 2:
             hash ^= ZOBRIST[32][63] ^ ZOBRIST[32][61]
+            
+            piece_positions[61] = new_board[63]
+            del piece_positions[63]
 
             new_board[61] = new_board[63]
             new_board[63] = 0
@@ -806,6 +825,9 @@ def make_move(position, move): # all determination of whether a move is legal sh
 
         elif metadata == 3:
             hash ^= ZOBRIST[25][56] ^ ZOBRIST[25][59]
+            
+            piece_positions[59] = new_board[56]
+            del piece_positions[56]
 
             new_board[59] = new_board[56]
             new_board[56] = 0
@@ -999,7 +1021,7 @@ def create_scored_moves(position, legal_moves, depth, entry_move):
         score = score_move(position, move, depth, entry_move)
         scored_moves.append((score, move))
 
-    scored_moves.sort(reverse=True)
+    scored_moves.sort(key=lambda x: (x[0], x[1][0], x[1][1]), reverse=True)
     return scored_moves
 
 def evaluate_board(board):
@@ -1121,15 +1143,17 @@ def undo_move(position, move, undo_info):
     board = position.board
 
     moved_piece = board[end]
+    captured_piece = undo_info[0]
 
     board[start] = moved_piece
-    board[end] = undo_info[0]
+    board[end] = captured_piece
 
     position.castle_rights = undo_info[1]
  
     position.side_to_move = undo_info[2]
 
     position.hash = undo_info[3]
+    original_piece = undo_info[4]
 
     if moved_piece == 13:
         position.black_king = start
@@ -1137,8 +1161,7 @@ def undo_move(position, move, undo_info):
     elif moved_piece == 29:
         position.white_king = start
 
-    if undo_info[4] != -1: # This is purely for undoing promotion moves 
-        board[start] = undo_info[4]
+    piece_positions = position.piece_locations
 
     position.pieces = undo_info[5]
 
@@ -1153,6 +1176,18 @@ def undo_move(position, move, undo_info):
 
     white_pawns = position.white_pawns
     black_pawns = position.black_pawns
+
+    # reverse the main piece move
+    piece_positions[start] = piece_positions[end]  # move piece back
+    del piece_positions[end]
+
+    # restore captured piece
+    if captured_piece != 0:
+        piece_positions[end] = captured_piece
+
+    if undo_info[4] != -1: # This is purely for undoing promotion moves 
+        board[start] = original_piece
+        piece_positions[start] = original_piece
 
     if change_white_pawns != []: # (start column, end column and identifier) if identifier = -1 captured piece -2 promotion anything else means its the actual ending file
         start, end = change_white_pawns
@@ -1170,21 +1205,31 @@ def undo_move(position, move, undo_info):
         elif end == -1 or end == -2:
             black_pawns[start] += 1
 
-    if extra != -1: 
-        metadata = extra # for castle moves, start and end refer to king position. flags: 0 = black_kingside, 1 = black_queenside, 2 = white_kingside, 3 = white_queenside 
-        
-        if metadata == 0: 
+    if extra != -1:  # for castle moves, start and end refer to king position. flags: 0 = black_kingside, 1 = black_queenside, 2 = white_kingside, 3 = white_queenside  
+        if extra == 0: 
             board[7] = board[5] 
             board[5] = 0 
-        elif metadata == 1: 
+
+            piece_positions[7] = piece_positions[5]
+            del piece_positions[5]
+        elif extra == 1: 
             board[0] = board[3] 
             board[3] = 0 
-        elif metadata == 2: 
+
+            piece_positions[0] = piece_positions[3]
+            del piece_positions[3]
+        elif extra == 2: 
             board[63] = board[61] 
-            board[61] = 0 
-        elif metadata == 3: 
+            board[61] = 0
+
+            piece_positions[63] = piece_positions[61]
+            del piece_positions[61]
+        elif extra == 3: 
             board[56] = board[59] 
             board[59] = 0
+
+            piece_positions[56] = piece_positions[59]
+            del piece_positions[59]
 
 def count_non_pawn_or_king(board): # This just counts the number of non pawn and non king pieces in a board. Used for Null move pruning.
     pieces = 0
@@ -1195,7 +1240,16 @@ def count_non_pawn_or_king(board): # This just counts the number of non pawn and
 
     return pieces
 
-def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
+def determine_piece_squares(board):
+    piece_positions = {}
+    
+    for i, value in enumerate(board):
+        if value != 0:
+            piece_positions[i] = value
+
+    return piece_positions
+
+def recurse(position, depth, alpha, beta, maximizing, allow_null_move, allow_lmr):
     found_legal_move = False
     global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS
     board = position.board
@@ -1205,7 +1259,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
         eval = position.update_evaluation((), [], True)
         return eval
 
-    first_move = True
+    first_move = 0
     num_pieces = position.pieces
     best_move = None
     alpha_orig = alpha
@@ -1243,6 +1297,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
                 beta - 1,
                 beta, 
                 maximizing ^ 1,
+                False,
                 False
                 )
         else:
@@ -1252,6 +1307,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
                 alpha,
                 alpha + 1,
                 maximizing ^ 1,
+                False,
                 False
             )
 
@@ -1268,6 +1324,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
 
 
     all_moves = create_pseudo_moves(
+        position,
         board,
         position.side_to_move,
         position.castle_rights,
@@ -1292,20 +1349,19 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
                 continue
 
         position.update_evaluation(move, undo_info)
-
+        first_move += 1
         found_legal_move = True
 
-        if first_move:
+        if first_move == 1:
             score = recurse(
                 temp_position,
                 depth-1,
                 alpha,
                 beta,
                 not maximizing,
-                allow_null_move
+                allow_null_move,
+                True
             )
-
-            first_move = False
 
             if maximizing:
                 alpha = max(alpha, score)
@@ -1326,32 +1382,58 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
                 break
 
         else:
-            if maximizing:
-                score = recurse(
-                    temp_position,
-                    depth-1,
-                    alpha,
-                    alpha+1,
-                    False,
-                    allow_null_move
-                )
+            in_check = is_square_attacked(position.white_king if position.side_to_move else position.black_king, board, position.side_to_move)
+            use_lmr = first_move > 3 and depth > 2 and not in_check and captured_piece == 0 and move != killer_moves[depth][0] and move != killer_moves[depth][1] and move != entry_move and allow_lmr
 
-                if score > alpha_orig and score < beta:
+            if maximizing:
+                if use_lmr:
+                    score = recurse(
+                        temp_position,
+                        depth-2,        # reduced depth
+                        alpha,
+                        alpha+1,
+                        False,
+                        allow_null_move,
+                        False
+                    )
+
+                    if score > alpha:
+                        score = recurse(
+                            temp_position,
+                            depth-1,
+                            alpha,
+                            beta,
+                            False,
+                            allow_null_move,
+                            True
+                        )
+                else:
                     score = recurse(
                         temp_position,
                         depth-1,
                         alpha,
-                        beta,
+                        alpha+1,
                         False,
-                        allow_null_move
+                        allow_null_move,
+                        True                        
                     )
+
+                    if score < beta and score > alpha:
+                        score = recurse(
+                            temp_position,
+                            depth-1,
+                            alpha,
+                            beta,
+                            True,
+                            allow_null_move,
+                            True
+                        )
 
                 if score > best:
                     best = score
                     best_move = move
 
                 alpha = max(alpha, score)
-
                 undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
                 if beta <= alpha:
@@ -1369,32 +1451,54 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move):
                     break
 
             else:
-                score = recurse(
-                    temp_position,
-                    depth-1,
-                    beta-1,
-                    beta,
-                    True,
-                    allow_null_move
-                )
+                if use_lmr:
+                    score = recurse(
+                        temp_position,
+                        depth-2,        # reduced depth
+                        beta-1,
+                        beta,
+                        True,
+                        allow_null_move,
+                        False
+                    )   
 
-                if score < beta_orig and score > alpha:
+                    if score < beta:
+                        score = recurse(
+                            temp_position,
+                            depth-1,
+                            alpha,
+                            beta,
+                            True,
+                            allow_null_move,
+                            True
+                        )
+                else:
                     score = recurse(
                         temp_position,
                         depth-1,
-                        alpha,
+                        beta-1,
                         beta,
                         True,
-                        allow_null_move
+                        allow_null_move,
+                        True
                     )
 
+                    if score < beta and score > alpha:
+                        score = recurse(
+                            temp_position,
+                            depth-1,
+                            alpha,
+                            beta,
+                            True,
+                            allow_null_move,
+                            True
+                        )
                 
                 if score < best:
                     best = score
                     best_move = move
 
                 beta = min(beta, score)
-
                 undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
                 if beta <= alpha:
@@ -1440,7 +1544,7 @@ def find_best_move(position, depth, starting_move):
     beta_orig = beta
     entry_move = None
     entry = TT.get(position.hash)
-    first_move = True
+    first_move = 0
     board = position.board
     found_legal_move = False
 
@@ -1462,6 +1566,7 @@ def find_best_move(position, depth, starting_move):
                 return entry_move
             
     all_moves = create_pseudo_moves(
+        position,
         board,
         side,
         position.castle_rights,
@@ -1487,18 +1592,18 @@ def find_best_move(position, depth, starting_move):
 
         found_legal_move = True
         position.update_evaluation(move, undo_info)
+        first_move += 1
 
-        if first_move:
+        if first_move == 1:
             score = recurse(
                 temp_position,
                 depth-1,
                 alpha,
                 beta,
                 not side,
+                True,
                 True
             )
-
-            first_move = False
 
             if side:
                 alpha = max(alpha, score)
@@ -1526,6 +1631,7 @@ def find_best_move(position, depth, starting_move):
                     alpha,
                     alpha+1,
                     False,
+                    True,
                     True
                 )
 
@@ -1536,6 +1642,7 @@ def find_best_move(position, depth, starting_move):
                         alpha,
                         beta,
                         False,
+                        True,
                         True
                     )
 
@@ -1568,6 +1675,7 @@ def find_best_move(position, depth, starting_move):
                     beta-1,
                     beta,
                     True,
+                    True,
                     True
                 )
 
@@ -1577,6 +1685,7 @@ def find_best_move(position, depth, starting_move):
                         depth-1,
                         alpha,
                         beta,
+                        True,
                         True,
                         True
                     )
@@ -1641,10 +1750,11 @@ position = Position(
     black_bishops == 2,
     black_pawns,
     white_pawns,
-    pawn_hash
+    pawn_hash,
+
+    determine_piece_squares(board)
 )
 previous_best_move = None
-
 start_time = time.perf_counter()
 for i in range(1, 9):
     previous_best_move = find_best_move(position, i, previous_best_move)

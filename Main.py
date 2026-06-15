@@ -2,6 +2,8 @@ import numpy as np # THis is intended to maximize white, minimize black. Be able
 import random
 import time
 import cProfile
+import pstats
+
 
 #lowercase is black, capital is white ; Black is 0, white is 1
 
@@ -204,6 +206,57 @@ ENDING_ISOLATED = 10
 
 PAWN_ZOBRIST = [[random.getrandbits(64) for _ in range(64)] for _ in range(25)]
 PH = {} # Pawn Hash
+
+# Precompute row for each square for pawn direction check
+SQUARE_ROW = [sq >> 3 for sq in range(64)]
+SQUARE_COLUMN = [sq & 7 for sq in range(64)]
+
+def is_valid_knight_move(start, target):
+    if target < 0 or target >= 64:
+        return False
+
+    start_file = start % 8
+    target_file = target % 8
+
+    diff = abs(start_file - target_file)
+
+    return diff in (1, 2)
+
+# For each square, precompute the diagonal rays as lists of indices
+DIAGONAL_RAYS = []
+for sq in range(64):
+    rays = [[], [], [], []]
+    row, col = sq >> 3, sq & 7
+    for i, (dr, dc) in enumerate([(-1,-1), (-1,1), (1,-1), (1,1)]):
+        r, c = row + dr, col + dc
+        while 0 <= r < 8 and 0 <= c < 8:
+            rays[i].append(r * 8 + c)
+            r += dr
+            c += dc
+    DIAGONAL_RAYS.append(rays)
+
+# For each square, precompute the straight rays as lists of indices
+STRAIGHT_RAYS = []
+for sq in range(64):
+    rays = [[], [], [], []]
+    row, col = sq >> 3, sq & 7
+    for i, (dr, dc) in enumerate([(0,-1), (0,1), (-1,0), (1,0)]):
+        r, c = row + dr, col + dc
+        while 0 <= r < 8 and 0 <= c < 8:
+            rays[i].append(r * 8 + c)
+            r += dr
+            c += dc
+    STRAIGHT_RAYS.append(rays)
+
+# For each square, precompute valid knight targets
+KNIGHT_ATTACKS = []
+for sq in range(64):
+    targets = []
+    for change in [6, 10, 15, 17, -6, -10, -15, -17]:
+        target = sq + change
+        if is_valid_knight_move(sq, target):
+            targets.append(target)
+    KNIGHT_ATTACKS.append(targets)
 
 class Position:
     def __init__(self, board, side_to_move, castle_rights, hash, black_king, white_king, pieces, opening_eval, closing_eval, phase, white_bishops, black_bishops, black_pawns, white_pawns, pawn_hash, piece_locations):
@@ -443,109 +496,50 @@ def is_valid_pawn_move(start, target):
 
 def determine_rook_moves(board, moves, start):
     piece = board[start]
-    color = -1 if piece == 0 else 1 if piece >= 17 else 0
+    color = 1 if piece >= 17 else 0
 
-    for direction in [-1, 1, -8, 8]:
-        current = start
-
-        while True:
-            next_square = current + direction
-
-            if not is_valid_rook_step(current, next_square, direction):
-                break
-
-            piece = board[next_square]
-            piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
-
-            if piece == 0:
-                moves.append((start, next_square, -1))
+    for ray in STRAIGHT_RAYS[start]:
+        for idx in ray:
+            target_piece = board[idx]
+            if target_piece == 0:
+                moves.append((start, idx, -1))
             else:
-                if piece_color != color:
-                    moves.append((start, next_square, -1))
+                target_color = 1 if target_piece >= 17 else 0
+                if target_color != color:
+                    moves.append((start, idx, -1))
                 break
 
-            current = next_square
+def determine_bishop_moves(board, moves, start):
+    piece = board[start]
+    color = 1 if piece >= 17 else 0
 
-def is_valid_rook_step(current, next_square, direction):
-    if next_square < 0 or next_square >= 64:
-        return False
+    for ray in DIAGONAL_RAYS[start]:
+        for idx in ray:
+            target_piece = board[idx]
+            if target_piece == 0:
+                moves.append((start, idx, -1))
+            else:
+                target_color = 1 if target_piece >= 17 else 0
+                if target_color != color:
+                    moves.append((start, idx, -1))
+                break
 
-    current_row = current // 8
-    current_col = current % 8
-
-    next_row = next_square // 8
-    next_col = next_square % 8
-
-    if direction == -1 or direction == 1:
-        return current_row == next_row
-
-    if direction == -8 or direction == 8:
-        return current_col == next_col
-
-    return False
-        
-def is_valid_knight_move(start, target):
-    if target < 0 or target >= 64:
-        return False
-
-    start_file = start % 8
-    target_file = target % 8
-
-    diff = abs(start_file - target_file)
-
-    return diff in (1, 2)
+def determine_queen_moves(board, moves, start):
+    determine_bishop_moves(board, moves, start)
+    determine_rook_moves(board, moves, start)
 
 def determine_knight_moves(board, moves, start):
     piece = board[start]
-    color = -1 if piece == 0 else 1 if piece >= 17 else 0
+    color = 1 if piece >= 17 else 0
 
-    for offset in [6, 10, 15, 17, -6, -10, -15, -17]:
-        target = start + offset
-
-        if not is_valid_knight_move(start, target):
-            continue
-
-        target_piece = board[target]
-        target_color = -1 if target_piece == 0 else 1 if target_piece >= 17 else 0
-
-        if target_color != color:
-            moves.append((start, target, -1))
-
-def determine_bishop_moves(board, moves, start_pos):
-    piece = board[start_pos]
-    color = -1 if piece == 0 else 1 if piece >= 17 else 0
-
-    # 4 diagonal directions: up-left, up-right, down-left, down-right
-    directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
-
-    row = start_pos // 8
-    col = start_pos % 8
-
-    for dr, dc in directions:
-        r, c = row + dr, col + dc
-
-        while 0 <= r < 8 and 0 <= c < 8:
-            idx = r * 8 + c
-
-            # empty square
-            if board[idx] == 0:
-                moves.append((start_pos, idx, -1))
-
-            else:
-                # occupied square -> check capture
-                if determine_capturable(board, idx, color):
-                    moves.append((start_pos, idx, -1))
-
-                # stop sliding in this direction no matter what
-                break
-
-            r += dr
-            c += dc
-
-def determine_queen_moves(board, moves, start_pos):
-    # just reuse rook + bishop logic
-    determine_bishop_moves(board, moves, start_pos)
-    determine_rook_moves(board, moves, start_pos)
+    for idx in KNIGHT_ATTACKS[start]:
+        target_piece = board[idx]
+        if target_piece == 0:
+            moves.append((start, idx, -1))
+        else:
+            target_color = 1 if target_piece >= 17 else 0
+            if target_color != color:
+                moves.append((start, idx, -1))
 
 def determine_king_moves(board, moves, start_pos, castle_rights):
     piece = board[start_pos]
@@ -853,85 +847,53 @@ def find_king(board, color):
 
     return -1
 
-def is_square_attacked(square, board, color): # color of the side that wants to move to that square; IE the side that needs the square to not be attacked.
-    # 4 diagonal directions: up-left, up-right, down-left, down-right
-    directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+def is_square_attacked(square, board, color):
+    sq_row = SQUARE_ROW[square]
 
-    row = square // 8
-    col = square % 8
-
-    for dr, dc in directions:
-        r, c = row + dr, col + dc
-
-        while 0 <= r < 8 and 0 <= c < 8:
-            idx = r * 8 + c
+    # diagonal rays - bishops, queens, pawns, kings
+    for ray in DIAGONAL_RAYS[square]:
+        last = None
+        for idx in ray:
             value = board[idx]
-
-            # empty square
             if value == 0:
-                r += dr
-                c += dc
                 continue
-
-            else:
-                # occupied square -> check capture
-                enemy_color = 0 if value < 17 else 1
-                if enemy_color != color: #if capturable, it means the piece of the opposite color.
-                    piece_number = PIECES[value]
-                    if (piece_number == BISHOP_NUMBER) or (piece_number == QUEEN_NUMBER):
+            enemy_color = 1 if value >= 17 else 0
+            if enemy_color != color:
+                pn = PIECES[value]
+                if pn == BISHOP_NUMBER or pn == QUEEN_NUMBER:
+                    return True
+                if pn == KING_NUMBER and last is None:
+                    return True
+                if pn == PAWN_NUMBER and last is None:
+                    if enemy_color == 0 and SQUARE_ROW[idx] - sq_row == -1:
                         return True
-                    if (piece_number == PAWN_NUMBER):
-                        if enemy_color == 0 and (r - row) == -1:
-                            return True
-                        if enemy_color == 1 and (r - row) == 1:
-                            return True
-                    if (piece_number == KING_NUMBER) and (r - row) in (-1, 1):
+                    if enemy_color == 1 and SQUARE_ROW[idx] - sq_row == 1:
                         return True
+            break
 
-                # stop sliding in this direction no matter what
-                break
-
-
-    for direction in [-1, 1, -8, 8]:
-        current = square
-        step = 0
-
-        while True:
-            step += 1
-            next_square = current + direction
-
-            if not is_valid_rook_step(current, next_square, direction):
-                break
-
-            piece = board[next_square]
-
-            if piece == 0:
-                current = next_square
+    # straight rays - rooks, queens, kings
+    for ray in STRAIGHT_RAYS[square]:
+        for step, idx in enumerate(ray):
+            value = board[idx]
+            if value == 0:
                 continue
-            else:
-                piece_color = -1 if piece == 0 else 1 if piece >= 17 else 0
-                if piece_color != color:
-                    piece_number = PIECES[piece]
-                    if (piece_number == ROOK_NUMBER) or (piece_number == QUEEN_NUMBER):
-                        return True
-                    if (piece_number == KING_NUMBER) and step == 1:
-                        return True
-                break
+            enemy_color = 1 if value >= 17 else 0
+            if enemy_color != color:
+                pn = PIECES[value]
+                if pn == ROOK_NUMBER or pn == QUEEN_NUMBER:
+                    return True
+                if pn == KING_NUMBER and step == 0:
+                    return True
+            break
 
+    # knight attacks
+    for idx in KNIGHT_ATTACKS[square]:
+        piece = board[idx]
+        if piece != 0:
+            if (1 if piece >= 17 else 0) != color:
+                if PIECES[piece] == KNIGHT_NUMBER:
+                    return True
 
-    for change in [6, 10, 15, 17, -6, -10, -15, -17]:
-        target = square + change
-
-        if not is_valid_knight_move(square, target):
-            continue
-
-        piece = board[target]
-        target_color = -1 if piece == 0 else 1 if piece >= 17 else 0
-
-        if target_color != color:
-            if PIECES[piece] == KNIGHT_NUMBER:
-                return True
-        
     return False
 
 def determine_pawn_legality(board, move): # This just makes sure that the pawn move does not go across the board
@@ -1021,7 +983,7 @@ def create_scored_moves(position, legal_moves, depth, entry_move):
         score = score_move(position, move, depth, entry_move)
         scored_moves.append((score, move))
 
-    scored_moves.sort(key=lambda x: (x[0], x[1][0], x[1][1]), reverse=True)
+    scored_moves.sort(reverse=True)
     return scored_moves
 
 def evaluate_board(board):
@@ -1755,6 +1717,7 @@ position = Position(
     determine_piece_squares(board)
 )
 previous_best_move = None
+
 start_time = time.perf_counter()
 for i in range(1, 9):
     previous_best_move = find_best_move(position, i, previous_best_move)

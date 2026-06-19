@@ -9,11 +9,14 @@ A chess engine being developed from scratch to explore search algorithms, evalua
 - Minmax search
 - Alpha-beta pruning
 - Move ordering: captures, promotions, killer moves, 
+- Transposition tables
+- PVS
+- Null move pruning
+- LMR pruning
 
 ## In Progress
-- Transposition tables
+C++ rewrite for performance optimization
 
 ## Planned Features
 - Bitboard representation
-- C++ rewrite for performance optimization
 - GUI/web frontend

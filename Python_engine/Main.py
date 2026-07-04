@@ -12,8 +12,6 @@ Epiece_values = [0, -120, -120, -120, -120, -120, -120, -120, -120, -520, -300, 
 
 PHASE_VALUES = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2]
 
-moves_set = {}
-
 PIECES = [0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2]
 
 KING_NUMBER = 6
@@ -24,6 +22,7 @@ QUEEN_NUMBER = 5
 KNIGHT_NUMBER = 3
 
 TT_HITS = 0
+
 TT_LOOKUPS = 0
 NUMBER_OF_RECURSIONS = 0
 
@@ -784,6 +783,9 @@ def make_move(position, move): # all determination of whether a move is legal sh
 
         hash ^= ZOBRIST_SIDE
 
+
+        final_ray = {}
+
         if metadata == 0:
             hash ^= ZOBRIST[16][7] ^ ZOBRIST[16][5] 
             
@@ -852,8 +854,7 @@ def is_square_attacked(square, board, color):
 
     # diagonal rays - bishops, queens, pawns, kings
     for ray in DIAGONAL_RAYS[square]:
-        last = None
-        for idx in ray:
+        for step, idx in enumerate(ray):
             value = board[idx]
             if value == 0:
                 continue
@@ -862,9 +863,9 @@ def is_square_attacked(square, board, color):
                 pn = PIECES[value]
                 if pn == BISHOP_NUMBER or pn == QUEEN_NUMBER:
                     return True
-                if pn == KING_NUMBER and last is None:
+                if pn == KING_NUMBER and step == 0:
                     return True
-                if pn == PAWN_NUMBER and last is None:
+                if pn == PAWN_NUMBER:
                     if enemy_color == 0 and SQUARE_ROW[idx] - sq_row == -1:
                         return True
                     if enemy_color == 1 and SQUARE_ROW[idx] - sq_row == 1:
@@ -896,20 +897,6 @@ def is_square_attacked(square, board, color):
 
     return False
 
-def determine_pawn_legality(board, move): # This just makes sure that the pawn move does not go across the board
-    start, end, extra = move
-    start_col = start % 8
-    end_col = end % 8
-
-    if abs(start_col - end_col) != 0:
-        end_piece = board[end]
-        start_piece = board[start]
-        if  -1 != (-1 if end_piece == 0 else 1 if end_piece >= 17 else 0) != (-1 if start_piece == 0 else 1 if start_piece >= 17 else 0):
-            return True
-        else:
-            return False
-    else:
-        return True
 
 def determine_legal_moves(position, all_moves): #Takes a board and psudo moves for that board, and returns a complete set of legal moves for that board
     legal_moves = [] # In the call to this function, all_moves contains all moves, including pawns moving forward
@@ -933,7 +920,7 @@ def determine_legal_moves(position, all_moves): #Takes a board and psudo moves f
         if not is_square_attacked(king_square, temp_board, moving_color):
 
             if PIECES[board[start]] == PAWN_NUMBER:
-                if determine_pawn_legality(board, move):
+                if is_valid_pawn_move(board, move):
                     legal_moves.append(move)
             else:
                 legal_moves.append(move)
@@ -1719,7 +1706,7 @@ position = Position(
 previous_best_move = None
 
 start_time = time.perf_counter()
-for i in range(1, 9):
+for i in range(1, 10):
     previous_best_move = find_best_move(position, i, previous_best_move)
     print("DEPTH: ", i, "MOVE: ", previous_best_move)
 end_time = time.perf_counter()

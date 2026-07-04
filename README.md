@@ -15,7 +15,7 @@ A chess engine being developed from scratch to explore search algorithms, evalua
 - LMR pruning
 
 ## In Progress
-C++ rewrite for performance optimization
+C++ rewrite for performance optimization. Currently completed pseudo move generation.
 
 ## Planned Features
 - Bitboard representation

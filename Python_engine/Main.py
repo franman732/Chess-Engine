@@ -897,38 +897,6 @@ def is_square_attacked(square, board, color):
 
     return False
 
-
-def determine_legal_moves(position, all_moves): #Takes a board and psudo moves for that board, and returns a complete set of legal moves for that board
-    legal_moves = [] # In the call to this function, all_moves contains all moves, including pawns moving forward
-    board = position.board
-    moving_color = position.side_to_move
-
-    for move in all_moves:
-
-        start, end, extra = move
-
-        temp_position, undo = make_move(position, move)
-
-        temp_board = temp_position.board
-        king_square = (
-            temp_position.white_king
-            if moving_color == 1
-            else temp_position.black_king
-        )
-
-
-        if not is_square_attacked(king_square, temp_board, moving_color):
-
-            if PIECES[board[start]] == PAWN_NUMBER:
-                if is_valid_pawn_move(board, move):
-                    legal_moves.append(move)
-            else:
-                legal_moves.append(move)
-
-        undo_move(temp_position, move, undo)
-
-    return legal_moves
-
 def score_move(position, move, depth, best_move):
     start, end, extra = move
 

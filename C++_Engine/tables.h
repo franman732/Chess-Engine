@@ -2,11 +2,10 @@
 
 #include "moves.h"
 #include "validation.h"
+#include "aliases.h"
 
 #include <array>
 #include <vector>
-
-using Raytable = std::array<std::array<std::array<int, 7>, 4>, 64>;
 
 constexpr std::array<int, 64> create_square_row() {
     std::array<int, 64> tempArray {};

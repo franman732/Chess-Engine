@@ -19,14 +19,15 @@ inline constexpr int KNIGHT_NUMBER = 3;
 inline constexpr std::array<int, 33> PIECES = {0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2};
 
 
+
 struct undoEvaluation {
     int openingEval;
     int closingEval;
     int phase;
     bool whiteBishops;
     bool blackBishops;
-    std::tuple<int, int, int> changeWhitePawns;
-    std::tuple<int, int, int> changeBlackPawns;
+    std::array<int, 8> WhitePawns;
+    std::array<int, 8> BlackPawns;
     uint64_t pawnHash;
 };
 

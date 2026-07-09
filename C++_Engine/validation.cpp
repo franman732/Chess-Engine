@@ -2,8 +2,9 @@
 #include "helper_functions.h"
 #include "moves.h"
 #include "tables.h"
+#include "aliases.h"
 
-bool is_square_attacked(int square, const std::array<int, 64>& board, int color) {
+bool is_square_attacked(int square, const Board& board, int color) {
     int sqRow = SQUARE_ROW[square];
 
     for (const std::array<int, 7>& ray : DIAGONAL_RAYS[square]) {
@@ -95,7 +96,7 @@ bool is_square_attacked(int square, const std::array<int, 64>& board, int color)
     return false;
 }
 
-bool determine_capturable(const std::array<int, 64>& board, int end, int color) {
+bool determine_capturable(const Board& board, int end, int color) {
     if ((end < 0) || (end >= 64)) {
         return false;
     }

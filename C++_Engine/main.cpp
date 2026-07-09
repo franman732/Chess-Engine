@@ -1,6 +1,7 @@
 #include "position.h"
 #include "initialization.h"
 #include "psuedo_move_generation.h"
+#include "aliases.h"
 
 #include <tuple>
 #include <array>
@@ -9,7 +10,7 @@
 
 int main() {
     std::cout << "Program started\n";
-    std::array<int, 64> board = {9, 10, 11, 12, 13, 14, 15, 16, // top is black/lowercase/0 ; bottom is white/uppercase/1
+    Board board = {9, 10, 11, 12, 13, 14, 15, 16, // top is black/lowercase/0 ; bottom is white/uppercase/1
                                 1, 2, 3, 0, 0, 6, 7, 8,
                                 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 20, 0, 0, 0,
@@ -22,10 +23,18 @@ int main() {
     
     Position pos;
 
+    pos.board = board;
     pos.sideToMove = sideToMove; // 1 is white, 0 is black; bottom is white, top is black
     pos.castleRights = castleRights; // 15 is 1111 in binary, which means all castles are legal.
-    pos.board = board;
+    pos.hash = compute_hash(board, sideToMove, castleRights);
+    
+    pos.pieces = count_pieces(board);
+    
+    pos.pawn_hash = 
+
     pos.pieceLocations = determine_piece_squares(board);
+
+
     std::cout << "Generating Pseudo Moves\n";
     std::vector<std::tuple<int, int, int>> pseudomoves = create_pseudo_moves(pos);
 
@@ -36,6 +45,3 @@ int main() {
               << ", Flags: " << flags << "\n";
     }
 }
-
-
-//main();

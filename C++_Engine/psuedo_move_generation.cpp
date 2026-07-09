@@ -3,12 +3,13 @@
 #include "moves.h"
 #include "tables.h"
 #include "validation.h"
+#include "aliases.h"
 
 #include <array>
 #include <vector>
 #include <iostream>
 
-void determine_sliding_moves(const std::array<int, 64>& board, std::vector<std::tuple<int, int, int>>& moves, const std::array<std::array<std::array<int, 7>, 4>, 64>& slidingRay, int start) {
+void determine_sliding_moves(const Board& board, moveList& moves, const Raytable& slidingRay, int start) {
     int piece = board[start];
     int color;
 
@@ -45,7 +46,7 @@ void determine_sliding_moves(const std::array<int, 64>& board, std::vector<std::
     }
 }
 
-void determine_pawn_moves(const std::array<int, 64>& board, std::vector<std::tuple<int, int, int>>& moves, int start) {
+void determine_pawn_moves(const Board& board, moveList& moves, int start) {
     int piece = board[start];
     int color;
 
@@ -89,20 +90,20 @@ void determine_pawn_moves(const std::array<int, 64>& board, std::vector<std::tup
     }
 }
 
-void determine_bishop_moves(const std::array<int, 64>& board, std::vector<std::tuple<int, int, int>>& moves, int start) {
+void determine_bishop_moves(const Board& board, moveList& moves, int start) {
     determine_sliding_moves(board, moves, DIAGONAL_RAYS, start);
 }
 
-void determine_rook_moves(const std::array<int, 64>& board, std::vector<std::tuple<int, int, int>>& moves, int start) {
+void determine_rook_moves(const Board& board, moveList& moves, int start) {
     determine_sliding_moves(board, moves, STRAIGHT_RAYS, start);
 }
 
-void determine_queen_moves(const std::array<int, 64>& board, std::vector<std::tuple<int, int, int>>& moves, int start) {
+void determine_queen_moves(const Board& board, moveList& moves, int start) {
     determine_sliding_moves(board, moves, STRAIGHT_RAYS, start);
     determine_sliding_moves(board, moves, DIAGONAL_RAYS, start);
 }
 
-void determine_knight_moves(const std::array<int, 64>& board, std::vector<std::tuple<int, int, int>>& moves, int start) {
+void determine_knight_moves(const Board& board, moveList& moves, int start) {
     int piece = board[start];
     int color;
 
@@ -131,7 +132,7 @@ void determine_knight_moves(const std::array<int, 64>& board, std::vector<std::t
     }
 }
 
-void determine_king_moves(const std::array<int, 64>& board, std::vector<std::tuple<int, int, int>>& moves, int start, int castleRights) {
+void determine_king_moves(const Board& board, moveList& moves, int start, int castleRights) {
     int piece = board[start];
     int color;
 
@@ -206,12 +207,12 @@ void determine_king_moves(const std::array<int, 64>& board, std::vector<std::tup
 }
 
 
-std::vector<std::tuple<int, int, int>> create_pseudo_moves(Position& pos) {
+moveList create_pseudo_moves(Position& pos) {
     std::array<int, 64>& board = pos.board;
     int color = pos.sideToMove;
     int castleRights = pos.castleRights;
     
-    std::vector<std::tuple<int, int, int>> moves = {};
+    moveList moves = {};
 
     for (const auto& [key, value] : pos.pieceLocations) {
         int pieceColor;

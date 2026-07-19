@@ -1,7 +1,8 @@
 #include "initialization.h"
 #include "aliases.h"
+#include "transposition_table.h"
+#include "position.h"
 
-#include <transposition_table.h>
 #include <unordered_map>
 #include <array>
 #include <iostream>
@@ -61,4 +62,32 @@ int count_pieces(const Board& board) {
     }
 
     return pieces;
+}
+
+int find_king(const Board& board, int color) {
+    int kingColor = 0;
+    
+    for (int i = 0; i < 64; i++) {
+        int piece = board[i];
+
+        if (piece == 0) {
+            continue;
+        }
+
+        if (PIECES[piece] == KING_NUMBER) {
+            if (piece == 0) {
+                kingColor = -1;
+            } else if (piece >= 17) {
+                kingColor = 1;
+            } else {
+                kingColor = 0;
+            }
+        }
+
+        if (kingColor == color) {
+            return i;
+        }
+    }
+
+    return -1;
 }

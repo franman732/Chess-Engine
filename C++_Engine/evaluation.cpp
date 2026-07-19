@@ -6,8 +6,8 @@
 
 #include <array>
 
-undoEvaluation evaluate_board(const Board& board) {
-    undoEvaluation undoEval;
+evaluation evaluate_board(const Board& board) {
+    evaluation undoEval;
     
     std::array<int, 8> whitePawns = {};
     std::array<int, 8> blackPawns = {};
@@ -132,22 +132,13 @@ undoEvaluation evaluate_board(const Board& board) {
 
     PAWN_HASH_TABLE[pawnHash] = pair;
 
-        int openingEval;
-    int closingEval;
-    int phase;
-    bool whiteBishops;
-    bool blackBishops;
-    std::array<int, 8> changeWhitePawns;
-    std::array<int, 8> changeBlackPawns;
-    uint64_t pawnHash;
-
     undoEval.openingEval = OGEval;
     undoEval.closingEval = EGEval;
     undoEval.phase = phase;
     undoEval.whiteBishops = whiteBishops;
     undoEval.blackBishops = blackBishops;
-    undoEval.WhitePawns = changeWhitePawns;
-    undoEval.BlackPawns = changeBlackPawns;
+    undoEval.whitePawns = whitePawns; // evaluation returns the number of pawns in each column : i.e. whitePawns and blackPawns. MakeMove and undoMove returns the changes in an 8 value array, that contains pairs of start and end columns.
+    undoEval.blackPawns = blackPawns;
     undoEval.pawnHash = pawnHash;
     
     return undoEval;

@@ -15,21 +15,13 @@ class Position {
         Board board;
         int castleRights;
         uint64_t hash;
-        //int blackKing;
-        //int whiteKing;
+        int blackKing;
+        int whiteKing;
         int pieces;
 
-        int openingEval;
-        int closingEval;
-        int phase;
-        int whiteBishops;
-        int blackBishops;
-        int whitePawns;
-        int blackPawns;
-        uint64_t pawnHash;
+        evaluation evalInfo;
 
         std::unordered_map<int, int> pieceLocations;
 
-    private:
-        void update_evaluation(AMove move, const undoMove& undoInfo, bool finalMove);
+        float update_evaluation(AMove move, const undoMove& undoInfo, bool finalMove = false);
 };

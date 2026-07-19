@@ -287,7 +287,6 @@ class Position:
 
         pawn_o_eval = 0
         pawn_e_eval = 0
-        phase = 0
 
         board = self.board
         O_eval = self.opening_eval
@@ -321,7 +320,7 @@ class Position:
 
 
                     O_eval += Opst[28][end_table_index]
-                    E_eval += Opst[28][end_table_index]
+                    E_eval += Epst[28][end_table_index]
                     O_eval += Opiece_values[28]
                     E_eval += Epiece_values[28]
 
@@ -693,10 +692,10 @@ def make_move(position, move): # all determination of whether a move is legal sh
                 pawn_hash ^= PAWN_ZOBRIST[end_piece][end]
                 column = end & 7
                 if side_to_move:
-                    undo[6][6] = [column, -1]
+                    undo[6][6] = [column, -1] # black pawns
                     black_pawns[column] -= 1
                 else:
-                    undo[6][5] = [column, -1]
+                    undo[6][5] = [column, -1] # white pawns
                     white_pawns[column] -= 1
 
         new_board[end] = moved_piece
@@ -782,9 +781,6 @@ def make_move(position, move): # all determination of whether a move is legal sh
         new_board[start] = 0
 
         hash ^= ZOBRIST_SIDE
-
-
-        final_ray = {}
 
         if metadata == 0:
             hash ^= ZOBRIST[16][7] ^ ZOBRIST[16][5] 
@@ -1435,7 +1431,7 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move, allow_lmr
         if maximizing and is_square_attacked(position.white_king, board, 1):
             best = -99999999
         elif not(maximizing) and is_square_attacked(position.black_king, board, 0):
-                best = -99999999
+                best = 99999999
         else:
             best = 0
     
@@ -1663,8 +1659,8 @@ position = Position(
     opening_eval,
     closing_eval,
     phase,
-    white_bishops == 2, 
-    black_bishops == 2,
+    white_bishops,
+    black_bishops,
     black_pawns,
     white_pawns,
     pawn_hash,

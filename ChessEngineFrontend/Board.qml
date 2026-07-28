@@ -66,18 +66,11 @@ GridLayout {
 
     function isCapturable_By (index, piece) { // index is the piece in piecePositions were checking to be captured by piece
         var capturedPiece = piecePositions[index]
-        printPieces()
-        console.log(piecePositions[index])
-        console.log(capturedPiece.pieceIndex)
-        console.log(piece.pieceIndex)
-        console.log("------------------------")
+
         var capturedPieceColor = capturedPiece.pieceIndex >= 17 ? 1: 0
         var capturingPieceColor = piece.pieceIndex >= 17 ? 1: 0
-        console.log(capturedPieceColor)
-        console.log(capturingPieceColor)
 
         if (capturedPieceColor !== capturingPieceColor) {
-            console.log("IS capturable")
             return true
         }
     }

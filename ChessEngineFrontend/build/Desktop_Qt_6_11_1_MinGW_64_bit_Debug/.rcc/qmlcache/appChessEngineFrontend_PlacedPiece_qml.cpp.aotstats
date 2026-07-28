@@ -18,7 +18,7 @@
                             "column": 13,
                             "durationMicroseconds": 0,
                             "functionName": "source",
-                            "line": 17,
+                            "line": 19,
                             "message": ""
                         },
                         {
@@ -26,15 +26,15 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "onPressed",
-                            "line": 22,
-                            "message": "Cannot access value for name window"
+                            "line": 24,
+                            "message": "Cannot access value for name board"
                         },
                         {
                             "codegenResult": 0,
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "onPressed",
-                            "line": 22,
+                            "line": 24,
                             "message": ""
                         },
                         {
@@ -42,7 +42,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onPositionChanged",
-                            "line": 28,
+                            "line": 32,
                             "message": "Cannot access value for name window"
                         },
                         {
@@ -50,7 +50,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onPositionChanged",
-                            "line": 28,
+                            "line": 32,
                             "message": ""
                         },
                         {
@@ -58,7 +58,7 @@
                             "column": 21,
                             "durationMicroseconds": 0,
                             "functionName": "onReleased",
-                            "line": 37,
+                            "line": 41,
                             "message": "Cannot access value for name board"
                         },
                         {
@@ -66,7 +66,7 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 20,
+                            "line": 22,
                             "message": ""
                         }
                     ],

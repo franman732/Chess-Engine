@@ -14,12 +14,16 @@ Image {
     property var dir
     property int pieceIndex
 
+    property var startCoordinates
+
     source: dir
 
     MouseArea {
         anchors.fill: parent
 
         onPressed: function(mouse) {
+            startCoordinates = board.getCoordinates(placedPiece.x, placedPiece.y, placedPiece)
+
             var p = placedPiece.mapToItem(window.contentItem, mouse.x - 46, mouse.y - 46)
             placedPiece.x = p.x
             placedPiece.y = p.y
@@ -36,10 +40,18 @@ Image {
 
         onReleased: {
             var coordinates = board.getCoordinates(placedPiece.x, placedPiece.y, placedPiece)
+            if (((coordinates.x !== -1) && (coordinates.y !== -1)) && (coordinates.i in board.piecePositions)) {
+                board.piecePositions[coordinates.i].destroy()
+                delete board.piecePositions[coordinates.i]
+                console.log("WE ARE OVERRIDING")
+                board.printPieces()
+            }
 
             if ((coordinates.x !== -1) && (coordinates.y !== -1)) {
                 placedPiece.x = coordinates.x
                 placedPiece.y = coordinates.y
+                delete board.piecePositions[startCoordinates.i]
+                board.piecePositions[coordinates.i] = placedPiece
             }
         }
     }

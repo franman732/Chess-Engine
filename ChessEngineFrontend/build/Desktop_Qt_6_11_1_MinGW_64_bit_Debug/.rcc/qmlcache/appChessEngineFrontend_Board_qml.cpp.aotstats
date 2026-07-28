@@ -42,7 +42,7 @@
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "printPieces",
-                            "line": 85,
+                            "line": 78,
                             "message": "Cannot generate efficient code for iterator on non-list type"
                         },
                         {

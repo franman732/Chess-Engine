@@ -44,16 +44,13 @@ Image {
             dragged.visible = false
             var coordinates = board.getCoordinates(dragged.x, dragged.y, dragged)
             if (((coordinates.x !== -1) && (coordinates.y !== -1)) && (coordinates.i in board.piecePositions)) {
-                console.log("WE ARE CHECKING IF CAPTURABLE")
-                if (board.isCapturable_By(coordinates.i, dragged)) {
-                    board.piecePositions[coordinates.i].destroy()
-                    delete board.piecePositions[coordinates.i]
-                    console.log("WE ARE OVERRIDING")
-                    board.printPieces()
-                }
+                board.piecePositions[coordinates.i].destroy()
+                delete board.piecePositions[coordinates.i]
+                console.log("WE ARE OVERRIDING")
+                board.printPieces()
             }
 
-            if (((coordinates.x !== -1) && (coordinates.y !== -1)) && !(coordinates.i in board.piecePositions)) {
+            if ((coordinates.x !== -1) && (coordinates.y !== -1)) {
                 var newPiece = board.placedPieceComponent.createObject(window)
                 newPiece.dir = dragged.dir
                 newPiece.x = coordinates.x

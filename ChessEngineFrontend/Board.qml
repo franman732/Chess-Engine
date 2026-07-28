@@ -16,6 +16,8 @@ GridLayout {
     property var placedPieceComponent
     property var window
 
+    property var piecePositions: ({})
+
     Repeater {
         model: 64
 
@@ -38,25 +40,60 @@ GridLayout {
         var centerX = pieceX + piece.width / 2
         var centerY = pieceY + piece.height / 2
 
-        var finalCoords = {x: -1, y: -1}
+        var finalCoords = {x: -1, y: -1, i: -1}
 
         if (((centerX > boardPos.x) && (centerX < (boardPos.x + board.width))) && ((centerY > boardPos.y) && (centerY < (boardPos.y + board.height)))) {
 
             var row = Math.floor((centerY - boardPos.y) / 120)
             var col = Math.floor((centerX - boardPos.x) / 120)
 
-            console.log(row)
-            console.log(col)
-
             var newPieceX = (col * 120) + 15 + boardPos.x - 1
             var newPieceY = (row * 120) + 15 + boardPos.y - 1 // 15 is the board offsets for the outline. I do not know how to get it through member access, so I hard coded it.
 
             finalCoords.x = newPieceX
             finalCoords.y = newPieceY
+            finalCoords.i = (col + (row * 8))
         } else {
             piece.visible = false
         }
 
         return finalCoords // If the piece is held off the board, or later over an existing piece, finalCoords = {-1, -1}. Otherwise it equals the final coordinates of the position.
+    }
+
+    function addPiece (index, piece) {
+        piecePositions[index] = piece
+    }
+
+    function isCapturable_By (index, piece) { // index is the piece in piecePositions were checking to be captured by piece
+        var capturedPiece = piecePositions[index]
+        printPieces()
+        console.log(piecePositions[index])
+        console.log(capturedPiece.pieceIndex)
+        console.log(piece.pieceIndex)
+        console.log("------------------------")
+        var capturedPieceColor = capturedPiece.pieceIndex >= 17 ? 1: 0
+        var capturingPieceColor = piece.pieceIndex >= 17 ? 1: 0
+        console.log(capturedPieceColor)
+        console.log(capturingPieceColor)
+
+        if (capturedPieceColor !== capturingPieceColor) {
+            console.log("IS capturable")
+            return true
+        }
+    }
+
+    function printPieces() {
+        console.log("=== Piece Positions ===")
+
+        for (var key in piecePositions) {
+            var piece = piecePositions[key]
+            console.log(
+                "Square", key,
+                "Dir:", piece.dir,
+                "Pos:", piece.x + ", " + piece.y
+            )
+        }
+
+        console.log("=======================")
     }
 }

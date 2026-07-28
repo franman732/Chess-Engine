@@ -12,6 +12,7 @@ Image {
 
     property var board
     property var dir
+    property int pieceIndex
 
     source: dir
 

@@ -13,7 +13,8 @@ Image {
 
     property var dragged
     property var board
-    property var dir
+    property string dir
+    property int pieceIndex
 
     source: dir
 
@@ -27,6 +28,7 @@ Image {
             dragged.x = p.x
             dragged.y = p.y
             dragged.dir = dir
+            dragged.pieceIndex = pieceIndex
         }
 
         onPositionChanged: function(mouse) {
@@ -41,12 +43,26 @@ Image {
         onReleased: {
             dragged.visible = false
             var coordinates = board.getCoordinates(dragged.x, dragged.y, dragged)
-            if ((coordinates.x !== -1) && (coordinates.y !== -1)) {
+            if (((coordinates.x !== -1) && (coordinates.y !== -1)) && (coordinates.i in board.piecePositions)) {
+                console.log("WE ARE CHECKING IF CAPTURABLE")
+                if (board.isCapturable_By(coordinates.i, dragged)) {
+                    board.piecePositions[coordinates.i].destroy()
+                    delete board.piecePositions[coordinates.i]
+                    console.log("WE ARE OVERRIDING")
+                    board.printPieces()
+                }
+            }
+
+            if (((coordinates.x !== -1) && (coordinates.y !== -1)) && !(coordinates.i in board.piecePositions)) {
                 var newPiece = board.placedPieceComponent.createObject(window)
                 newPiece.dir = dragged.dir
                 newPiece.x = coordinates.x
                 newPiece.y = coordinates.y
                 newPiece.board = board
+                newPiece.pieceIndex = pieceIndex
+                board.addPiece(coordinates.i, newPiece)
+                console.log("WE ARE CREATING NEW")
+                board.printPieces()
             }
         }
     }

@@ -65,36 +65,42 @@ ApplicationWindow {
         bB.x = startBX
         bB.y = startY
         bB.board = board
+        bB.pieceIndex = 11
 
         var bKn = pieceComponent.createObject(window)
         bKn.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackKnight.png"
         bKn.x = startBX
         bKn.y = startY + offset
         bKn.board = board
+        bKn.pieceIndex = 10
 
         var bR = pieceComponent.createObject(window)
         bR.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackRook.png"
         bR.x = startBX
         bR.y = startY + offset * 2
         bR.board = board
+        bR.pieceIndex = 9
 
         var bP = pieceComponent.createObject(window)
         bP.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackPawn.png"
         bP.x = startBX
         bP.y = startY + offset * 3
         bP.board = board
+        bP.pieceIndex = 1
 
         var bK = pieceComponent.createObject(window)
         bK.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackKing.png"
         bK.x = startBX
         bK.y = startY + offset * 4
         bK.board = board
+        bK.pieceIndex = 13
 
         var bQ = pieceComponent.createObject(window)
         bQ.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackQueen.png"
         bQ.x = startBX
         bQ.y = startY + offset * 5
         bQ.board = board
+        bQ.pieceIndex = 12
 
 
         var wB = pieceComponent.createObject(window)
@@ -102,36 +108,42 @@ ApplicationWindow {
         wB.x = startWX
         wB.y = startY
         wB.board = board
+        wB.pieceIndex = 27
 
         var wKn = pieceComponent.createObject(window)
         wKn.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/whiteKnight.png"
         wKn.x = startWX
         wKn.y = startY + offset
         wKn.board = board
+        wKn.pieceIndex = 26
 
         var wR = pieceComponent.createObject(window)
         wR.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/whiteRook.png"
         wR.x = startWX
         wR.y = startY + offset * 2
         wR.board = board
+        wR.pieceIndex = 25
 
         var wP = pieceComponent.createObject(window)
         wP.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/whitePawn.png"
         wP.x = startWX
         wP.y = startY + offset * 3
         wP.board = board
+        wP.pieceIndex = 17
 
         var wK = pieceComponent.createObject(window)
         wK.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/whiteKing.png"
         wK.x = startWX
         wK.y = startY + offset * 4
         wK.board = board
+        wK.pieceIndex = 29
 
         var wQ = pieceComponent.createObject(window)
         wQ.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/whiteQueen.png"
         wQ.x = startWX
         wQ.y = startY + offset * 5
         wQ.board = board
+        wQ.pieceIndex = 28
 
 
         var draggedPiece = draggedPieceComponent.createObject(window)

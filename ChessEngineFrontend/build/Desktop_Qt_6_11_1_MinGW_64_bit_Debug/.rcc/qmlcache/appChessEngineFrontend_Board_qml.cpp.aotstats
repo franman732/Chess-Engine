@@ -6,12 +6,44 @@
                 {
                     "entries": [
                         {
+                            "codegenResult": 0,
+                            "column": 34,
+                            "durationMicroseconds": 0,
+                            "functionName": "piecePositions",
+                            "line": 19,
+                            "message": ""
+                        },
+                        {
                             "codegenResult": 2,
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "getCoordinates",
-                            "line": 35,
+                            "line": 37,
                             "message": "Functions without type annotations won't be compiled"
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 5,
+                            "durationMicroseconds": 0,
+                            "functionName": "addPiece",
+                            "line": 63,
+                            "message": "Functions without type annotations won't be compiled"
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 5,
+                            "durationMicroseconds": 0,
+                            "functionName": "isCapturable_By",
+                            "line": 67,
+                            "message": "Functions without type annotations won't be compiled"
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 5,
+                            "durationMicroseconds": 0,
+                            "functionName": "printPieces",
+                            "line": 85,
+                            "message": "Cannot generate efficient code for iterator on non-list type"
                         },
                         {
                             "codegenResult": 0,
@@ -26,7 +58,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "row",
-                            "line": 28,
+                            "line": 30,
                             "message": ""
                         },
                         {
@@ -34,7 +66,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "col",
-                            "line": 29,
+                            "line": 31,
                             "message": ""
                         },
                         {
@@ -42,7 +74,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 31,
+                            "line": 33,
                             "message": ""
                         }
                     ],

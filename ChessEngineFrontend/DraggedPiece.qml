@@ -2,6 +2,7 @@ import QtQuick
 
 Image {
     property string dir
+    property int pieceIndex
 
     source: dir
     id: dragged

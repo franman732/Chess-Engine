@@ -18,7 +18,7 @@
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "getCoordinates",
-                            "line": 37,
+                            "line": 40,
                             "message": "Functions without type annotations won't be compiled"
                         },
                         {
@@ -26,7 +26,7 @@
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "addPiece",
-                            "line": 63,
+                            "line": 66,
                             "message": "Functions without type annotations won't be compiled"
                         },
                         {
@@ -34,7 +34,7 @@
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "isCapturable_By",
-                            "line": 67,
+                            "line": 70,
                             "message": "Functions without type annotations won't be compiled"
                         },
                         {
@@ -42,8 +42,16 @@
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "printPieces",
-                            "line": 78,
+                            "line": 81,
                             "message": "Cannot generate efficient code for iterator on non-list type"
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 5,
+                            "durationMicroseconds": 2000,
+                            "functionName": "resetPiecePositions",
+                            "line": 96,
+                            "message": "Cannot load property contentItem from Board::window with type QVariant."
                         },
                         {
                             "codegenResult": 0,

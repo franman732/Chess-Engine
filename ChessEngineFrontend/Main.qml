@@ -59,7 +59,7 @@ ApplicationWindow {
         }
     }
 
-    Component.onCompleted: {
+    Component.onCompleted: { // This section is entirely dedicated to creating the template pieces.
         var bB = pieceComponent.createObject(window)
         bB.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackBishop.png"
         bB.x = startBX
@@ -163,5 +163,8 @@ ApplicationWindow {
         wP.dragged = draggedPiece
         wK.dragged = draggedPiece
         wQ.dragged = draggedPiece
+
+
+        board.resetPiecePositions()
    }
 }

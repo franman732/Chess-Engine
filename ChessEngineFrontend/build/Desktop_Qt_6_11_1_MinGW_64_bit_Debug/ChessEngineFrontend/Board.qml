@@ -45,19 +45,21 @@ GridLayout {
 
         var finalCoords = {x: -1, y: -1, i: -1}
 
-        if (((centerX > boardPos.x) && (centerX < (boardPos.x + board.width))) && ((centerY > boardPos.y) && (centerY < (boardPos.y + board.height)))) {
+        var row = Math.floor((centerY - boardPos.y) / squareWidth)
+        var col = Math.floor((centerX - boardPos.x) / squareHeight)
 
-            var row = Math.floor((centerY - boardPos.y) / squareWidth)
-            var col = Math.floor((centerX - boardPos.x) / squareHeight)
+        finalCoords.i = (col + (row * 8))
+
+        if (((centerX > boardPos.x) && (centerX < (boardPos.x + board.width))) && ((centerY > boardPos.y) && (centerY < (boardPos.y + board.height)))) {
 
             var newPieceX = (col * squareWidth) + 15 + boardPos.x - 1
             var newPieceY = (row * squareHeight) + 15 + boardPos.y - 1 // 15 is the board offsets for the outline. I do not know how to get it through member access, so I hard coded it.
 
             finalCoords.x = newPieceX
             finalCoords.y = newPieceY
-            finalCoords.i = (col + (row * 8))
-        } else {
+        } else if ((piece.pieceIndex !== 13) && (piece.pieceIndex !== 29)) {
             piece.visible = false
+            delete piecePositions[finalCoords.i]
         }
 
         return finalCoords // If the piece is held off the board, or later over an existing piece, finalCoords = {-1, -1}. Otherwise it equals the final coordinates of the position.

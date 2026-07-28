@@ -33,6 +33,13 @@ namespace _qt_qml_ChessEngineFrontend_Board_qml {
         reinterpret_cast<const QV4::CompiledData::Unit*>(&qmlData), &aotBuiltFunctions[0], nullptr
     };
 }
+namespace _qt_qml_ChessEngineFrontend_PlacedPiece_qml { 
+    extern const unsigned char qmlData[];
+    extern const QQmlPrivate::AOTCompiledFunction aotBuiltFunctions[];
+    const QQmlPrivate::CachedQmlUnit unit = {
+        reinterpret_cast<const QV4::CompiledData::Unit*>(&qmlData), &aotBuiltFunctions[0], nullptr
+    };
+}
 
 }
 namespace {
@@ -51,6 +58,7 @@ Registry::Registry() {
     resourcePathToCachedUnit.insert(QStringLiteral("/qt/qml/ChessEngineFrontend/Piece.qml"), &QmlCacheGeneratedCode::_qt_qml_ChessEngineFrontend_Piece_qml::unit);
     resourcePathToCachedUnit.insert(QStringLiteral("/qt/qml/ChessEngineFrontend/DraggedPiece.qml"), &QmlCacheGeneratedCode::_qt_qml_ChessEngineFrontend_DraggedPiece_qml::unit);
     resourcePathToCachedUnit.insert(QStringLiteral("/qt/qml/ChessEngineFrontend/Board.qml"), &QmlCacheGeneratedCode::_qt_qml_ChessEngineFrontend_Board_qml::unit);
+    resourcePathToCachedUnit.insert(QStringLiteral("/qt/qml/ChessEngineFrontend/PlacedPiece.qml"), &QmlCacheGeneratedCode::_qt_qml_ChessEngineFrontend_PlacedPiece_qml::unit);
     QQmlPrivate::RegisterQmlUnitCacheHook registration;
     registration.structVersion = 0;
     registration.lookupCachedQmlUnit = &lookupCachedUnit;

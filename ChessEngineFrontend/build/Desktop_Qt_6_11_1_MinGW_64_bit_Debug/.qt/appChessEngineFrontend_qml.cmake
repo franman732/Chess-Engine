@@ -10,6 +10,8 @@ set(src_and_dest_list
     "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/ChessEngineFrontend/DraggedPiece.qml"
     "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Board.qml"
     "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/ChessEngineFrontend/Board.qml"
+    "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/PlacedPiece.qml"
+    "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/ChessEngineFrontend/PlacedPiece.qml"
 
 )
 set(timestamp_file "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/appChessEngineFrontend_qml.txt")

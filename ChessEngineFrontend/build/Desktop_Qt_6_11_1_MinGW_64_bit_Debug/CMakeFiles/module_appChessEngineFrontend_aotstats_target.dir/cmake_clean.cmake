@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   ".rcc/qmlcache/appChessEngineFrontend_Main_qml.cpp.aotstats"
   ".rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp"
   ".rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp.aotstats"
+  ".rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp"
+  ".rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.aotstats"
   ".rcc/qmlcache/module_appChessEngineFrontend.aotstats"
   "CMakeFiles/module_appChessEngineFrontend_aotstats_target"
 )

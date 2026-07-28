@@ -15,10 +15,10 @@
                         },
                         {
                             "codegenResult": 0,
-                            "column": 29,
+                            "column": 35,
                             "durationMicroseconds": 0,
-                            "functionName": "pieceComponent",
-                            "line": 51,
+                            "functionName": "placedPieceComponent",
+                            "line": 57,
                             "message": ""
                         },
                         {
@@ -26,7 +26,7 @@
                             "column": 21,
                             "durationMicroseconds": 0,
                             "functionName": "window",
-                            "line": 52,
+                            "line": 58,
                             "message": ""
                         },
                         {
@@ -34,7 +34,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "centerIn",
-                            "line": 50,
+                            "line": 56,
                             "message": ""
                         },
                         {
@@ -42,7 +42,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onCompleted",
-                            "line": 56,
+                            "line": 62,
                             "message": "Type call to method createObject, returning QObject does not have a property dir for writing"
                         }
                     ],

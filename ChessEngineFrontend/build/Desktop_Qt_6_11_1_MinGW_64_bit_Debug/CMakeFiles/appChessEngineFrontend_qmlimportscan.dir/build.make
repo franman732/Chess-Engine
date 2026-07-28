@@ -75,6 +75,7 @@ CMakeFiles/appChessEngineFrontend_qmlimportscan: .qt/qml_imports/appChessEngineF
 .qt/qml_imports/appChessEngineFrontend_build.cmake: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Piece.qml
 .qt/qml_imports/appChessEngineFrontend_build.cmake: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/DraggedPiece.qml
 .qt/qml_imports/appChessEngineFrontend_build.cmake: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Board.qml
+.qt/qml_imports/appChessEngineFrontend_build.cmake: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/PlacedPiece.qml
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Running qmlimportscanner for appChessEngineFrontend"
 	cd /d C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend && call C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\.qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmlimportscanner.exe @C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/qml_imports/appChessEngineFrontend_build.rsp
 

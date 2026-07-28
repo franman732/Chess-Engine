@@ -11,8 +11,9 @@ GridLayout {
     columns: 8
     rowSpacing: 0
     columnSpacing: 0
+    z:10
 
-    property var pieceComponent
+    property var placedPieceComponent
     property var window
 
     Repeater {
@@ -31,14 +32,15 @@ GridLayout {
         }
     }
 
-    function addPiece (piece) {
+    function getCoordinates (pieceX, pieceY, piece) { // piece is the piece that I want to replicate. It is simply used to get width and height of the piece to center it properly.
         var boardPos = board.mapToItem(window.contentItem, 0, 0)
 
-        var centerX = piece.x + piece.width / 2
-        var centerY = piece.y + piece.height / 2
+        var centerX = pieceX + piece.width / 2
+        var centerY = pieceY + piece.height / 2
+
+        var finalCoords = {x: -1, y: -1}
 
         if (((centerX > boardPos.x) && (centerX < (boardPos.x + board.width))) && ((centerY > boardPos.y) && (centerY < (boardPos.y + board.height)))) {
-            var newPiece = pieceComponent.createObject(window)
 
             var row = Math.floor((centerY - boardPos.y) / 120)
             var col = Math.floor((centerX - boardPos.x) / 120)
@@ -46,9 +48,15 @@ GridLayout {
             console.log(row)
             console.log(col)
 
-            newPiece.dir = piece.dir
-            newPiece.x = (col * 120) + 15 + boardPos.x - 1
-            newPiece.y = (row * 120) + 15 + boardPos.y - 1 // 15 is the board offsets for the outline. I do not know how to get it through member access.
+            var newPieceX = (col * 120) + 15 + boardPos.x - 1
+            var newPieceY = (row * 120) + 15 + boardPos.y - 1 // 15 is the board offsets for the outline. I do not know how to get it through member access, so I hard coded it.
+
+            finalCoords.x = newPieceX
+            finalCoords.y = newPieceY
+        } else {
+            piece.visible = false
         }
+
+        return finalCoords // If the piece is held off the board, or later over an existing piece, finalCoords = {-1, -1}. Otherwise it equals the final coordinates of the position.
     }
 }

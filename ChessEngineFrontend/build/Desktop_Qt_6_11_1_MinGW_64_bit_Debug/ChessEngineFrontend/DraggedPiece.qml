@@ -13,8 +13,4 @@ Image {
     width: 96
     height: 96
     fillMode: Image.PreserveAspectFit
-
-    MouseArea {
-        anchors.fill: parent
-    }
 }

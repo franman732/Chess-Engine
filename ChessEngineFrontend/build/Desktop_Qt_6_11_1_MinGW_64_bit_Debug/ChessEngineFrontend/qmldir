@@ -5,5 +5,6 @@ Main 254.0 Main.qml
 Piece 254.0 Piece.qml
 DraggedPiece 254.0 DraggedPiece.qml
 Board 254.0 Board.qml
+PlacedPiece 254.0 PlacedPiece.qml
 depends QtQuick
 

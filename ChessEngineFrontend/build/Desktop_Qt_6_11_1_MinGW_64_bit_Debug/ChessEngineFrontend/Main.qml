@@ -34,6 +34,12 @@ ApplicationWindow {
         border.color: "gray"
 
         Component {
+            id: placedPieceComponent
+
+            PlacedPiece { }
+        }
+
+        Component {
             id: pieceComponent
 
             Piece { }
@@ -48,7 +54,7 @@ ApplicationWindow {
         Board {
             id: board
             anchors.centerIn: parent
-            pieceComponent: pieceComponent
+            placedPieceComponent: placedPieceComponent
             window: window
         }
     }

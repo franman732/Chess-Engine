@@ -72,6 +72,7 @@ CMakeFiles/appChessEngineFrontend_copy_qml: .qt/appChessEngineFrontend_qml.txt
 .qt/appChessEngineFrontend_qml.txt: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Piece.qml
 .qt/appChessEngineFrontend_qml.txt: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/DraggedPiece.qml
 .qt/appChessEngineFrontend_qml.txt: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Board.qml
+.qt/appChessEngineFrontend_qml.txt: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/PlacedPiece.qml
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Copying appChessEngineFrontend qml sources into build dir"
 	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -DFILES_INFO_PATH=C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/appChessEngineFrontend_qml.cmake -P C:/QTIDE/6.11.1/mingw_64/lib/cmake/Qt6Qml/Qt6QmlCopyFiles.cmake
 

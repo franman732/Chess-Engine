@@ -71,6 +71,7 @@ CMakeFiles/module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/module_a
 .rcc/qmlcache/module_appChessEngineFrontend.aotstats: .rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp.aotstats
 .rcc/qmlcache/module_appChessEngineFrontend.aotstats: .rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.cpp.aotstats
 .rcc/qmlcache/module_appChessEngineFrontend.aotstats: .rcc/qmlcache/appChessEngineFrontend_Board_qml.cpp.aotstats
+.rcc/qmlcache/module_appChessEngineFrontend.aotstats: .rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.aotstats
 .rcc/qmlcache/module_appChessEngineFrontend.aotstats: .rcc/qmlcache/module_appChessEngineFrontend.aotstatslist
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating .rcc/qmlcache/module_appChessEngineFrontend.aotstats"
 	call .qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmlaotstats.exe aggregate C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/module_appChessEngineFrontend.aotstatslist C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/module_appChessEngineFrontend.aotstats
@@ -131,6 +132,20 @@ CMakeFiles/module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/module_a
 .rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp.aotstats: .rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp
 	@$(CMAKE_COMMAND) -E touch_nocreate .rcc\qmlcache\appChessEngineFrontend_Piece_qml.cpp.aotstats
 
+.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp: C:/QTIDE/6.11.1/mingw_64/bin/qmlcachegen.exe
+.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/PlacedPiece.qml
+.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp: .qt/rcc/qmake_ChessEngineFrontend.qrc
+.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp: .qt/rcc/appChessEngineFrontend_raw_qml_0.qrc
+.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp: .qt/rcc/appChessEngineFrontend_raw_res_0.qrc
+.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp: ChessEngineFrontend/appChessEngineFrontend.qmltypes
+.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp: ChessEngineFrontend/qmldir
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating .rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp, .rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.aotstats"
+	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache
+	call .qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmlcachegen.exe --bare --resource-path /qt/qml/ChessEngineFrontend/PlacedPiece.qml -I C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug -I C:/QTIDE/6.11.1/mingw_64/qml -i C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/ChessEngineFrontend/qmldir --resource C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/rcc/qmake_ChessEngineFrontend.qrc --resource C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/rcc/appChessEngineFrontend_raw_qml_0.qrc --resource C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/rcc/appChessEngineFrontend_raw_res_0.qrc --dump-aot-stats --module-id=ChessEngineFrontend(appChessEngineFrontend) -o C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/PlacedPiece.qml
+
+.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.aotstats: .rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp
+	@$(CMAKE_COMMAND) -E touch_nocreate .rcc\qmlcache\appChessEngineFrontend_PlacedPiece_qml.cpp.aotstats
+
 module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFrontend_Board_qml.cpp
 module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFrontend_Board_qml.cpp.aotstats
 module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.cpp
@@ -139,6 +154,8 @@ module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFront
 module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFrontend_Main_qml.cpp.aotstats
 module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp
 module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp.aotstats
+module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp
+module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.aotstats
 module_appChessEngineFrontend_aotstats_target: .rcc/qmlcache/module_appChessEngineFrontend.aotstats
 module_appChessEngineFrontend_aotstats_target: CMakeFiles/module_appChessEngineFrontend_aotstats_target
 module_appChessEngineFrontend_aotstats_target: CMakeFiles/module_appChessEngineFrontend_aotstats_target.dir/build.make

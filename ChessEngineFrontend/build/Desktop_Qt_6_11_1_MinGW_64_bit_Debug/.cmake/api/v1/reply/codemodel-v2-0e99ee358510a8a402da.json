@@ -7,7 +7,7 @@
 				{
 					"build" : ".",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-.-Debug-7aced14f9a8e42f97df8.json",
+					"jsonFile" : "directory-.-Debug-4389f398259d94572028.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.16"
@@ -76,7 +76,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "all_aotstats::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-all_aotstats-Debug-b24591edc19dea8c1ee0.json",
+					"jsonFile" : "target-all_aotstats-Debug-bf6039fb20569f179ee6.json",
 					"name" : "all_aotstats",
 					"projectIndex" : 0
 				},
@@ -111,7 +111,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "appChessEngineFrontend::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-appChessEngineFrontend-Debug-ab947260dbf06abb1fa6.json",
+					"jsonFile" : "target-appChessEngineFrontend-Debug-aadf07d60bbf5ac344dd.json",
 					"name" : "appChessEngineFrontend",
 					"projectIndex" : 0
 				},
@@ -125,7 +125,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "appChessEngineFrontend_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-appChessEngineFrontend_autogen_timestamp_deps-Debug-d596b0397d66e9a8e05f.json",
+					"jsonFile" : "target-appChessEngineFrontend_autogen_timestamp_deps-Debug-fe2dc1e1f9c0a9b3f78c.json",
 					"name" : "appChessEngineFrontend_autogen_timestamp_deps",
 					"projectIndex" : 0
 				},
@@ -202,7 +202,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "module_appChessEngineFrontend_aotstats_target::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-module_appChessEngineFrontend_aotstats_target-Debug-9cc2ff4ae833ec0f789c.json",
+					"jsonFile" : "target-module_appChessEngineFrontend_aotstats_target-Debug-99fe5c2b51b489a522d0.json",
 					"name" : "module_appChessEngineFrontend_aotstats_target",
 					"projectIndex" : 0
 				}

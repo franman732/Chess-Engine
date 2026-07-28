@@ -431,6 +431,30 @@ appChessEngineFrontend_autogen/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\appChessEngineFrontend.dir\build.make CMakeFiles/appChessEngineFrontend.dir/7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.cpp.s
 .PHONY : 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.cpp.s
 
+7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.obj: 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.obj
+.PHONY : 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.obj
+
+# target to build an object file
+7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\appChessEngineFrontend.dir\build.make CMakeFiles/appChessEngineFrontend.dir/7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.obj
+.PHONY : 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.obj
+
+7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.i: 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.i
+.PHONY : 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.i
+
+# target to preprocess a source file
+7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\appChessEngineFrontend.dir\build.make CMakeFiles/appChessEngineFrontend.dir/7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.i
+.PHONY : 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.i
+
+7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.s: 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.s
+.PHONY : 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.s
+
+# target to generate assembly for a file
+7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\appChessEngineFrontend.dir\build.make CMakeFiles/appChessEngineFrontend.dir/7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.s
+.PHONY : 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.s
+
 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_qmlcache_loader.obj: 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_qmlcache_loader.cpp.obj
 .PHONY : 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_qmlcache_loader.obj
 
@@ -705,6 +729,9 @@ help:
 	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.obj
 	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.i
 	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.s
+	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.obj
+	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.i
+	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.s
 	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_qmlcache_loader.obj
 	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_qmlcache_loader.i
 	@echo ... 7589f786f71257b16c2ee4360a426f5b/.rcc/qmlcache/appChessEngineFrontend_qmlcache_loader.s

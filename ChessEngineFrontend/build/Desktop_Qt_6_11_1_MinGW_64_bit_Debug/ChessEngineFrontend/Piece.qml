@@ -40,7 +40,14 @@ Image {
 
         onReleased: {
             dragged.visible = false
-            board.addPiece(dragged)
+            var coordinates = board.getCoordinates(dragged.x, dragged.y, dragged)
+            if ((coordinates.x !== -1) && (coordinates.y !== -1)) {
+                var newPiece = board.placedPieceComponent.createObject(window)
+                newPiece.dir = dragged.dir
+                newPiece.x = coordinates.x
+                newPiece.y = coordinates.y
+                newPiece.board = board
+            }
         }
     }
 }

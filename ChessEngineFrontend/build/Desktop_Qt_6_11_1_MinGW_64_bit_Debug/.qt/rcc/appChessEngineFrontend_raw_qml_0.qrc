@@ -4,6 +4,7 @@
     <file alias="Piece.qml">C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Piece.qml</file>
     <file alias="DraggedPiece.qml">C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/DraggedPiece.qml</file>
     <file alias="Board.qml">C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Board.qml</file>
+    <file alias="PlacedPiece.qml">C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/PlacedPiece.qml</file>
   </qresource>
 </RCC>
 

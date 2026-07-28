@@ -43,6 +43,7 @@ qt_add_qml_module(appChessEngineFrontend
         QML_FILES Piece.qml
         QML_FILES DraggedPiece.qml
         QML_FILES Board.qml
+        QML_FILES PlacedPiece.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

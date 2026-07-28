@@ -70,6 +70,7 @@ CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/G
 CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Piece.qml
 CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/DraggedPiece.qml
 CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Board.qml
+CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/PlacedPiece.qml
 CMakeFiles/appChessEngineFrontend_qmllint_module: .rcc/qmllint/appChessEngineFrontend_module.rsp
 	cd /d C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend && call C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\.qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmllint.exe @C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmllint/appChessEngineFrontend_module.rsp
 

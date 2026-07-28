@@ -16,6 +16,7 @@ set(CMAKE_MULTIPLE_OUTPUT_PAIRS
   "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.cpp.aotstats" "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_DraggedPiece_qml.cpp"
   "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_Main_qml.cpp.aotstats" "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_Main_qml.cpp"
   "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp.aotstats" "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_Piece_qml.cpp"
+  "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp.aotstats" "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_PlacedPiece_qml.cpp"
   )
 
 

@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/qt/qml/ChessEngineFrontend/">
+    <file alias="Main.qml">C:/Users/Nathaniel/Documents/ChessEngineFrontend/Main.qml</file>
+    <file alias="Piece.qml">C:/Users/Nathaniel/Documents/ChessEngineFrontend/Piece.qml</file>
+    <file alias="DraggedPiece.qml">C:/Users/Nathaniel/Documents/ChessEngineFrontend/DraggedPiece.qml</file>
+    <file alias="Board.qml">C:/Users/Nathaniel/Documents/ChessEngineFrontend/Board.qml</file>
+  </qresource>
+</RCC>
+

@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="/qt/qml/ChessEngineFrontend/">
+    <file alias="pieceImages/blackBishop.png">C:/Users/Nathaniel/Documents/ChessEngineFrontend/pieceImages/blackBishop.png</file>
+    <file alias="pieceImages/blackKnight.png">C:/Users/Nathaniel/Documents/ChessEngineFrontend/pieceImages/blackKnight.png</file>
+    <file alias="pieceImages/blackRook.png">C:/Users/Nathaniel/Documents/ChessEngineFrontend/pieceImages/blackRook.png</file>
+    <file alias="pieceImages/blackPawn.png">C:/Users/Nathaniel/Documents/ChessEngineFrontend/pieceImages/blackPawn.png</file>
+    <file alias="pieceImages/blackKing.png">C:/Users/Nathaniel/Documents/ChessEngineFrontend/pieceImages/blackKing.png</file>
+    <file alias="pieceImages/blackQueen.png">C:/Users/Nathaniel/Documents/ChessEngineFrontend/pieceImages/blackQueen.png</file>
+    <file alias="pieceImages/whiteKing.png">C:/Users/Nathaniel/Documents/ChessEngineFrontend/pieceImages/whiteKing.png</file>
+  </qresource>
+</RCC>
+

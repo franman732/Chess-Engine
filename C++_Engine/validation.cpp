@@ -12,16 +12,16 @@ bool is_square_attacked(int square, const Board& board, int color) {
         for (int idx : ray) {
             int value = board[idx];
             counter += 1;
-            if ((value == 0) || idx == 0) {
+            if ((value == 0) || idx == -1) {
                 continue;
             }
 
             int pieceColor = -1;
 
-            if (value == 0) {
-                pieceColor = 1;
-            } else if (value >= 17) {
-                pieceColor = 0;
+            if (value >= 17) {
+                pieceColor = 1;   // white
+            } else if (value > 0) {
+                pieceColor = 0;   // black
             }
 
             if (pieceColor != color) {

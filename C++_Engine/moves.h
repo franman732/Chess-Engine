@@ -5,23 +5,23 @@
 #include <array>
 #include <cstdint>
 
-inline constexpr int WK = 4;
-inline constexpr int WQ = 8;
-inline constexpr int BK = 1; // These 4 values will just be used for changing castle rights.
-inline constexpr int BQ = 2;
+constexpr int WK = 4;
+constexpr int WQ = 8;
+constexpr int BK = 1; // These 4 values will just be used for changing castle rights.
+constexpr int BQ = 2;
 
-inline constexpr int KING_NUMBER = 6;
-inline constexpr int PAWN_NUMBER = 1;
-inline constexpr int ROOK_NUMBER = 2;
-inline constexpr int BISHOP_NUMBER = 4;
-inline constexpr int QUEEN_NUMBER = 5;
-inline constexpr int KNIGHT_NUMBER = 3;
+constexpr int KING_NUMBER = 6;
+constexpr int PAWN_NUMBER = 1;
+constexpr int ROOK_NUMBER = 2;
+constexpr int BISHOP_NUMBER = 4;
+constexpr int QUEEN_NUMBER = 5;
+constexpr int KNIGHT_NUMBER = 3;
 
-inline constexpr std::array<int, 33> PIECES = {0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2};
+constexpr std::array<int, 33> PIECES = {0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 4, 3, 2};
 
 struct evaluation {
-    int openingEval;
-    int closingEval;
+    float openingEval;
+    float closingEval;
     int phase;
     bool whiteBishops;
     bool blackBishops;
@@ -31,8 +31,8 @@ struct evaluation {
 };
 
 struct undoEvaluation {
-    int openingEval;
-    int closingEval;
+    float openingEval;
+    float closingEval;
     int phase;
     bool whiteBishops;
     bool blackBishops;

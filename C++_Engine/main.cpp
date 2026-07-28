@@ -6,6 +6,7 @@
 #include "search.h"
 #include "transposition_table.h"
 
+#include <chrono>
 #include <tuple>
 #include <array>
 #include <iostream>
@@ -45,8 +46,10 @@ int main() {
     TT_tracker tracker = {0, 0, 0};
 
     std::cout << "Generating Pseudo Moves\n";
-    for (int i = 1; i < 11; i ++) {
-        AMove previousBestMove = Find_Best_Move(pos, i, previousBestMove, tracker);
+    auto start = std::chrono::high_resolution_clock::now();
+
+    for (int i = 1; i < 10; i ++) {
+        previousBestMove = Find_Best_Move(pos, i, previousBestMove, tracker);
         std::cout << "DEPTH: " << i
                     << " MOVE: ("
                     << std::get<0>(previousBestMove) << ", "
@@ -54,7 +57,20 @@ int main() {
                     << std::get<2>(previousBestMove) << ")\n";
     }
 
-    std::cout << std::get<0>(previousBestMove) << ", "
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration = end - start;
+    std::cout << "Loop execution time: " << duration.count() << " ms \n" << std::endl;
+
+    std::cout <<tracker.TT_Lookups << " TT LOOKUP,"
+            << tracker.numberOfRecursions << " NUMBER OF RECURSIONS,"
+            << tracker.TT_Hits << " TT HITS,"
+            << TT.size() << " NUMBER OF ELEMENTS \n";
+
+
+    std::cout << "[[[[[]]]]]"
+            << std::get<0>(previousBestMove) << ", "
             << std::get<1>(previousBestMove) << ", "
             << std::get<2>(previousBestMove) << ")\n";
+
+    std::cout << "end\n";
 }

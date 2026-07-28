@@ -4,7 +4,7 @@
 
 #include <array>
 
-const int MAXDEPTH = 8;
+constexpr int MAXDEPTH = 8;
 
 inline std::array<std::array<AMove, 2>, MAXDEPTH> killerMoves = [] {
     std::array<std::array<AMove, 2>, MAXDEPTH> arr{};
@@ -12,8 +12,8 @@ inline std::array<std::array<AMove, 2>, MAXDEPTH> killerMoves = [] {
     return arr;
 }();
 
-std::array<std::array<int, 64>, 64> history{};
+inline std::array<std::array<int, 64>, 64> history{};
 
-int score_move(Position pos, AMove move, int depth, AMove bestMove);
+int score_move(Position& pos, AMove move, int depth, AMove bestMove);
 
-scoredMoves create_scored_moves(Position pos, moveList legalMoves, int depth, AMove bestMove);
+scoredMoves create_scored_moves(Position& pos, moveList& legalMoves, int depth, AMove bestMove);

@@ -17,11 +17,11 @@ evaluation evaluate_board(const Board& board) {
     int whiteIsolated = 0;
     int blackIsolated = 0;
 
-    int pawnOGEval = 0;
-    int pawnEGEval = 0;
+    float pawnOGEval = 0;
+    float pawnEGEval = 0;
 
-    int OGEval = 0;
-    int EGEval = 0;
+    float OGEval = 0;
+    float EGEval = 0;
 
     int phase = 0;
 
@@ -128,7 +128,7 @@ evaluation evaluate_board(const Board& board) {
     pawnOGEval += blackStacked * OPENING_STACKED;
     pawnEGEval += blackStacked * ENDING_STACKED;
 
-    std::pair<int, int> pair{pawnOGEval, pawnEGEval};
+    std::pair<float, float> pair{pawnOGEval, pawnEGEval};
 
     PAWN_HASH_TABLE[pawnHash] = pair;
 

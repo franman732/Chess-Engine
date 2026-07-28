@@ -12,6 +12,7 @@
 #include <algorithm>
 
 AMove Find_Best_Move(Position pos, int depth, AMove startingMove, TT_tracker& tracker) {
+   // std::cout << "Entering Find_Best_Move\n";
     float alpha = -99999999;
     float beta = 99999999;
     int side = pos.sideToMove;
@@ -22,7 +23,7 @@ AMove Find_Best_Move(Position pos, int depth, AMove startingMove, TT_tracker& tr
     AMove entryMove = {-1, -1, -1};
     TT_Info entry = {-1, -1, "", {-1, -1, -1}}; // Default value.
     int firstMove = 0;
-    Board board = pos.board;
+    Board& board = pos.board;
     bool foundLegalMove = false;
 
     auto it = TT.find(pos.hash);
@@ -37,6 +38,7 @@ AMove Find_Best_Move(Position pos, int depth, AMove startingMove, TT_tracker& tr
         if (entryDepth >= depth) {
             if (entryFlag == "EXACT") {
                 tracker.TT_Hits += 1;
+                //std::cout << "WE RETURNED TT \n";
                 return entryMove;
             } else if (entryFlag == "LOWER") {
                 alpha = std::max(alpha, entryScore);
@@ -46,19 +48,23 @@ AMove Find_Best_Move(Position pos, int depth, AMove startingMove, TT_tracker& tr
 
             if (alpha >= beta) {
                 tracker.TT_Hits += 1;
+                //std::cout << "WE RETURNED TT \n";
                 return entryMove;
             }
         }
     }
+    //std::cout << "We passed TT!\n";
 
     moveList allMoves = create_pseudo_moves(pos);
     scoredMoves scoredMovesList = create_scored_moves(pos, allMoves, depth, startingMove);
     AMove bestMove = {-1, -1, -1};
 
+    //std::cout << "WE PASSED MAKING MOVES\n";
+
     if (side) {
-        bestEval = -99999999;
+        bestEval = -99999999 - depth;
     } else {
-        bestEval = 99999999;
+        bestEval = 99999999 - depth;
     }
 
     for (int i = 0; i < scoredMovesList.size(); i++) {
@@ -66,7 +72,9 @@ AMove Find_Best_Move(Position pos, int depth, AMove startingMove, TT_tracker& tr
         auto [start, end, extra] = move;
         int capturedPiece = board[end];
         undoMove undoInfo = make_move(pos, move);
+    //std::cout << "WE PASSED UNDOINFO\n";
 
+        //std::cout << "WE PASSED UNDOINFO\n";
         if (!(pos.sideToMove)) {
             if (is_square_attacked(pos.whiteKing, pos.board, 1)) {
                 undo_move(pos, move, undoInfo);
@@ -78,6 +86,9 @@ AMove Find_Best_Move(Position pos, int depth, AMove startingMove, TT_tracker& tr
                 continue;
             }
         }
+
+
+        //std::cout << "WEE PASSED CHECKMATE CHECKING\n";
 
         foundLegalMove = true;
         pos.update_evaluation(move, undoInfo);
@@ -174,9 +185,9 @@ AMove Find_Best_Move(Position pos, int depth, AMove startingMove, TT_tracker& tr
 
     if (!(foundLegalMove)) {
         if (side && is_square_attacked(pos.whiteKing, board, 1)) {
-            bestEval = -99999999;
+            bestEval = -99999999 - depth;
         } else if ((!side) && is_square_attacked(pos.blackKing, board, 0)) {
-            bestEval = -99999999;
+            bestEval = 99999999 - depth;
         } else {
             bestEval = 0;
         }
@@ -190,19 +201,19 @@ AMove Find_Best_Move(Position pos, int depth, AMove startingMove, TT_tracker& tr
         flag = "LOWER";
     }
 
-    if ((entry.depth != -1) || (depth >= entry.depth)) {
+    if ((entry.depth == -1) || (depth >= entry.depth)) {
         TT[pos.hash] = TT_Info{depth, bestEval, flag, bestMove};
     }
 
     return bestMove;
 }
 
-float recurse(Position pos, int depth, float alpha, float beta, int maximizing, bool allowNullMove, bool allowLMR, TT_tracker& tracker) {
+float recurse(Position& pos, int depth, float alpha, float beta, int maximizing, bool allowNullMove, bool allowLMR, TT_tracker& tracker) {
     bool foundLegalMove = false;
     tracker.numberOfRecursions += 1;
 
     if (depth == 0) {
-        int eval = pos.update_evaluation(AMove(-1, -1, -1), undoMove(), true);
+        float eval = pos.update_evaluation(AMove(-1, -1, -1), undoMove(), true);
         return eval;
     }
 
@@ -212,8 +223,10 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
     float origBeta = beta;
     float best;
 
+    AMove entryMove;
+
     float score;
-    TT_Info entry;
+    TT_Info entry = {-1, -1, "", {-1, -1, -1}};
 
     auto it = TT.find(pos.hash);
     if (it != TT.end()) {
@@ -222,7 +235,7 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
 
     if (entry.depth != -1) { // IF it is in the transposition table, then depth wont equal -1.
         tracker.TT_Lookups += 1;
-        auto [entryDepth, entryScore, entryFlag, entryMove] = entry;
+        auto [entryDepth, entryScore, entryFlag, entry_Move] = entry;
 
         if (entryDepth >= depth) {
             if (entryFlag == "EXACT") {
@@ -238,6 +251,12 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
                 tracker.TT_Hits += 1;
                 return entryScore;
             }
+        }
+
+        if (entryDepth <= depth) {
+            entryMove = entry_Move;
+        } else {
+            entryMove = {-1, -1, -1};
         }
     }
 
@@ -273,17 +292,25 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
         }
     }
 
+    //std::cout << "Entering Find_Best_Move\n";
+    
     moveList allMoves = create_pseudo_moves(pos);
 
-    scoredMoves scoredMovesList = create_scored_moves(pos, allMoves, depth, entry.bestMove);
+    //std::cout << "Pseudo moves generated: " << allMoves.size() << '\n';
+
+    scoredMoves scoredMovesList = create_scored_moves(pos, allMoves, depth, entryMove);
+
+    //std::cout << "Scored moves: " << scoredMovesList.size() << '\n';
 
     if (maximizing) {
-        best = -99999999;
+        best = -99999999 - depth;
     } else {
-        best = 99999999;
+        best = 99999999 - depth;
     }
 
     for (int i = 0; i < scoredMovesList.size(); i++) {
+        //std::cout << "Trying move " << i << '\n';
+        
         AMove move = scoredMovesList[i].second;
         auto [start, end, extra] = move;
 
@@ -305,7 +332,7 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
         pos.update_evaluation(move, undoInfo);
         firstMove += 1;
         foundLegalMove = true;
-
+        //std::cout << "Calling recurse depth=" << depth-1 << '\n';
         if (firstMove == 1) {
             score = recurse(pos, depth - 1, alpha, beta, maximizing ^ 1, allowNullMove, true, tracker);
 
@@ -344,7 +371,7 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
                     score = recurse(pos, depth - 1, alpha, alpha + 1, false, allowNullMove, true, tracker);
 
                     if ((score < beta) && (score > alpha)) {
-                        score = recurse(pos, depth - 1, alpha, beta, true, allowNullMove, true, tracker);
+                        score = recurse(pos, depth - 1, alpha, beta, false, allowNullMove, true, tracker);
                     }
                 }
 
@@ -361,7 +388,7 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
 
                     history[start][end] += (depth * depth);
 
-                    if ((capturedPiece == 0) && (!(PIECES[pos.board[start]] == PAWN_NUMBER)) && ((end >> 3 == 0) || (end >> 3 == 7))) {
+                    if ((capturedPiece == 0) && (!((PIECES[pos.board[start]] == PAWN_NUMBER) && ((end >> 3 == 0) || (end >> 3 == 7))))) {
                         if (move != killerMoves[depth][0]) {
                             killerMoves[depth][1] = killerMoves[depth][0];
                             killerMoves[depth][0] = move;
@@ -398,7 +425,7 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
 
                     history[start][end] += (depth * depth);
 
-                    if ((capturedPiece == 0) && (!(PIECES[pos.board[start]] == PAWN_NUMBER)) && ((end >> 3 == 0) || (end >> 3 == 7))) {
+                    if ((capturedPiece == 0) && (!((PIECES[pos.board[start]] == PAWN_NUMBER) && ((end >> 3 == 0) || (end >> 3 == 7))))) {
                         if (move != killerMoves[depth][0]) {
                             killerMoves[depth][1] = killerMoves[depth][0];
                             killerMoves[depth][0] = move;
@@ -414,9 +441,9 @@ float recurse(Position pos, int depth, float alpha, float beta, int maximizing, 
 
     if (!foundLegalMove) {
         if ((maximizing) && (is_square_attacked(pos.whiteKing, pos.board, 1))) {
-            best = -99999999;
+            best = -99999999 - depth;
         } else if ((!maximizing) && (is_square_attacked(pos.blackKing, pos.board, 0))) {
-            best = 99999999;
+            best = 99999999 - depth;
         } else {
             best = 0;
         }

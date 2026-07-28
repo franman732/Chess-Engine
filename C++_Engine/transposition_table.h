@@ -21,8 +21,8 @@ struct TT_tracker {
     int numberOfRecursions;
 };
 
-std::unordered_map<uint64_t, TT_Info> TT;
-std::mt19937_64 gen(std::random_device{}());  // Defines a random number generator that can be called to using gen()
+inline std::unordered_map<uint64_t, TT_Info> TT;
+inline std::mt19937_64 gen(std::random_device{}());  // Defines a random number generator that can be called to using gen()
 
 inline std::array<std::array<uint64_t, 64>, 25> ZOBRIST = []{
     std::array<std::array<uint64_t, 64>, 25> table{};
@@ -36,8 +36,8 @@ inline std::array<std::array<uint64_t, 64>, 25> ZOBRIST = []{
     return table;
 }();
 
-uint64_t ZOBRIST_SIDE = gen();
-std::unordered_map<int, int> ZOBRIST_CASTLE;
+inline uint64_t ZOBRIST_SIDE = gen();
+inline std::unordered_map<int, int> ZOBRIST_CASTLE;
 
 inline std::array<std::array<uint64_t, 64>, 25> PAWN_ZOBRIST = [] {
     std::array<std::array<uint64_t, 64>, 25> table{};
@@ -51,4 +51,4 @@ inline std::array<std::array<uint64_t, 64>, 25> PAWN_ZOBRIST = [] {
     return table;
 }();
 
-std::unordered_map<int, std::tuple<int, int>> PAWN_HASH_TABLE;
+inline std::unordered_map<int, std::tuple<float, float>> PAWN_HASH_TABLE;

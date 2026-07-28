@@ -6,4 +6,4 @@
 
 undoMove make_move(Position& pos, AMove move);
 
-void undo_move(Position& pos, AMove move, undoMove undoInfo);
+void undo_move(Position& pos, AMove move, undoMove& undoInfo);

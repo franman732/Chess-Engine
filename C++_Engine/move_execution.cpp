@@ -14,14 +14,14 @@ undoMove make_move(Position& pos, AMove move) {
     int numPieces = pos.pieces;
     uint64_t hash = pos.hash;
     uint64_t pawnHash = pos.evalInfo.pawnHash;
-    Board board = pos.board;
+    Board& board = pos.board;
     int sideToMove = pos.sideToMove;
-    std::array<int, 8> blackPawns = pos.evalInfo.blackPawns;
-    std::array<int, 8> whitePawns = pos.evalInfo.whitePawns;
-    std::unordered_map<int, int> piecePos = pos.pieceLocations;
+    std::array<int, 8>& blackPawns = pos.evalInfo.blackPawns;
+    std::array<int, 8>& whitePawns = pos.evalInfo.whitePawns;
+    std::unordered_map<int, int>& piecePos = pos.pieceLocations;
 
-    std::array<int, 2> changeWhitePawns;
-    std::array<int, 2> changeBlackPawns;
+    std::array<int, 2> changeWhitePawns = {-1, -1};
+    std::array<int, 2> changeBlackPawns = {-1, -1};
 
     undoMove undo;
     undo.capturedPiece = board[end];
@@ -215,9 +215,9 @@ undoMove make_move(Position& pos, AMove move) {
     return undo;
 }
 
-void undo_move(Position& pos, AMove move, undoMove undoInfo) {
+void undo_move(Position& pos, AMove move, undoMove& undoInfo) {
     auto [start, end, extra] = move;
-    Board board = pos.board;
+    Board& board = pos.board;
 
     int movedPiece = board[end];
     int capturedPiece = undoInfo.capturedPiece;
@@ -237,7 +237,7 @@ void undo_move(Position& pos, AMove move, undoMove undoInfo) {
         pos.whiteKing = start;
     }
 
-    std::unordered_map<int, int> piecePositions = pos.pieceLocations;
+    std::unordered_map<int, int>& piecePositions = pos.pieceLocations;
 
     pos.pieces = undoInfo.numPieces;
 
@@ -250,8 +250,8 @@ void undo_move(Position& pos, AMove move, undoMove undoInfo) {
     auto changeBlackPawns = undoInfo.undoEval.changeBlackPawns;
     pos.evalInfo.pawnHash = undoInfo.undoEval.pawnHash;
 
-    std::array<int, 8> blackPawns = pos.evalInfo.blackPawns;
-    std::array<int, 8> whitePawns = pos.evalInfo.whitePawns;
+    std::array<int, 8>& blackPawns = pos.evalInfo.blackPawns;
+    std::array<int, 8>& whitePawns = pos.evalInfo.whitePawns;
 
     piecePositions[start] = piecePositions[end];
     piecePositions.erase(end);

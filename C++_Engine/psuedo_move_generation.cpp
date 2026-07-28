@@ -115,9 +115,7 @@ void determine_knight_moves(const Board& board, moveList& moves, int start) {
         color = 0;
     }
 
-    std::cout << "WE SHOULD BE CHECKING NIGHT ATTACK LIST\n";
     for (const auto idx: KNIGHT_ATTACKS[start]) {
-        std::cout << "WE IN KNIGHT ATTACK LIST\n";
         if (idx == -1) {
             continue;
         }
@@ -226,7 +224,6 @@ moveList create_pseudo_moves(Position& pos) {
         }
 
         if (pieceColor == color) {
-            std::cout << "WE FOUND A PIECE BOIII\n";
             if (PIECES[value] == PAWN_NUMBER) {
                 determine_pawn_moves(board, moves, key);
             }
@@ -236,7 +233,6 @@ moveList create_pseudo_moves(Position& pos) {
             }
 
             else if (PIECES[value] == KNIGHT_NUMBER) {
-                std::cout << "WE FOUND A KNIGHT\n";
                 determine_knight_moves(board, moves, key);
             }
 

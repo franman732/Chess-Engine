@@ -1,4 +1,5 @@
 #pragma once
+
 #include "helper_functions.h"
 
 #include <array>

@@ -41,7 +41,7 @@ float Position::update_evaluation(AMove move, const undoMove& undoInfo, bool fin
             endTableIndex = end;
         } else {
             startTableIndex = 63 - start;
-            endTableIndex = 63 - start;
+            endTableIndex = 63 - end;
         }
 
         if (!(isWhite)) {
@@ -53,7 +53,7 @@ float Position::update_evaluation(AMove move, const undoMove& undoInfo, bool fin
         evalInfo.openingEval -= OPST[movedPiece][startTableIndex];
         evalInfo.closingEval -= EPST[movedPiece][startTableIndex];
         evalInfo.openingEval += OPST[movedPiece][endTableIndex];
-        evalInfo.closingEval += OPST[movedPiece][endTableIndex];
+        evalInfo.closingEval += EPST[movedPiece][endTableIndex];
 
         if (PIECES[movedPiece] == PAWN_NUMBER) {
             int row = end >> 3;
@@ -75,6 +75,8 @@ float Position::update_evaluation(AMove move, const undoMove& undoInfo, bool fin
 
                 evalInfo.openingEval += OPST[12][endTableIndex];
                 evalInfo.closingEval += EPST[12][endTableIndex];
+                evalInfo.openingEval += OPENING_PIECE_VALUES[12];
+                evalInfo.closingEval += ENDING_PIECE_VALUES[12];
 
             }
         }
@@ -127,7 +129,7 @@ float Position::update_evaluation(AMove move, const undoMove& undoInfo, bool fin
     }
 
     if ((std::get<0>(zobristEvaluation) == 0.1234567) && (std::get<1>(zobristEvaluation) == 0.1234567)) {
-        for (int file; file < 8; file++) {
+        for (int file = 0; file < 8; file++) {
             int w = evalInfo.whitePawns[file];
             int b = evalInfo.blackPawns[file];
 
@@ -153,7 +155,7 @@ float Position::update_evaluation(AMove move, const undoMove& undoInfo, bool fin
                 bool right = ((file < 7) && (evalInfo.blackPawns[file + 1]));
 
                 if ((!left) && (!right)) {
-                    blackIsolated += w;
+                    blackIsolated += b;
                 }
             }
         }

@@ -8,13 +8,13 @@
 #include <tuple>
 #include <array>
 
-std::array<int, 33> OPENING_PIECE_VALUES;
-std::array<int, 33> ENDING_PIECE_VALUES;
+constexpr std::array<int, 33> OPENING_PIECE_VALUES = {0, -100, -100, -100, -100, -100, -100, -100, -100, -500, -320, -330, -900, -20000, -330, -320, -500, 100, 100, 100, 100, 100, 100, 100, 100, 500, 320, 330, 900, 20000, 330, 320, 500};
+constexpr std::array<int, 33> ENDING_PIECE_VALUES = {0, -120, -120, -120, -120, -120, -120, -120, -120, -520, -300, -340, -900, -20000, -340, -300, -520, 120, 120, 120, 120, 120, 120, 120, 120, 520, 300, 340, 900, 20000, 340, 300, 520};
 
-std::array<int, 33> PHASE_VALUES;
+constexpr std::array<int, 33> PHASE_VALUES = {0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 4, 0, 1, 1, 2};
 
-std::array<int, 8> PASSED_OPENING;
-std::array<int, 8> PASSED_CLOSING;
+constexpr std::array<int, 8> PASSED_OPENING = {0, 5, 10, 20, 35, 60, 100, 0};
+constexpr std::array<int, 8> PASSED_CLOSING = {0, 10, 20, 40, 70, 120, 200, 0};
 
 constexpr int OPENING_STACKED = 15;
 constexpr int ENDING_STACKED = 10;

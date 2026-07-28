@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-int score_move(Position pos, AMove move, int depth, AMove bestMove) {
+int score_move(Position& pos, AMove move, int depth, AMove bestMove) {
     auto& [start, end, extra] = move;
     
     int attacker = pos.board[start];
@@ -42,7 +42,7 @@ int score_move(Position pos, AMove move, int depth, AMove bestMove) {
     return score;
 }
 
-scoredMoves create_scored_moves(Position pos, moveList legalMoves, int depth, AMove bestMove) {
+scoredMoves create_scored_moves(Position& pos, moveList& legalMoves, int depth, AMove bestMove) {
     scoredMoves scoredMoves{};
 
     for (AMove& move : legalMoves) {

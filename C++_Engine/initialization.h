@@ -2,7 +2,6 @@
 
 #include "aliases.h"
 
-
 #include <unordered_map>
 
 std::unordered_map<int, int> determine_piece_squares(const Board& board);

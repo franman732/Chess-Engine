@@ -46,7 +46,7 @@ Image {
             if (((coordinates.x !== -1) && (coordinates.y !== -1)) && (coordinates.i in board.piecePositions)) {
                 board.piecePositions[coordinates.i].destroy()
                 delete board.piecePositions[coordinates.i]
-                console.log("WE ARE OVERRIDING")
+                console.log("WE ARE OVERRIDING in PIECE")
                 board.printPieces()
             }
 
@@ -58,7 +58,7 @@ Image {
                 newPiece.board = board
                 newPiece.pieceIndex = pieceIndex
                 board.addPiece(coordinates.i, newPiece)
-                console.log("WE ARE CREATING NEW")
+                console.log("WE ARE CREATING NEW in PIECE")
                 board.printPieces()
             }
         }

@@ -8,7 +8,7 @@
                         {
                             "codegenResult": 0,
                             "column": 15,
-                            "durationMicroseconds": 0,
+                            "durationMicroseconds": 2000,
                             "functionName": "fillMode",
                             "line": 12,
                             "message": ""

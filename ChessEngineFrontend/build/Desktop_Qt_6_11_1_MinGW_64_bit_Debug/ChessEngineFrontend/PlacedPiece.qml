@@ -40,18 +40,23 @@ Image {
 
         onReleased: {
             var coordinates = board.getCoordinates(placedPiece.x, placedPiece.y, placedPiece)
-            if (((coordinates.x !== -1) && (coordinates.y !== -1)) && (coordinates.i in board.piecePositions)) {
-                board.piecePositions[coordinates.i].destroy()
-                delete board.piecePositions[coordinates.i]
-                console.log("WE ARE OVERRIDING")
-                board.printPieces()
-            }
+            if (board.piecePositions[coordinates.i] !== placedPiece) {
+                if (((coordinates.x !== -1) && (coordinates.y !== -1)) && (coordinates.i in board.piecePositions)) {
+                    board.piecePositions[coordinates.i].destroy()
+                    delete board.piecePositions[coordinates.i]
+                    console.log("WE ARE OVERRIDING")
+                    board.printPieces()
+                }
 
-            if ((coordinates.x !== -1) && (coordinates.y !== -1)) {
+                if ((coordinates.x !== -1) && (coordinates.y !== -1)) {
+                    placedPiece.x = coordinates.x
+                    placedPiece.y = coordinates.y
+                    delete board.piecePositions[startCoordinates.i]
+                    board.piecePositions[coordinates.i] = placedPiece
+                }
+            } else {
                 placedPiece.x = coordinates.x
                 placedPiece.y = coordinates.y
-                delete board.piecePositions[startCoordinates.i]
-                board.piecePositions[coordinates.i] = placedPiece
             }
         }
     }

@@ -52,10 +52,10 @@ RM = C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\Nathaniel\Documents\ChessEngineFrontend
+CMAKE_SOURCE_DIR = C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug
+CMAKE_BINARY_DIR = C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug
 
 # Utility rule file for appChessEngineFrontend_qmllint_module.
 
@@ -66,12 +66,12 @@ include CMakeFiles/appChessEngineFrontend_qmllint_module.dir/compiler_depend.mak
 include CMakeFiles/appChessEngineFrontend_qmllint_module.dir/progress.make
 
 CMakeFiles/appChessEngineFrontend_qmllint_module: C:/QTIDE/6.11.1/mingw_64/bin/qmllint.exe
-CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/ChessEngineFrontend/Main.qml
-CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/ChessEngineFrontend/Piece.qml
-CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/ChessEngineFrontend/draggedPiece.qml
-CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/ChessEngineFrontend/Board.qml
+CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Main.qml
+CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Piece.qml
+CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/DraggedPiece.qml
+CMakeFiles/appChessEngineFrontend_qmllint_module: C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Board.qml
 CMakeFiles/appChessEngineFrontend_qmllint_module: .rcc/qmllint/appChessEngineFrontend_module.rsp
-	cd /d C:\Users\Nathaniel\Documents\ChessEngineFrontend && call C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\.qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmllint.exe @C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmllint/appChessEngineFrontend_module.rsp
+	cd /d C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend && call C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\.qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmllint.exe @C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmllint/appChessEngineFrontend_module.rsp
 
 appChessEngineFrontend_qmllint_module: CMakeFiles/appChessEngineFrontend_qmllint_module
 appChessEngineFrontend_qmllint_module: CMakeFiles/appChessEngineFrontend_qmllint_module.dir/build.make
@@ -86,6 +86,6 @@ CMakeFiles/appChessEngineFrontend_qmllint_module.dir/clean:
 .PHONY : CMakeFiles/appChessEngineFrontend_qmllint_module.dir/clean
 
 CMakeFiles/appChessEngineFrontend_qmllint_module.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\Nathaniel\Documents\ChessEngineFrontend C:\Users\Nathaniel\Documents\ChessEngineFrontend C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles\appChessEngineFrontend_qmllint_module.dir\DependInfo.cmake "--color=$(COLOR)"
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles\appChessEngineFrontend_qmllint_module.dir\DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/appChessEngineFrontend_qmllint_module.dir/depend
 

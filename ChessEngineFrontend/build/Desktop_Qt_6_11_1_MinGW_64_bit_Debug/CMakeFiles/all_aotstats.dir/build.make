@@ -52,10 +52,10 @@ RM = C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\Nathaniel\Documents\ChessEngineFrontend
+CMAKE_SOURCE_DIR = C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug
+CMAKE_BINARY_DIR = C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug
 
 # Utility rule file for all_aotstats.
 
@@ -66,12 +66,12 @@ include CMakeFiles/all_aotstats.dir/compiler_depend.make
 include CMakeFiles/all_aotstats.dir/progress.make
 
 CMakeFiles/all_aotstats: .rcc/qmlcache/all_aotstats.txt
-	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E cat C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.txt
+	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E cat C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.txt
 
 .rcc/qmlcache/all_aotstats.aotstats: .rcc/qmlcache/module_appChessEngineFrontend.aotstats
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating .rcc/qmlcache/all_aotstats.aotstats, .rcc/qmlcache/all_aotstats.txt"
-	call .qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmlaotstats.exe aggregate C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.aotstatslist C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.aotstats
-	call .qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmlaotstats.exe format C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.aotstats C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating .rcc/qmlcache/all_aotstats.aotstats, .rcc/qmlcache/all_aotstats.txt"
+	call .qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmlaotstats.exe aggregate C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.aotstatslist C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.aotstats
+	call .qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmlaotstats.exe format C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.aotstats C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/all_aotstats.txt
 
 .rcc/qmlcache/all_aotstats.txt: .rcc/qmlcache/all_aotstats.aotstats
 	@$(CMAKE_COMMAND) -E touch_nocreate .rcc\qmlcache\all_aotstats.txt
@@ -91,6 +91,6 @@ CMakeFiles/all_aotstats.dir/clean:
 .PHONY : CMakeFiles/all_aotstats.dir/clean
 
 CMakeFiles/all_aotstats.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\Nathaniel\Documents\ChessEngineFrontend C:\Users\Nathaniel\Documents\ChessEngineFrontend C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles\all_aotstats.dir\DependInfo.cmake "--color=$(COLOR)"
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles\all_aotstats.dir\DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/all_aotstats.dir/depend
 

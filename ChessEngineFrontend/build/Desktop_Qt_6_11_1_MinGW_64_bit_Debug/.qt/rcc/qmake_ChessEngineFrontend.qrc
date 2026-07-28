@@ -1,6 +1,6 @@
 <RCC>
   <qresource prefix="/qt/qml/ChessEngineFrontend">
-    <file alias="qmldir">C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/ChessEngineFrontend/qmldir</file>
+    <file alias="qmldir">C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/ChessEngineFrontend/qmldir</file>
   </qresource>
 </RCC>
 

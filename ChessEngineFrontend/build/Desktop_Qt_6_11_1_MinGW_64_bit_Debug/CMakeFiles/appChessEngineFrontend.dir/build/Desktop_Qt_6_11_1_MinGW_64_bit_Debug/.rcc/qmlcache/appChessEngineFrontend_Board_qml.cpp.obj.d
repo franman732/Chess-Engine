@@ -1,5 +1,5 @@
 CMakeFiles/appChessEngineFrontend.dir/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.rcc/qmlcache/appChessEngineFrontend_Board_qml.cpp.obj: \
- C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\.rcc\qmlcache\appChessEngineFrontend_Board_qml.cpp \
+ C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\.rcc\qmlcache\appChessEngineFrontend_Board_qml.cpp \
  C:/QTIDE/6.11.1/mingw_64/include/QtQml/qqmlprivate.h \
  C:/QTIDE/6.11.1/mingw_64/include/QtQml/qjsprimitivevalue.h \
  C:/QTIDE/6.11.1/mingw_64/include/QtQml/qtqmlglobal.h \

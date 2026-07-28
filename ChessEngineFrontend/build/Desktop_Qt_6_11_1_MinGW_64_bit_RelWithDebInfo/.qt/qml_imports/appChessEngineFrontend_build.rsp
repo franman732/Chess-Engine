@@ -1,0 +1,15 @@
+-rootPath
+C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend
+-cmake-output
+-output-file
+C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_RelWithDebInfo/.qt/qml_imports/appChessEngineFrontend_build.cmake
+-importPath
+C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_RelWithDebInfo
+-importPath
+C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_RelWithDebInfo/ChessEngineFrontend
+-importPath
+C:/QTIDE/6.11.1/mingw_64/qml
+-qrcFiles
+C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_RelWithDebInfo/.qt/rcc/qmake_ChessEngineFrontend.qrc
+C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_RelWithDebInfo/.qt/rcc/appChessEngineFrontend_raw_qml_0.qrc
+C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_RelWithDebInfo/.qt/rcc/appChessEngineFrontend_raw_res_0.qrc

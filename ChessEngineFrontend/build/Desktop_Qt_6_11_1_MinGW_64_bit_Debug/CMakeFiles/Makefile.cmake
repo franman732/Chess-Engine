@@ -715,7 +715,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "C:/QTIDE/Tools/CMake_64/share/cmake-3.30/Modules/Platform/Windows-windres.cmake"
   "C:/QTIDE/Tools/CMake_64/share/cmake-3.30/Modules/Platform/Windows.cmake"
   "C:/QTIDE/Tools/CMake_64/share/cmake-3.30/Modules/Platform/WindowsPaths.cmake"
-  "C:/Users/Nathaniel/Documents/ChessEngineFrontend/CMakeLists.txt"
+  "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/CMakeLists.txt"
   ".qt/qml_imports/appChessEngineFrontend_conf.cmake"
   ".qtcreator/cmake-helper/maintenance_tool_provider.cmake"
   ".qtcreator/cmake-helper/package-manager.cmake"

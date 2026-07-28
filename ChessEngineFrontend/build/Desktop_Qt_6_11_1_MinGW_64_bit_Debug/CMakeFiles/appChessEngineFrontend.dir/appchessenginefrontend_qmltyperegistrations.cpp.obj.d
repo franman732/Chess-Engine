@@ -1,5 +1,5 @@
 CMakeFiles/appChessEngineFrontend.dir/appchessenginefrontend_qmltyperegistrations.cpp.obj: \
- C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\appchessenginefrontend_qmltyperegistrations.cpp \
+ C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\appchessenginefrontend_qmltyperegistrations.cpp \
  C:/QTIDE/6.11.1/mingw_64/include/QtQml/qqml.h \
  C:/QTIDE/6.11.1/mingw_64/include/QtQml/qqmlprivate.h \
  C:/QTIDE/6.11.1/mingw_64/include/QtQml/qjsprimitivevalue.h \

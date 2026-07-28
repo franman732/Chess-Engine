@@ -18,7 +18,7 @@
                             "column": 29,
                             "durationMicroseconds": 0,
                             "functionName": "pieceComponent",
-                            "line": 50,
+                            "line": 51,
                             "message": ""
                         },
                         {
@@ -26,7 +26,7 @@
                             "column": 21,
                             "durationMicroseconds": 0,
                             "functionName": "window",
-                            "line": 51,
+                            "line": 52,
                             "message": ""
                         },
                         {
@@ -34,7 +34,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "centerIn",
-                            "line": 49,
+                            "line": 50,
                             "message": ""
                         },
                         {
@@ -42,11 +42,11 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onCompleted",
-                            "line": 55,
+                            "line": 56,
                             "message": "Type call to method createObject, returning QObject does not have a property dir for writing"
                         }
                     ],
-                    "filePath": "C:/Users/Nathaniel/Documents/ChessEngineFrontend/Main.qml"
+                    "filePath": "C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/Main.qml"
                 }
             ],
             "moduleId": "ChessEngineFrontend(appChessEngineFrontend)"

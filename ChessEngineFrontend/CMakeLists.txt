@@ -30,7 +30,12 @@ qt_add_qml_module(appChessEngineFrontend
         pieceImages/blackKing.png
         pieceImages/blackQueen.png
 
+        pieceImages/whiteBishop.png
+        pieceImages/whiteKnight.png
+        pieceImages/whiteRook.png
+        pieceImages/whitePawn.png
         pieceImages/whiteKing.png
+        pieceImages/whiteQueen.png
 
         QML_FILES
         QML_FILES

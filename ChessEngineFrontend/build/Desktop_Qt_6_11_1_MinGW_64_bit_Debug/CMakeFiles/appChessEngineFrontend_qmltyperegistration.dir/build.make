@@ -52,10 +52,10 @@ RM = C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\Nathaniel\Documents\ChessEngineFrontend
+CMAKE_SOURCE_DIR = C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug
+CMAKE_BINARY_DIR = C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug
 
 # Utility rule file for appChessEngineFrontend_qmltyperegistration.
 
@@ -77,34 +77,34 @@ appchessenginefrontend_qmltyperegistrations.cpp: C:/QTIDE/6.11.1/mingw_64/metaty
 appchessenginefrontend_qmltyperegistrations.cpp: C:/QTIDE/6.11.1/mingw_64/metatypes/qt6quick_metatypes.json
 appchessenginefrontend_qmltyperegistrations.cpp: C:/QTIDE/6.11.1/mingw_64/metatypes/qt6gui_metatypes.json
 appchessenginefrontend_qmltyperegistrations.cpp: C:/QTIDE/6.11.1/mingw_64/metatypes/qt6opengl_metatypes.json
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic QML type registration for target appChessEngineFrontend"
-	call .qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmltyperegistrar.exe --generate-qmltypes=C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/ChessEngineFrontend/appChessEngineFrontend.qmltypes --import-name=ChessEngineFrontend --major-version=254 --minor-version=254 @C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/qmltypes/appChessEngineFrontend_foreign_types.txt -o C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/appchessenginefrontend_qmltyperegistrations.cpp C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/qt6appchessenginefrontend_metatypes.json
-	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/qmltypes
-	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E touch C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/qmltypes/appChessEngineFrontend.qmltypes
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic QML type registration for target appChessEngineFrontend"
+	call .qt\bin\qt_setup_tool_path.bat C:/QTIDE/6.11.1/mingw_64/bin/qmltyperegistrar.exe --generate-qmltypes=C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/ChessEngineFrontend/appChessEngineFrontend.qmltypes --import-name=ChessEngineFrontend --major-version=254 --minor-version=254 @C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/qmltypes/appChessEngineFrontend_foreign_types.txt -o C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/appchessenginefrontend_qmltyperegistrations.cpp C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/qt6appchessenginefrontend_metatypes.json
+	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/qmltypes
+	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E touch C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/qmltypes/appChessEngineFrontend.qmltypes
 
 ChessEngineFrontend/appChessEngineFrontend.qmltypes: appchessenginefrontend_qmltyperegistrations.cpp
 	@$(CMAKE_COMMAND) -E touch_nocreate ChessEngineFrontend\appChessEngineFrontend.qmltypes
 
 meta_types/qt6appchessenginefrontend_metatypes.json: meta_types/qt6appchessenginefrontend_metatypes.json.gen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating meta_types/qt6appchessenginefrontend_metatypes.json"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating meta_types/qt6appchessenginefrontend_metatypes.json"
 	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E true
 
 meta_types/qt6appchessenginefrontend_metatypes.json.gen: C:/QTIDE/6.11.1/mingw_64/bin/moc.exe
 meta_types/qt6appchessenginefrontend_metatypes.json.gen: meta_types/appChessEngineFrontend_json_file_list.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Running moc --collect-json for target appChessEngineFrontend"
-	C:\QTIDE\6.11.1\mingw_64\bin\moc.exe -o C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/qt6appchessenginefrontend_metatypes.json.gen --collect-json @C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/appChessEngineFrontend_json_file_list.txt
-	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/qt6appchessenginefrontend_metatypes.json.gen C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/qt6appchessenginefrontend_metatypes.json
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Running moc --collect-json for target appChessEngineFrontend"
+	C:\QTIDE\6.11.1\mingw_64\bin\moc.exe -o C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/qt6appchessenginefrontend_metatypes.json.gen --collect-json @C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/appChessEngineFrontend_json_file_list.txt
+	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/qt6appchessenginefrontend_metatypes.json.gen C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/qt6appchessenginefrontend_metatypes.json
 
 meta_types/appChessEngineFrontend_json_file_list.txt: C:/QTIDE/6.11.1/mingw_64/bin/cmake_automoc_parser.exe
 meta_types/appChessEngineFrontend_json_file_list.txt: appChessEngineFrontend_autogen/timestamp
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Running AUTOMOC file extraction for target appChessEngineFrontend"
-	C:\QTIDE\6.11.1\mingw_64\bin\cmake_automoc_parser.exe --cmake-autogen-cache-file C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/CMakeFiles/appChessEngineFrontend_autogen.dir/ParseCache.txt --cmake-autogen-info-file C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/CMakeFiles/appChessEngineFrontend_autogen.dir/AutogenInfo.json --output-file-path C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/appChessEngineFrontend_json_file_list.txt --timestamp-file-path C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/appChessEngineFrontend_json_file_list.txt.timestamp --cmake-autogen-include-dir-path C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/appChessEngineFrontend_autogen/include
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Running AUTOMOC file extraction for target appChessEngineFrontend"
+	C:\QTIDE\6.11.1\mingw_64\bin\cmake_automoc_parser.exe --cmake-autogen-cache-file C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/CMakeFiles/appChessEngineFrontend_autogen.dir/ParseCache.txt --cmake-autogen-info-file C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/CMakeFiles/appChessEngineFrontend_autogen.dir/AutogenInfo.json --output-file-path C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/appChessEngineFrontend_json_file_list.txt --timestamp-file-path C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/meta_types/appChessEngineFrontend_json_file_list.txt.timestamp --cmake-autogen-include-dir-path C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/appChessEngineFrontend_autogen/include
 
 appChessEngineFrontend_autogen/timestamp: C:/QTIDE/6.11.1/mingw_64/bin/moc.exe
 appChessEngineFrontend_autogen/timestamp: CMakeFiles/appChessEngineFrontend_qmltyperegistration.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Automatic MOC and UIC for target appChessEngineFrontend"
-	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E cmake_autogen C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/CMakeFiles/appChessEngineFrontend_autogen.dir/AutogenInfo.json Debug
-	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E touch C:/Users/Nathaniel/Documents/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/appChessEngineFrontend_autogen/timestamp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Automatic MOC and UIC for target appChessEngineFrontend"
+	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E cmake_autogen C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/CMakeFiles/appChessEngineFrontend_autogen.dir/AutogenInfo.json Debug
+	C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E touch C:/Users/Nathaniel/Documents/GitHub/Chess_Engine/ChessEngineFrontend/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/appChessEngineFrontend_autogen/timestamp
 
 appChessEngineFrontend_qmltyperegistration: CMakeFiles/appChessEngineFrontend_qmltyperegistration
 appChessEngineFrontend_qmltyperegistration: ChessEngineFrontend/appChessEngineFrontend.qmltypes
@@ -125,6 +125,6 @@ CMakeFiles/appChessEngineFrontend_qmltyperegistration.dir/clean:
 .PHONY : CMakeFiles/appChessEngineFrontend_qmltyperegistration.dir/clean
 
 CMakeFiles/appChessEngineFrontend_qmltyperegistration.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\Nathaniel\Documents\ChessEngineFrontend C:\Users\Nathaniel\Documents\ChessEngineFrontend C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles\appChessEngineFrontend_qmltyperegistration.dir\DependInfo.cmake "--color=$(COLOR)"
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\CMakeFiles\appChessEngineFrontend_qmltyperegistration.dir\DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/appChessEngineFrontend_qmltyperegistration.dir/depend
 

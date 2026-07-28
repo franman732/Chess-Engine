@@ -1,2 +1,2 @@
 CMakeFiles/appChessEngineFrontend.dir/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/.qt/rcc/qrc_appChessEngineFrontend_raw_qml_0.cpp.obj: \
- C:\Users\Nathaniel\Documents\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\.qt\rcc\qrc_appChessEngineFrontend_raw_qml_0.cpp
+ C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\build\Desktop_Qt_6_11_1_MinGW_64_bit_Debug\.qt\rcc\qrc_appChessEngineFrontend_raw_qml_0.cpp

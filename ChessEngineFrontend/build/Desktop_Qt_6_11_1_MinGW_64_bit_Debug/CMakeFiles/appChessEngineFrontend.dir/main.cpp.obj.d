@@ -1,5 +1,5 @@
 CMakeFiles/appChessEngineFrontend.dir/main.cpp.obj: \
- C:\Users\Nathaniel\Documents\ChessEngineFrontend\main.cpp \
+ C:\Users\Nathaniel\Documents\GitHub\Chess_Engine\ChessEngineFrontend\main.cpp \
  C:/QTIDE/6.11.1/mingw_64/include/QtGui/QGuiApplication \
  C:/QTIDE/6.11.1/mingw_64/include/QtGui/qguiapplication.h \
  C:/QTIDE/6.11.1/mingw_64/include/QtGui/qtguiglobal.h \

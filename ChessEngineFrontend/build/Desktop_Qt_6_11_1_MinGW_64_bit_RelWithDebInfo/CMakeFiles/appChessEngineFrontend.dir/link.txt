@@ -1,0 +1,3 @@
+C:\QTIDE\Tools\CMake_64\bin\cmake.exe -E rm -f CMakeFiles\appChessEngineFrontend.dir/objects.a
+C:\QTIDE\Tools\mingw1310_64\bin\ar.exe qc CMakeFiles\appChessEngineFrontend.dir/objects.a @CMakeFiles\appChessEngineFrontend.dir\objects1.rsp
+C:\QTIDE\Tools\mingw1310_64\bin\g++.exe -O2 -g -DNDEBUG -mwindows -Wl,--whole-archive CMakeFiles\appChessEngineFrontend.dir/objects.a -Wl,--no-whole-archive -o appChessEngineFrontend.exe -Wl,--out-implib,libappChessEngineFrontend.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\appChessEngineFrontend.dir\linkLibs.rsp

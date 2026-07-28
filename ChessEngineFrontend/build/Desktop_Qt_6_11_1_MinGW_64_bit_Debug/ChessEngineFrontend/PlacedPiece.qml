@@ -40,7 +40,9 @@ Image {
 
         onReleased: {
             var coordinates = board.getCoordinates(placedPiece.x, placedPiece.y, placedPiece)
-            if (board.piecePositions[coordinates.i] !== placedPiece) {
+            var pieceIndex = board.piecePositions[coordinates.i]?.pieceIndex ?? -1;
+
+            if ((board.piecePositions[coordinates.i] !== placedPiece) && ((pieceIndex !== 13) && (pieceIndex !== 29))) {
                 if (((coordinates.x !== -1) && (coordinates.y !== -1)) && (coordinates.i in board.piecePositions)) {
                     board.piecePositions[coordinates.i].destroy()
                     delete board.piecePositions[coordinates.i]
@@ -55,8 +57,8 @@ Image {
                     board.piecePositions[coordinates.i] = placedPiece
                 }
             } else {
-                placedPiece.x = coordinates.x
-                placedPiece.y = coordinates.y
+                placedPiece.x = startCoordinates.x
+                placedPiece.y = startCoordinates.y
             }
         }
     }

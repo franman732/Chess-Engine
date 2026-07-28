@@ -7,7 +7,7 @@ Image {
     source: dir
     id: dragged
 
-    z: 1000
+    z: 10000
 
 //    x: 1000
 //    y: 50

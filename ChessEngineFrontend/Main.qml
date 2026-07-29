@@ -95,36 +95,36 @@ ApplicationWindow {
         Component.onCompleted: {
                 var bB = pieceComponent.createObject(window)
                 bB.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackBishop.png"
-                bB.x = (width - bB.width) / 2 + bPTs.sideGap
-                bB.y = (height - bB.height) / 2
+                bB.x = bPTs.sideGap + bPTs.x + squareWidth / 2 - (bB.width / 2)
+                bB.y = bPTs.y + bPTs.topAndBottomGap + (bPTs.squareHeight - bB.height) / 2
                 bB.board = board
                 bB.pieceIndex = 11
 
                 var bKn = pieceComponent.createObject(window)
                 bKn.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackKnight.png"
-                bKn.x = (width - bKn.width) / 2 + bPTs.sideGap * 2 + bPTs.squareWidth
-                bKn.y = (height - bKn.height) / 2
+                bKn.x = bPTs.sideGap * 2 + bPTs.x + squareWidth / 2 - (bB.width / 2) + squareWidth
+                bKn.y = bPTs.y + bPTs.topAndBottomGap + (bPTs.squareHeight - bKn.height) / 2
                 bKn.board = board
                 bKn.pieceIndex = 10
 
                 var bR = pieceComponent.createObject(window)
                 bR.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackRook.png"
-                bR.x = (width - bR.width) / 2 + bPTs.sideGap * 3 + bPTs.squareWidth * 2
-                bR.y = (height - bR.height) / 2
+                bR.x = bPTs.sideGap * 3 + bPTs.x + squareWidth / 2 - (bB.width / 2) + squareWidth * 2
+                bR.y = bPTs.y + bPTs.topAndBottomGap + (bPTs.squareHeight - bKn.height) / 2
                 bR.board = board
                 bR.pieceIndex = 9
 
                 var bP = pieceComponent.createObject(window)
                 bP.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackPawn.png"
-                bP.x = (width - bP.width) / 2 + bPTs.sideGap * 4 + bPTs.squareWidth * 3
-                bP.y = (height - bP.height) / 2
+                bP.x = bPTs.sideGap * 4 + bPTs.x + squareWidth / 2 - (bB.width / 2) + squareWidth * 3
+                bP.y = bPTs.y + bPTs.topAndBottomGap + (bPTs.squareHeight - bKn.height) / 2
                 bP.board = board
                 bP.pieceIndex = 1
 
                 var bQ = pieceComponent.createObject(window)
                 bQ.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackQueen.png"
-                bQ.x = (width - bQ.width) / 2 + bPTs.sideGap * 5 + bPTs.squareWidth * 4
-                bQ.y = (height - bQ.height) / 2
+                bQ.x = bPTs.sideGap * 5 + bPTs.x + squareWidth / 2 - (bB.width / 2) + squareWidth * 4
+                bQ.y = bPTs.y + bPTs.topAndBottomGap + (bPTs.squareHeight - bKn.height) / 2
                 bQ.board = board
                 bQ.pieceIndex = 12
 

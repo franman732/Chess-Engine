@@ -59,7 +59,7 @@ GridLayout {
             finalCoords.y = newPieceY
         } else if ((piece.pieceIndex !== 13) && (piece.pieceIndex !== 29)) {
             piece.visible = false
-            delete piecePositions[finalCoords.i]
+            delete piecePositions[piece.startCoordinates.i]
         }
 
         return finalCoords // If the piece is held off the board, or later over an existing piece, finalCoords = {-1, -1}. Otherwise it equals the final coordinates of the position.

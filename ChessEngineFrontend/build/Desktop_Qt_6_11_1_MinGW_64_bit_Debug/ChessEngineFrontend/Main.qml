@@ -59,50 +59,88 @@ ApplicationWindow {
         }
     }
 
+    Rectangle {
+        id: bPTs
+
+        x: 835
+        y: 25
+
+        width: 890
+        height: 125
+
+        color: "gray"
+
+        property int topAndBottomGap: 10
+        property int sideGap: 20
+
+        property real squareWidth: (width - sideGap * 6) / 5
+        property real squareHeight: height - topAndBottomGap * 2
+
+        Repeater {
+            model: 5
+
+            Rectangle {
+                width: bPTs.squareWidth
+                height: bPTs.squareHeight
+
+                x: bPTs.sideGap * (index + 1)
+                   + bPTs.squareWidth * index
+
+                y: bPTs.topAndBottomGap
+
+                color: "lightGray"
+            }
+        }
+
+        Component.onCompleted: {
+                var bB = pieceComponent.createObject(window)
+                bB.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackBishop.png"
+                bB.x = (width - bB.width) / 2 + bPTs.sideGap
+                bB.y = (height - bB.height) / 2
+                bB.board = board
+                bB.pieceIndex = 11
+
+                var bKn = pieceComponent.createObject(window)
+                bKn.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackKnight.png"
+                bKn.x = (width - bKn.width) / 2 + bPTs.sideGap * 2 + bPTs.squareWidth
+                bKn.y = (height - bKn.height) / 2
+                bKn.board = board
+                bKn.pieceIndex = 10
+
+                var bR = pieceComponent.createObject(window)
+                bR.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackRook.png"
+                bR.x = (width - bR.width) / 2 + bPTs.sideGap * 3 + bPTs.squareWidth * 2
+                bR.y = (height - bR.height) / 2
+                bR.board = board
+                bR.pieceIndex = 9
+
+                var bP = pieceComponent.createObject(window)
+                bP.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackPawn.png"
+                bP.x = (width - bP.width) / 2 + bPTs.sideGap * 4 + bPTs.squareWidth * 3
+                bP.y = (height - bP.height) / 2
+                bP.board = board
+                bP.pieceIndex = 1
+
+                var bQ = pieceComponent.createObject(window)
+                bQ.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackQueen.png"
+                bQ.x = (width - bQ.width) / 2 + bPTs.sideGap * 5 + bPTs.squareWidth * 4
+                bQ.y = (height - bQ.height) / 2
+                bQ.board = board
+                bQ.pieceIndex = 12
+
+                var draggedPiece = draggedPieceComponent.createObject(window)
+                draggedPiece.visible = false
+                draggedPiece.z = 1000 // simply makes draggedPiece show above every other object.
+
+                bB.dragged = draggedPiece
+                bKn.dragged = draggedPiece
+                bR.dragged = draggedPiece
+                bP.dragged = draggedPiece
+                bQ.dragged = draggedPiece
+        }
+    }
+
     Component.onCompleted: { // This section is entirely dedicated to creating the template pieces.
-        var bB = pieceComponent.createObject(window)
-        bB.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackBishop.png"
-        bB.x = startBX
-        bB.y = startY
-        bB.board = board
-        bB.pieceIndex = 11
-
-        var bKn = pieceComponent.createObject(window)
-        bKn.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackKnight.png"
-        bKn.x = startBX
-        bKn.y = startY + offset
-        bKn.board = board
-        bKn.pieceIndex = 10
-
-        var bR = pieceComponent.createObject(window)
-        bR.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackRook.png"
-        bR.x = startBX
-        bR.y = startY + offset * 2
-        bR.board = board
-        bR.pieceIndex = 9
-
-        var bP = pieceComponent.createObject(window)
-        bP.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackPawn.png"
-        bP.x = startBX
-        bP.y = startY + offset * 3
-        bP.board = board
-        bP.pieceIndex = 1
-
-        var bK = pieceComponent.createObject(window)
-        bK.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackKing.png"
-        bK.x = startBX
-        bK.y = startY + offset * 4
-        bK.board = board
-        bK.pieceIndex = 13
-
-        var bQ = pieceComponent.createObject(window)
-        bQ.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/blackQueen.png"
-        bQ.x = startBX
-        bQ.y = startY + offset * 5
-        bQ.board = board
-        bQ.pieceIndex = 12
-
-
         var wB = pieceComponent.createObject(window)
         wB.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/whiteBishop.png"
         wB.x = startWX
@@ -145,17 +183,7 @@ ApplicationWindow {
         wQ.board = board
         wQ.pieceIndex = 28
 
-
         var draggedPiece = draggedPieceComponent.createObject(window)
-        draggedPiece.visible = false
-        draggedPiece.z = 1000 // simply makes draggedPiece show above every other object.
-
-        bB.dragged = draggedPiece
-        bKn.dragged = draggedPiece
-        bR.dragged = draggedPiece
-        bP.dragged = draggedPiece
-        bK.dragged = draggedPiece
-        bQ.dragged = draggedPiece
 
         wB.dragged = draggedPiece
         wKn.dragged = draggedPiece

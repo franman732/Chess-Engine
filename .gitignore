@@ -8,3 +8,9 @@ ChessEngine.venv
 # Executables
 *.exe
 *.out
+
+# Qt build files
+build/
+*.user
+*.user.*
+*.qtc

@@ -57,9 +57,17 @@ GridLayout {
 
             finalCoords.x = newPieceX
             finalCoords.y = newPieceY
+            console.log("getting final coordinates actually")
+        } else if ((piece.pieceIndex !== 13) && (piece.pieceIndex !== 29) && (piece.id !== "dragged")) {
+            console.log("PIECE NIVISIBLE and deleted")
+                console.log("index:", piece.startCoordinates.i)
+                console.log("value:", board.piecePositions[piece.startCoordinates.i])
+                console.log("type:", typeof board.piecePositions[piece.startCoordinates.i])
+            board.piecePositions[piece.startCoordinates.i].destroy() // This is for every piece that is not dragged piece
+            delete board.piecePositions[piece.startCoordinates.i]
         } else if ((piece.pieceIndex !== 13) && (piece.pieceIndex !== 29)) {
-            piece.visible = false
-            delete piecePositions[piece.startCoordinates.i]
+            piece.visible = false // this is for the dragged piece
+            console.log("PIECE NIVISIBLE")
         }
 
         return finalCoords // If the piece is held off the board, or later over an existing piece, finalCoords = {-1, -1}. Otherwise it equals the final coordinates of the position.
@@ -109,6 +117,7 @@ GridLayout {
         p_BR1.y = 15 + boardPos.y - 1
         p_BR1.board = board
         p_BR1.pieceIndex = 9
+        p_BR1.startCoordinates = getCoordinates(p_BR1.x, p_BR1.y, p_BR1)
         addPiece(0, p_BR1)
 
         var p_BK1 = placedPieceComponent.createObject(window)
@@ -117,6 +126,7 @@ GridLayout {
         p_BK1.y = 15 + boardPos.y - 1
         p_BK1.board = board
         p_BK1.pieceIndex = 10
+        p_BK1.startCoordinates = getCoordinates(p_BK1.x, p_BK1.y, p_BK1)
         addPiece(1, p_BK1)
 
         var p_BB1 = placedPieceComponent.createObject(window)
@@ -125,6 +135,7 @@ GridLayout {
         p_BB1.y = 15 + boardPos.y - 1
         p_BB1.board = board
         p_BB1.pieceIndex = 11
+        p_BB1.startCoordinates = getCoordinates(p_BB1.x, p_BB1.y, p_BB1)
         addPiece(2, p_BB1)
 
         var p_BQ = placedPieceComponent.createObject(window)
@@ -133,6 +144,7 @@ GridLayout {
         p_BQ.y = 15 + boardPos.y - 1
         p_BQ.board = board
         p_BQ.pieceIndex = 12
+        p_BQ.startCoordinates = getCoordinates(p_BQ.x, p_BQ.y, p_BQ)
         addPiece(3, p_BQ)
 
         var p_BK = placedPieceComponent.createObject(window)
@@ -141,6 +153,7 @@ GridLayout {
         p_BK.y = 15 + boardPos.y - 1
         p_BK.board = board
         p_BK.pieceIndex = 13
+        p_BK.startCoordinates = getCoordinates(p_BK.x, p_BK.y, p_BK)
         addPiece(4, p_BK)
 
         var p_BB2 = placedPieceComponent.createObject(window)
@@ -149,6 +162,7 @@ GridLayout {
         p_BB2.y = 15 + boardPos.y - 1
         p_BB2.board = board
         p_BB2.pieceIndex = 11
+        p_BB2.startCoordinates = getCoordinates(p_BB2.x, p_BB2.y, p_BB2)
         addPiece(5, p_BB2)
 
         var p_BK2 = placedPieceComponent.createObject(window)
@@ -157,6 +171,7 @@ GridLayout {
         p_BK2.y = 15 + boardPos.y - 1
         p_BK2.board = board
         p_BK2.pieceIndex = 10
+        p_BK2.startCoordinates = getCoordinates(p_BK2.x, p_BK2.y, p_BK2)
         addPiece(6, p_BK2)
 
         var p_BR2 = placedPieceComponent.createObject(window)
@@ -165,6 +180,7 @@ GridLayout {
         p_BR2.y = 15 + boardPos.y - 1
         p_BR2.board = board
         p_BR2.pieceIndex = 9
+        p_BR2.startCoordinates = getCoordinates(p_BR2.x, p_BR2.y, p_BR2)
         addPiece(7, p_BR2)
 
         for (var i = 0; i < 8; i++) {
@@ -174,6 +190,7 @@ GridLayout {
             p_BP.y = squareHeight + 15 + boardPos.y - 1
             p_BP.board = board
             p_BP.pieceIndex = 1
+            p_BP.startCoordinates = getCoordinates(p_BP.x, p_BP.y, p_BP)
             addPiece(i + 8, p_BP)
         }
 
@@ -187,6 +204,7 @@ GridLayout {
         p_WR1.y = (7 * squareHeight) + 15 + boardPos.y - 1
         p_WR1.board = board
         p_WR1.pieceIndex = 25
+        p_WR1.startCoordinates = getCoordinates(p_WR1.x, p_WR1.y, p_WR1)
         addPiece(56, p_WR1)
 
         var p_WK1 = placedPieceComponent.createObject(window)
@@ -195,7 +213,8 @@ GridLayout {
         p_WK1.y = (7 * squareHeight) + 15 + boardPos.y - 1
         p_WK1.board = board
         p_WK1.pieceIndex = 26
-        addPiece(57, p_BK1)
+        p_WK1.startCoordinates = getCoordinates(p_WK1.x, p_WK1.y, p_WK1)
+        addPiece(57, p_WK1)
 
         var p_WB1 = placedPieceComponent.createObject(window)
         p_WB1.dir = "qrc:/qt/qml/ChessEngineFrontend/pieceImages/whiteBishop.png"
@@ -203,6 +222,7 @@ GridLayout {
         p_WB1.y = (7 * squareHeight) + 15 + boardPos.y - 1
         p_WB1.board = board
         p_WB1.pieceIndex = 27
+        p_WB1.startCoordinates = getCoordinates(p_WB1.x, p_WB1.y, p_WB1)
         addPiece(58, p_WB1)
 
         var p_WQ = placedPieceComponent.createObject(window)
@@ -211,6 +231,7 @@ GridLayout {
         p_WQ.y = (7 * squareHeight) + 15 + boardPos.y - 1
         p_WQ.board = board
         p_WQ.pieceIndex = 28
+        p_WQ.startCoordinates = getCoordinates(p_WQ.x, p_WQ.y, p_WQ)
         addPiece(59, p_WQ)
 
         var p_WK = placedPieceComponent.createObject(window)
@@ -219,6 +240,7 @@ GridLayout {
         p_WK.y = (7 * squareHeight) + 15 + boardPos.y - 1
         p_WK.board = board
         p_WK.pieceIndex = 29
+        p_WK.startCoordinates = getCoordinates(p_WK.x, p_WK.y, p_WK)
         addPiece(60, p_WK)
 
         var p_WB2 = placedPieceComponent.createObject(window)
@@ -227,6 +249,7 @@ GridLayout {
         p_WB2.y = (7 * squareHeight) + 15 + boardPos.y - 1
         p_WB2.board = board
         p_WB2.pieceIndex = 27
+        p_WB2.startCoordinates = getCoordinates(p_WB2.x, p_WB2.y, p_WB2)
         addPiece(61, p_WB2)
 
         var p_WK2 = placedPieceComponent.createObject(window)
@@ -235,6 +258,7 @@ GridLayout {
         p_WK2.y = (7 * squareHeight) + 15 + boardPos.y - 1
         p_WK2.board = board
         p_WK2.pieceIndex = 26
+        p_WK2.startCoordinates = getCoordinates(p_WK2.x, p_WK2.y, p_WK2)
         addPiece(62, p_WK2)
 
         var p_WR2 = placedPieceComponent.createObject(window)
@@ -243,6 +267,7 @@ GridLayout {
         p_WR2.y = (7 * squareHeight) + 15 + boardPos.y - 1
         p_WR2.board = board
         p_WR2.pieceIndex = 25
+        p_WR2.startCoordinates = getCoordinates(p_WR2.x, p_WR2.y, p_WR2)
         addPiece(63, p_WR2)
 
         for (var j = 0; j < 8; j++) {
@@ -252,6 +277,7 @@ GridLayout {
             p_WP.y = (6 * squareHeight) + 15 + boardPos.y - 1
             p_WP.board = board
             p_WP.pieceIndex = 17
+            p_WP.startCoordinates = getCoordinates(p_WP.x, p_WP.y, p_WP)
             addPiece(j + 48, p_WP)
         }
     }

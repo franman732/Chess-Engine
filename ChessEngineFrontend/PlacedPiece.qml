@@ -14,7 +14,7 @@ Image {
     property var dir
     property int pieceIndex
 
-    property var startCoordinates
+    property var startCoordinates: ({x: -1, y: -1, i: -1})
 
     source: dir
 
@@ -42,25 +42,20 @@ Image {
             var coordinates = board.getCoordinates(placedPiece.x, placedPiece.y, placedPiece)
             var capturedPieceIndex = board.piecePositions[coordinates.i]?.pieceIndex ?? -1;
 
-            if ((board.piecePositions[coordinates.i] !== placedPiece) && ((capturedPieceIndex !== 13) && (capturedPieceIndex !== 29))) {
-                if (((coordinates.x !== -1) && (coordinates.y !== -1)) && (coordinates.i in board.piecePositions)) {
+            if ((board.piecePositions[coordinates.i] !== placedPiece) && ((capturedPieceIndex !== 13) && (capturedPieceIndex !== 29)) && (coordinates.x !== -1 && coordinates.y !== -1)) {
+                if (coordinates.i in board.piecePositions) {
                     board.piecePositions[coordinates.i].destroy()
                     delete board.piecePositions[coordinates.i]
                     console.log("WE ARE OVERRIDING")
                     board.printPieces()
                 }
 
-                if ((coordinates.x !== -1) && (coordinates.y !== -1)) {
-                    placedPiece.x = coordinates.x
-                    placedPiece.y = coordinates.y
-                    delete board.piecePositions[startCoordinates.i]
-                    board.piecePositions[coordinates.i] = placedPiece
-                }
+                placedPiece.x = coordinates.x
+                placedPiece.y = coordinates.y
+                console.log("WE ARE DELETING IN PLACEDPIECEasdfas")
+                delete board.piecePositions[startCoordinates.i]
+                board.piecePositions[coordinates.i] = placedPiece
 
-                if ((coordinates.x === -1) && (coordinates.y === -1) && ((pieceIndex === 13) || (pieceIndex === 29))) {
-                    placedPiece.x = startCoordinates.x
-                    placedPiece.y = startCoordinates.y // This moves the king back to start position if it is dragged outside of the range of the board
-                }
             } else {
                 placedPiece.x = startCoordinates.x
                 placedPiece.y = startCoordinates.y // This was just for fixing when you let go of the mouse while still on top of the same square, hence board.piecePositions[coordinates.i] !== placedPiece

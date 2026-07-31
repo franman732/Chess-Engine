@@ -22,6 +22,20 @@ ApplicationWindow {
     property var draggedPiece
     property var draggedPiece2
 
+    Button {
+           text: "Determine Best Move"
+           x: 100
+           y: 100
+
+           height: 50
+           width: 200
+
+           // Handle the click event
+           onClicked: {
+               engineManager.testPrint("HELLO WORLDDS")
+           }
+       }
+
     Rectangle {
         id: boardBoarder
 

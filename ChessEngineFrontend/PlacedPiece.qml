@@ -56,6 +56,8 @@ Image {
                 delete board.piecePositions[startCoordinates.i]
                 board.piecePositions[coordinates.i] = placedPiece
 
+                placedPiece.startCoordinates = coordinates
+
             } else {
                 placedPiece.x = startCoordinates.x
                 placedPiece.y = startCoordinates.y // This was just for fixing when you let go of the mouse while still on top of the same square, hence board.piecePositions[coordinates.i] !== placedPiece

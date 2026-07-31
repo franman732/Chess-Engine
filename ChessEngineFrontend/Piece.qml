@@ -60,6 +60,8 @@ Image {
                 board.addPiece(coordinates.i, newPiece)
                 console.log("WE ARE CREATING NEW in PIECE")
                 board.printPieces()
+
+                newPiece.startCoordinates = coordinates
             }
         }
     }

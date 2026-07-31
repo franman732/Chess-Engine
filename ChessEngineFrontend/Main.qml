@@ -32,7 +32,7 @@ ApplicationWindow {
 
            // Handle the click event
            onClicked: {
-               engineManager.testPrint("HELLO WORLDDS")
+               engineManager.findBestMove(board.buildCPPPieceList())
            }
        }
 

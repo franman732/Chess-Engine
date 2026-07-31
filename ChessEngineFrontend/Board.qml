@@ -77,6 +77,16 @@ GridLayout {
         piecePositions[index] = piece
     }
 
+    function buildCPPPieceList() {
+            var boardState = new Array(64).fill(0)
+
+            for (var square in piecePositions) {
+                boardState[parseInt(square)] = piecePositions[square].pieceIndex
+            }
+
+            return boardState
+    }
+
     function isCapturable_By (index, piece) { // index is the piece in piecePositions were checking to be captured by piece
         var capturedPiece = piecePositions[index]
 

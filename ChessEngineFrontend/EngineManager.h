@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QVariantList>
 
 class EngineManager : public QObject {
     Q_OBJECT
@@ -9,5 +10,5 @@ class EngineManager : public QObject {
 public:
     explicit EngineManager(QObject *parent = nullptr);
 
-    Q_INVOKABLE void testPrint(QString testString);
+    Q_INVOKABLE void findBestMove(const QVariantList &boardState);
 };

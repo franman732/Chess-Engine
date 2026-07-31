@@ -22,9 +22,6 @@ ApplicationWindow {
     property var draggedPiece
     property var draggedPiece2
 
-    property real sx: width / 2560
-    property real sy: height / 1440
-
     Rectangle {
         id: boardBoarder
 

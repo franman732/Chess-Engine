@@ -26,7 +26,7 @@ TT_HITS = 0
 TT_LOOKUPS = 0
 NUMBER_OF_RECURSIONS = 0
 
-board = [9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
+boardOrig = [9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
                  1, 2, 3, 0, 0, 6, 7, 8,
                  0, 0, 0, 0, 0, 0, 0, 0,
                  0, 0, 0, 0, 21, 0, 0, 0,
@@ -1468,7 +1468,7 @@ def find_best_move(position, depth, starting_move):
         if entry_depth >= depth:
             if entry_flag == "EXACT":
                 TT_HITS += 1
-                return entry_move
+                return entry_move, entry_score
             elif entry_flag == "LOWER":
                 alpha = max(alpha, entry_score)
             elif entry_flag == "UPPER":
@@ -1476,7 +1476,7 @@ def find_best_move(position, depth, starting_move):
 
             if alpha >= beta:
                 TT_HITS += 1
-                return entry_move
+                return entry_move, entry_score
             
     all_moves = create_pseudo_moves(
         position,
@@ -1643,40 +1643,62 @@ def find_best_move(position, depth, starting_move):
     if entry is None or depth >= entry_depth:
         TT[position.hash] = (depth, best_eval, flag, best_move)
 
-    return best_move
+    return best_move, best_eval
 
-opening_eval, closing_eval, phase, white_bishops, black_bishops, white_pawns, black_pawns, pawn_hash = evaluate_board(board)
+def main():
+    while True:
 
-position = Position(
-    board,
-    1,
-    initial_castle_rights,
-    compute_hash(board, 1, initial_castle_rights),
-    find_king(board, 0),
-    find_king(board, 1),
-    count_non_pawn_or_king(board),
-    
-    opening_eval,
-    closing_eval,
-    phase,
-    white_bishops,
-    black_bishops,
-    black_pawns,
-    white_pawns,
-    pawn_hash,
+        command = input()
 
-    determine_piece_squares(board)
-)
-previous_best_move = None
+        if command == "quit":
+            break
 
-start_time = time.perf_counter()
-for i in range(1, 10):
-    previous_best_move = find_best_move(position, i, previous_best_move)
-    print("DEPTH: ", i, "MOVE: ", previous_best_move)
-end_time = time.perf_counter()
+        board = list(map(int, command.split(",")))
 
-print("TIME TAKEN: ", end_time - start_time)
+        print("OLD BOARD: ", boardOrig)
+        print("NEW BOARD: ", board)
+
+        opening_eval, closing_eval, phase, white_bishops, black_bishops, white_pawns, black_pawns, pawn_hash = evaluate_board(board)
+
+        position = Position(
+            board,
+            1,
+            initial_castle_rights,
+            compute_hash(board, 1, initial_castle_rights),
+            find_king(board, 0),
+            find_king(board, 1),
+            count_non_pawn_or_king(board),
+            
+            opening_eval,
+            closing_eval,
+            phase,
+            white_bishops,
+            black_bishops,
+            black_pawns,
+            white_pawns,
+            pawn_hash,
+
+            determine_piece_squares(board)
+        )
+        previous_best_move = None
+
+        start_time = time.perf_counter()
+        for i in range(1, 10):
+            previous_best_move, bestEval = find_best_move(position, i, previous_best_move)
+            print("BEST MOVE:", previous_best_move, flush=True)
+            print("BEST EVAL:", bestEval, flush=True)
+
+
+            #print("DEPTH: ", i, "MOVE: ", previous_best_move)
+        end_time = time.perf_counter()
+
+        print("TIME: ", end_time - start_time)
+
+
+main()
+"""print("TIME TAKEN: ", end_time - start_time)
 print(previous_best_move)
 
 
 print("TTS HITS: ", TT_HITS, " TT LOOKUPS: ", TT_LOOKUPS, " RECURSIONS: ", NUMBER_OF_RECURSIONS, " ELEMENTS IN TT: ", len(TT.values()))
+"""

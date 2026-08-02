@@ -24,17 +24,53 @@ ApplicationWindow {
 
     Button {
            text: "Determine Best Move"
-           x: 100
-           y: 100
+           font.pointSize: 15
+
+           palette.button: "white"
 
            height: 50
-           width: 200
+           width: 300
+
+           x: boardBoarder.x + boardBoarder.width + 50
+           y: boardBoarder.y + boardBoarder.height - height
 
            // Handle the click event
            onClicked: {
                engineManager.findBestMove(board.buildCPPPieceList())
            }
        }
+
+    Text {
+        id: bestMoveText
+
+        font.pointSize: 15
+
+        height: 50
+        width: 300
+
+        text: engineManager.bestMove
+
+        x: boardBoarder.x + boardBoarder.width + 50
+        y: boardBoarder.y + boardBoarder.height - height - 100 // 50 is just there for the gap
+
+       // Text: "Best Move: "
+    }
+
+    Text {
+        id: bestEvalText
+
+        font.pointSize: 15
+
+        height: 50
+        width: 300
+
+        text: engineManager.bestEval
+
+        x: boardBoarder.x + boardBoarder.width + 50
+        y: boardBoarder.y + boardBoarder.height - height - 50 // 50 is just there for the gap
+
+        //Text: "Best Eval: "
+    }
 
     Rectangle {
         id: boardBoarder

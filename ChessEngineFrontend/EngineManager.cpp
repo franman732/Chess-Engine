@@ -49,21 +49,27 @@ EngineManager::EngineManager(QObject *parent)
 
             for (QString line : lines)
             {
-                if (line.startsWith("MOVE:")) {
-                    QString bestMove = line.mid(5);
+                qDebug() << "WERE IN THE FOR LOOP";
+                qDebug() << line;
 
-                    qDebug() << "Best move: " << bestMove;
+                if (line.startsWith("BEST MOVE:")) {
+                    bestMoveVar = line.mid(10).trimmed();
+                    emit bestMoveChanged();
+                    qDebug() << "Best move: " << bestMoveVar;
+                    qDebug() << "WE IN BEST MOVE";
                 }
 
-                else if (line.startsWith("EVAL:")) {
-                    double bestEval = line.mid(5).toDouble();
-
-                    qDebug() << "Best eval: " << bestEval;
+                else if (line.startsWith("BEST EVAL:")) {
+                    bestEvalVar = line.mid(10).trimmed().toDouble();
+                    emit bestEvalChanged();
+                    qDebug() << "Best eval: " << bestEvalVar;
+                    qDebug() << "WE IN BEST EVAL";
                 }
                 else {
                     QString time = line;
 
                     qDebug() << "time: "<< time;
+                    qDebug() << " WE IN TIME";
                 }
             }
         }

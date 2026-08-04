@@ -76,7 +76,7 @@ ApplicationWindow {
         id: boardBoarder
 
         x: 795
-        y: 185
+        y: 165
 
         width: 1050
         height: 1050
@@ -118,7 +118,7 @@ ApplicationWindow {
             width: 890
             height: 125
 
-            x: boardBoarder.x + 50
+            x: boardBoarder.x + (boardBoarder.width - width) / 2
             y: window.height - 25 - height
 
             color: "gray"
@@ -200,7 +200,7 @@ ApplicationWindow {
     Rectangle {
         id: bPTs
 
-        x: boardBoarder.x + 50
+        x: boardBoarder.x + (boardBoarder.width - width) / 2
         y: 25
 
         width: 890

@@ -3,7 +3,7 @@ import random
 import time
 import cProfile
 import pstats
-
+import threading
 
 #lowercase is black, capital is white ; Black is 0, white is 1
 
@@ -26,7 +26,10 @@ TT_HITS = 0
 TT_LOOKUPS = 0
 NUMBER_OF_RECURSIONS = 0
 
-boardOrig = [9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
+reSearch = False
+originalCommand = None
+
+board = [9, 10, 11, 12, 13, 14, 15, 16, # top is black/lowercase/0 ; bottom is white/uppercase/1
                  1, 2, 3, 0, 0, 6, 7, 8,
                  0, 0, 0, 0, 0, 0, 0, 0,
                  0, 0, 0, 0, 21, 0, 0, 0,
@@ -1163,228 +1166,432 @@ def determine_piece_squares(board):
     return piece_positions
 
 def recurse(position, depth, alpha, beta, maximizing, allow_null_move, allow_lmr):
-    found_legal_move = False
-    global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS
-    board = position.board
-    NUMBER_OF_RECURSIONS += 1
+    global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS, reSearch
 
-    if depth == 0:
-        eval = position.update_evaluation((), [], True)
-        return eval
+    if (not reSearch):
+        found_legal_move = False
+        board = position.board
+        NUMBER_OF_RECURSIONS += 1
 
-    first_move = 0
-    num_pieces = position.pieces
-    best_move = None
-    alpha_orig = alpha
-    beta_orig = beta
-    entry_move = None
-    entry = TT.get(position.hash)
+        if depth == 0:
+            eval = position.update_evaluation((), [], True)
+            return eval
 
-    if entry is not None:  
-        TT_LOOKUPS += 1
-        entry_depth, entry_score, entry_flag, entry_move = entry
+        first_move = 0
+        num_pieces = position.pieces
+        best_move = None
+        alpha_orig = alpha
+        beta_orig = beta
+        entry_move = None
+        entry = TT.get(position.hash)
 
-        if entry_depth >= depth:
-            if entry_flag == "EXACT":
-                TT_HITS += 1
-                return entry_score
-            elif entry_flag == "LOWER":
-                alpha = max(alpha, entry_score)
-            elif entry_flag == "UPPER":
-                beta = min(beta, entry_score)
+        if entry is not None:  
+            TT_LOOKUPS += 1
+            entry_depth, entry_score, entry_flag, entry_move = entry
 
-            if alpha >= beta:
-                TT_HITS += 1
-                return entry_score
+            if entry_depth >= depth:
+                if entry_flag == "EXACT":
+                    TT_HITS += 1
+                    return entry_score
+                elif entry_flag == "LOWER":
+                    alpha = max(alpha, entry_score)
+                elif entry_flag == "UPPER":
+                    beta = min(beta, entry_score)
+
+                if alpha >= beta:
+                    TT_HITS += 1
+                    return entry_score
+                
+            entry_move = entry_move if (entry_depth <= depth) else None
+
+        if (allow_null_move and depth >= REDUCTION_FACTOR + 1 and not(is_square_attacked(position.white_king if position.side_to_move else position.black_king, board, position.side_to_move)) and num_pieces != 0):
+            position.side_to_move ^= 1
+            position.hash ^= ZOBRIST_SIDE
             
-        entry_move = entry_move if (entry_depth <= depth) else None
-
-    if (allow_null_move and depth >= REDUCTION_FACTOR + 1 and not(is_square_attacked(position.white_king if position.side_to_move else position.black_king, board, position.side_to_move)) and num_pieces != 0):
-        position.side_to_move ^= 1
-        position.hash ^= ZOBRIST_SIDE
-        
-        if maximizing:
-            score = recurse(
-                position,
-                depth - 1 - REDUCTION_FACTOR,
-                beta - 1,
-                beta, 
-                maximizing ^ 1,
-                False,
-                False
-                )
-        else:
-            score = recurse(
-                position,
-                depth - 1 - REDUCTION_FACTOR,
-                alpha,
-                alpha + 1,
-                maximizing ^ 1,
-                False,
-                False
-            )
-
-        position.side_to_move ^= 1
-        position.hash ^= ZOBRIST_SIDE
-
-        if maximizing:
-            if score >= beta:
-                return beta
-        else:
-            if score <= alpha:
-                return alpha
-        
-
-
-    all_moves = create_pseudo_moves(
-        position,
-        board,
-        position.side_to_move,
-        position.castle_rights,
-    )
-
-    scored_moves = create_scored_moves(position, all_moves, depth, entry_move)
-
-    best = -99999999 if maximizing else 99999999
-
-    for _, move in scored_moves:
-        start, end, extra = move
-        captured_piece = board[end]
-        temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
-
-        if not(temp_position.side_to_move): # We swap which side we look at because when the move made was done on blacks side, then temp_position side becomes white, since black moved. Swap to get the side that just moved to check if legal
-            if is_square_attacked(temp_position.white_king, temp_position.board, 1):
-                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
-                continue
-        else:
-            if is_square_attacked(temp_position.black_king, temp_position.board, 0):
-                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
-                continue
-
-        position.update_evaluation(move, undo_info)
-        first_move += 1
-        found_legal_move = True
-
-        if first_move == 1:
-            score = recurse(
-                temp_position,
-                depth-1,
-                alpha,
-                beta,
-                not maximizing,
-                allow_null_move,
-                True
-            )
-
             if maximizing:
-                alpha = max(alpha, score)
-
-                if score > best:
-                    best = score
-                    best_move = move
+                score = recurse(
+                    position,
+                    depth - 1 - REDUCTION_FACTOR,
+                    beta - 1,
+                    beta, 
+                    maximizing ^ 1,
+                    False,
+                    False
+                    )
             else:
-                beta = min(beta, score)
+                score = recurse(
+                    position,
+                    depth - 1 - REDUCTION_FACTOR,
+                    alpha,
+                    alpha + 1,
+                    maximizing ^ 1,
+                    False,
+                    False
+                )
 
-                if score < best:
-                    best = score
-                    best_move = move
-
-            undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
-
-            if alpha >= beta:
-                break
-
-        else:
-            in_check = is_square_attacked(position.white_king if position.side_to_move else position.black_king, board, position.side_to_move)
-            use_lmr = first_move > 3 and depth > 2 and not in_check and captured_piece == 0 and move != killer_moves[depth][0] and move != killer_moves[depth][1] and move != entry_move and allow_lmr
+            position.side_to_move ^= 1
+            position.hash ^= ZOBRIST_SIDE
 
             if maximizing:
-                if use_lmr:
+                if score >= beta:
+                    return beta
+            else:
+                if score <= alpha:
+                    return alpha
+            
+
+
+        all_moves = create_pseudo_moves(
+            position,
+            board,
+            position.side_to_move,
+            position.castle_rights,
+        )
+
+        scored_moves = create_scored_moves(position, all_moves, depth, entry_move)
+
+        best = -99999999 if maximizing else 99999999
+
+        for _, move in scored_moves:
+            start, end, extra = move
+            captured_piece = board[end]
+            temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
+
+            if not(temp_position.side_to_move): # We swap which side we look at because when the move made was done on blacks side, then temp_position side becomes white, since black moved. Swap to get the side that just moved to check if legal
+                if is_square_attacked(temp_position.white_king, temp_position.board, 1):
+                    undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                    continue
+            else:
+                if is_square_attacked(temp_position.black_king, temp_position.board, 0):
+                    undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                    continue
+
+            position.update_evaluation(move, undo_info)
+            first_move += 1
+            found_legal_move = True
+
+            if first_move == 1:
+                score = recurse(
+                    temp_position,
+                    depth-1,
+                    alpha,
+                    beta,
+                    not maximizing,
+                    allow_null_move,
+                    True
+                )
+
+                if maximizing:
+                    alpha = max(alpha, score)
+
+                    if score > best:
+                        best = score
+                        best_move = move
+                else:
+                    beta = min(beta, score)
+
+                    if score < best:
+                        best = score
+                        best_move = move
+
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+
+                if alpha >= beta:
+                    break
+
+            else:
+                in_check = is_square_attacked(position.white_king if position.side_to_move else position.black_king, board, position.side_to_move)
+                use_lmr = first_move > 3 and depth > 2 and not in_check and captured_piece == 0 and move != killer_moves[depth][0] and move != killer_moves[depth][1] and move != entry_move and allow_lmr
+
+                if maximizing:
+                    if use_lmr:
+                        score = recurse(
+                            temp_position,
+                            depth-2,        # reduced depth
+                            alpha,
+                            alpha+1,
+                            False,
+                            allow_null_move,
+                            False
+                        )
+
+                        if score > alpha:
+                            score = recurse(
+                                temp_position,
+                                depth-1,
+                                alpha,
+                                beta,
+                                False,
+                                allow_null_move,
+                                True
+                            )
+                    else:
+                        score = recurse(
+                            temp_position,
+                            depth-1,
+                            alpha,
+                            alpha+1,
+                            False,
+                            allow_null_move,
+                            True                     
+                        )
+
+                        if score < beta and score > alpha:
+                            score = recurse(
+                                temp_position,
+                                depth-1,
+                                alpha,
+                                beta,
+                                True,
+                                allow_null_move,
+                                True
+                            )
+
+                    if score > best:
+                        best = score
+                        best_move = move
+
+                    alpha = max(alpha, score)
+                    undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+
+                    if beta <= alpha:
+                        # store killer move (only if it's quiet)
+                        start, end, extra = move
+
+                        history[start][end] += depth * depth
+
+                        if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
+                            if move != killer_moves[depth][0]:
+                                killer_moves[depth][1] = killer_moves[depth][0]
+                                killer_moves[depth][0] = move
+
+                        
+                        break
+
+                else:
+                    if use_lmr:
+                        score = recurse(
+                            temp_position,
+                            depth-2,        # reduced depth
+                            beta-1,
+                            beta,
+                            True,
+                            allow_null_move,
+                            False
+                        )   
+
+                        if score < beta:
+                            score = recurse(
+                                temp_position,
+                                depth-1,
+                                alpha,
+                                beta,
+                                True,
+                                allow_null_move,
+                                True
+                            )
+                    else:
+                        score = recurse(
+                            temp_position,
+                            depth-1,
+                            beta-1,
+                            beta,
+                            True,
+                            allow_null_move,
+                            True
+                        )
+
+                        if score < beta and score > alpha:
+                            score = recurse(
+                                temp_position,
+                                depth-1,
+                                alpha,
+                                beta,
+                                True,
+                                allow_null_move,
+                                True
+                            )
+                    
+                    if score < best:
+                        best = score
+                        best_move = move
+
+                    beta = min(beta, score)
+                    undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+
+                    if beta <= alpha:
+                        # store killer move (only if it's quiet)
+                        start, end, extra = move
+
+                        history[start][end] += depth * depth
+
+                        if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
+                            if move != killer_moves[depth][0]:
+                                killer_moves[depth][1] = killer_moves[depth][0]
+                                killer_moves[depth][0] = move
+
+                        break
+                    
+        if not found_legal_move: # if legal_move is still false, meaning no legal moves were found
+            if maximizing and is_square_attacked(position.white_king, board, 1):
+                best = -99999999
+            elif not(maximizing) and is_square_attacked(position.black_king, board, 0):
+                    best = 99999999
+            else:
+                best = 0
+        
+        flag = "EXACT"
+
+        if best <= alpha_orig:
+            flag = "UPPER"
+        elif best >= beta_orig:
+            flag = "LOWER"  
+
+        if entry is None or depth >= entry_depth:
+            TT[position.hash] = (depth, best, flag, best_move)
+        
+        return best
+    else:
+        print("We researching in recurse")
+
+        return 0
+
+def find_best_move(position, depth, starting_move):
+    global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS, reSearch, originalCommand
+
+    if (not reSearch):
+        alpha = -99999999   
+        beta = 99999999
+        side = position.side_to_move    
+
+        alpha_orig = alpha
+        beta_orig = beta
+        entry_move = None
+        entry = TT.get(position.hash)
+        first_move = 0
+        board = position.board
+        found_legal_move = False
+
+        if entry is not None:  
+            TT_LOOKUPS += 1
+            entry_depth, entry_score, entry_flag, entry_move = entry
+
+            if entry_depth >= depth:
+                if entry_flag == "EXACT":
+                    TT_HITS += 1
+                    return entry_move, entry_score
+                elif entry_flag == "LOWER":
+                    alpha = max(alpha, entry_score)
+                elif entry_flag == "UPPER":
+                    beta = min(beta, entry_score)
+
+                if alpha >= beta:
+                    TT_HITS += 1
+                    return entry_move, entry_score
+                
+        all_moves = create_pseudo_moves(
+            position,
+            board,
+            side,
+            position.castle_rights,
+        )
+
+        scored_moves = create_scored_moves(position, all_moves, depth, starting_move)
+        best_move = None
+        best_eval = -99999999 if side else 99999999
+
+        for _, move in scored_moves:
+            start, end, extra = move
+            captured_piece = board[end]
+            temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
+
+            if not(temp_position.side_to_move): # We swap which side we look at because when the move made was done on blacks side, then temp_position side becomes white, since black moved. Swap to get the side that just moved to check if legal
+                if is_square_attacked(temp_position.white_king, temp_position.board, 1):
+                    undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                    continue
+            else:
+                if is_square_attacked(temp_position.black_king, temp_position.board, 0):
+                    undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                    continue
+
+            found_legal_move = True
+            position.update_evaluation(move, undo_info)
+            first_move += 1
+
+            if first_move == 1:
+                score = recurse(
+                    temp_position,
+                    depth-1,
+                    alpha,
+                    beta,
+                    not side,
+                    True,
+                    True
+                )
+
+                if side:
+                    alpha = max(alpha, score)
+
+                    if score > best_eval:
+                        best_eval = score
+                        best_move = move
+                else:
+                    beta = min(beta, score)
+
+                    if score < best_eval:
+                        best_eval = score
+                        best_move = move
+
+                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+
+                if alpha >= beta:
+                    break
+
+            else:
+                if side:
                     score = recurse(
                         temp_position,
-                        depth-2,        # reduced depth
+                        depth-1,
                         alpha,
                         alpha+1,
                         False,
-                        allow_null_move,
-                        False
+                        True,
+                        True
                     )
 
-                    if score > alpha:
+                    if score > alpha_orig and score < beta:
                         score = recurse(
                             temp_position,
                             depth-1,
                             alpha,
                             beta,
                             False,
-                            allow_null_move,
-                            True
-                        )
-                else:
-                    score = recurse(
-                        temp_position,
-                        depth-1,
-                        alpha,
-                        alpha+1,
-                        False,
-                        allow_null_move,
-                        True                        
-                    )
-
-                    if score < beta and score > alpha:
-                        score = recurse(
-                            temp_position,
-                            depth-1,
-                            alpha,
-                            beta,
                             True,
-                            allow_null_move,
                             True
                         )
 
-                if score > best:
-                    best = score
-                    best_move = move
+                    if score > best_eval:
+                        best_eval = score
+                        best_move = move
 
-                alpha = max(alpha, score)
-                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                    alpha = max(alpha, score)
 
-                if beta <= alpha:
-                    # store killer move (only if it's quiet)
-                    start, end, extra = move
+                    undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
-                    history[start][end] += depth * depth
+                    if beta <= alpha:
+                        # store killer move (only if it's quiet)
+                        start, end, extra = move
 
-                    if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
-                        if move != killer_moves[depth][0]:
-                            killer_moves[depth][1] = killer_moves[depth][0]
-                            killer_moves[depth][0] = move
+                        history[start][end] += depth * depth
 
-                    
-                    break
+                        if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
+                            if move != killer_moves[depth][0]:
+                                killer_moves[depth][1] = killer_moves[depth][0]
+                                killer_moves[depth][0] = move
 
-            else:
-                if use_lmr:
-                    score = recurse(
-                        temp_position,
-                        depth-2,        # reduced depth
-                        beta-1,
-                        beta,
-                        True,
-                        allow_null_move,
-                        False
-                    )   
+                        
+                        break
 
-                    if score < beta:
-                        score = recurse(
-                            temp_position,
-                            depth-1,
-                            alpha,
-                            beta,
-                            True,
-                            allow_null_move,
-                            True
-                        )
                 else:
                     score = recurse(
                         temp_position,
@@ -1392,260 +1599,78 @@ def recurse(position, depth, alpha, beta, maximizing, allow_null_move, allow_lmr
                         beta-1,
                         beta,
                         True,
-                        allow_null_move,
+                        True,
                         True
                     )
 
-                    if score < beta and score > alpha:
+                    if score < beta_orig and score > alpha:
                         score = recurse(
                             temp_position,
                             depth-1,
                             alpha,
                             beta,
                             True,
-                            allow_null_move,
+                            True,
                             True
                         )
-                
-                if score < best:
-                    best = score
-                    best_move = move
-
-                beta = min(beta, score)
-                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
-
-                if beta <= alpha:
-                    # store killer move (only if it's quiet)
-                    start, end, extra = move
-
-                    history[start][end] += depth * depth
-
-                    if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
-                        if move != killer_moves[depth][0]:
-                            killer_moves[depth][1] = killer_moves[depth][0]
-                            killer_moves[depth][0] = move
-
-                    break
-                
-    if not found_legal_move: # if legal_move is still false, meaning no legal moves were found
-        if maximizing and is_square_attacked(position.white_king, board, 1):
-            best = -99999999
-        elif not(maximizing) and is_square_attacked(position.black_king, board, 0):
-                best = 99999999
-        else:
-            best = 0
-    
-    flag = "EXACT"
-
-    if best <= alpha_orig:
-        flag = "UPPER"
-    elif best >= beta_orig:
-        flag = "LOWER"  
-
-    if entry is None or depth >= entry_depth:
-        TT[position.hash] = (depth, best, flag, best_move)
-    
-    return best
-
-def find_best_move(position, depth, starting_move):
-    global TT_LOOKUPS, TT_HITS, NUMBER_OF_RECURSIONS
-    alpha = -99999999
-    beta = 99999999
-    side = position.side_to_move    
-
-    alpha_orig = alpha
-    beta_orig = beta
-    entry_move = None
-    entry = TT.get(position.hash)
-    first_move = 0
-    board = position.board
-    found_legal_move = False
-
-    if entry is not None:  
-        TT_LOOKUPS += 1
-        entry_depth, entry_score, entry_flag, entry_move = entry
-
-        if entry_depth >= depth:
-            if entry_flag == "EXACT":
-                TT_HITS += 1
-                return entry_move, entry_score
-            elif entry_flag == "LOWER":
-                alpha = max(alpha, entry_score)
-            elif entry_flag == "UPPER":
-                beta = min(beta, entry_score)
-
-            if alpha >= beta:
-                TT_HITS += 1
-                return entry_move, entry_score
-            
-    all_moves = create_pseudo_moves(
-        position,
-        board,
-        side,
-        position.castle_rights,
-    )
-
-    scored_moves = create_scored_moves(position, all_moves, depth, starting_move)
-    best_move = None
-    best_eval = -99999999 if side else 99999999
-
-    for _, move in scored_moves:
-        start, end, extra = move
-        captured_piece = board[end]
-        temp_position, undo_info = make_move(position, move) # Initial king square is the king square of the side we want to make the move. SO, if black is moving, black king
-
-        if not(temp_position.side_to_move): # We swap which side we look at because when the move made was done on blacks side, then temp_position side becomes white, since black moved. Swap to get the side that just moved to check if legal
-            if is_square_attacked(temp_position.white_king, temp_position.board, 1):
-                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
-                continue
-        else:
-            if is_square_attacked(temp_position.black_king, temp_position.board, 0):
-                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
-                continue
-
-        found_legal_move = True
-        position.update_evaluation(move, undo_info)
-        first_move += 1
-
-        if first_move == 1:
-            score = recurse(
-                temp_position,
-                depth-1,
-                alpha,
-                beta,
-                not side,
-                True,
-                True
-            )
-
-            if side:
-                alpha = max(alpha, score)
-
-                if score > best_eval:
-                    best_eval = score
-                    best_move = move
-            else:
-                beta = min(beta, score)
-
-                if score < best_eval:
-                    best_eval = score
-                    best_move = move
-
-            undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
-
-            if alpha >= beta:
-                break
-
-        else:
-            if side:
-                score = recurse(
-                    temp_position,
-                    depth-1,
-                    alpha,
-                    alpha+1,
-                    False,
-                    True,
-                    True
-                )
-
-                if score > alpha_orig and score < beta:
-                    score = recurse(
-                        temp_position,
-                        depth-1,
-                        alpha,
-                        beta,
-                        False,
-                        True,
-                        True
-                    )
-
-                if score > best_eval:
-                    best_eval = score
-                    best_move = move
-
-                alpha = max(alpha, score)
-
-                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
-
-                if beta <= alpha:
-                    # store killer move (only if it's quiet)
-                    start, end, extra = move
-
-                    history[start][end] += depth * depth
-
-                    if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
-                        if move != killer_moves[depth][0]:
-                            killer_moves[depth][1] = killer_moves[depth][0]
-                            killer_moves[depth][0] = move
 
                     
-                    break
+                    if score < best_eval:
+                        best_eval = score
+                        best_move = move
 
-            else:
-                score = recurse(
-                    temp_position,
-                    depth-1,
-                    beta-1,
-                    beta,
-                    True,
-                    True,
-                    True
-                )
+                    beta = min(beta, score)
 
-                if score < beta_orig and score > alpha:
-                    score = recurse(
-                        temp_position,
-                        depth-1,
-                        alpha,
-                        beta,
-                        True,
-                        True,
-                        True
-                    )
+                    undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
 
-                
-                if score < best_eval:
-                    best_eval = score
-                    best_move = move
+                    if beta <= alpha:
+                        # store killer move (only if it's quiet)
+                        start, end, extra = move
 
-                beta = min(beta, score)
+                        history[start][end] += depth * depth
 
-                undo_move(position, move, undo_info) # undo move undoes the creation of the new king square as well
+                        if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
+                            if move != killer_moves[depth][0]:
+                                killer_moves[depth][1] = killer_moves[depth][0]
+                                killer_moves[depth][0] = move
 
-                if beta <= alpha:
-                    # store killer move (only if it's quiet)
-                    start, end, extra = move
+                        break
 
-                    history[start][end] += depth * depth
-
-                    if captured_piece == 0 and not ((PIECES[board[start]] == PAWN_NUMBER) and (end // 8 in (0,7))):  # quiet move
-                        if move != killer_moves[depth][0]:
-                            killer_moves[depth][1] = killer_moves[depth][0]
-                            killer_moves[depth][0] = move
-
-                    break
-
-    if not found_legal_move: # if legal_move is still false, meaning no legal moves were found
-        if side and is_square_attacked(position.white_king, board, 1):
-            best_eval = -99999999
-        elif not(side) and is_square_attacked(position.black_king, board, 0):
+        if not found_legal_move: # if legal_move is still false, meaning no legal moves were found
+            if side and is_square_attacked(position.white_king, board, 1):
                 best_eval = -99999999
-        else:
-            best_eval = 0
+            elif not(side) and is_square_attacked(position.black_king, board, 0):
+                    best_eval = -99999999
+            else:
+                best_eval = 0
 
-    flag = "EXACT"
+        flag = "EXACT"
 
-    if best_eval <= alpha_orig:
-        flag = "UPPER"
-    elif best_eval >= beta_orig:
-        flag = "LOWER"  
+        if best_eval <= alpha_orig:
+            flag = "UPPER"
+        elif best_eval >= beta_orig:
+            flag = "LOWER"  
 
-    if entry is None or depth >= entry_depth:
-        TT[position.hash] = (depth, best_eval, flag, best_move)
+        if entry is None or depth >= entry_depth:
+            TT[position.hash] = (depth, best_eval, flag, best_move)
 
-    return best_move, best_eval
+        return best_move, best_eval
+    else:
+        print("We researching")
+
+        return (-1, -1, -1), 0
+
+def searchEntry(position):
+    previous_best_move = None
+
+    for i in range(1, 10):
+        previous_best_move, bestEval = find_best_move(position, i, previous_best_move)
+        print("BEST MOVE:", previous_best_move, flush=True)
+        print("BEST EVAL:", bestEval, flush=True)
 
 def main():
+    global reSearch
+
     while True:
 
         command = input()
@@ -1655,8 +1680,9 @@ def main():
 
         board = list(map(int, command.split(",")))
 
-        print("OLD BOARD: ", boardOrig)
-        print("NEW BOARD: ", board)
+        reSearch = True
+        time.sleep(0.5)
+        reSearch = False
 
         opening_eval, closing_eval, phase, white_bishops, black_bishops, white_pawns, black_pawns, pawn_hash = evaluate_board(board)
 
@@ -1680,22 +1706,20 @@ def main():
 
             determine_piece_squares(board)
         )
-        previous_best_move = None
+
+        searchThread = threading.Thread(target = searchEntry, args = (position,))
+
+        print("we starting", flush=True)
 
         start_time = time.perf_counter()
-        for i in range(1, 10):
-            previous_best_move, bestEval = find_best_move(position, i, previous_best_move)
-            print("BEST MOVE:", previous_best_move, flush=True)
-            print("BEST EVAL:", bestEval, flush=True)
-
-
-            #print("DEPTH: ", i, "MOVE: ", previous_best_move)
+        searchThread.start()
         end_time = time.perf_counter()
 
-        print("TIME: ", end_time - start_time)
+        print("TIME: ", end_time - start_time, flush=True)
 
+mainThread = threading.Thread(target = main)
+mainThread.start()
 
-main()
 """print("TIME TAKEN: ", end_time - start_time)
 print(previous_best_move)
 

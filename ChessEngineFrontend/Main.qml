@@ -75,15 +75,15 @@ ApplicationWindow {
     Rectangle {
         id: boardBoarder
 
-        x: 785
-        y: 205
+        x: 795
+        y: 185
 
-        width: 990
-        height: 990
+        width: 1050
+        height: 1050
 
         color: "transparent"
 
-        border.width: 15
+        border.width: 60
         border.color: "gray"
 
         Component {

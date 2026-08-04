@@ -49,27 +49,44 @@ EngineManager::EngineManager(QObject *parent)
 
             for (QString line : lines)
             {
-                qDebug() << "WERE IN THE FOR LOOP";
                 qDebug() << line;
 
                 if (line.startsWith("BEST MOVE:")) {
-                    bestMoveVar = line.mid(10).trimmed();
+                    QString bestMoveString = line.mid(10).trimmed();
+                    QStringList bestMoveStringList = bestMoveString.split(',');
+
+                    for (QString& string : bestMoveStringList) {
+                        string = string.remove(0, 1); // removes index 0 of the string, which is either a parenthesis or a space
+                    }
+
+                    bestMoveStringList[bestMoveStringList.length() - 1].chop(1); // removes the last character of the final part of the move string, which is ). This is for convenience sake so converting every value in the list to an int doesnt break the program.
+
+                    int start = bestMoveStringList[0].toInt();
+                    int end = bestMoveStringList[1].toInt();
+
+                    int startRow = start / 8;
+                    int startCol = start & 7;
+
+                    int endRow = end / 8;
+                    int endCol = end & 7;
+
+                    QString bestMoveStart = columnDictionary[startCol] + rowDictionary[startRow];
+                    QString bestMoveEnd = columnDictionary[endCol] + rowDictionary[endRow];
+
+                    bestMoveVar = "Best Move: " + bestMoveStart + " " + "->" + " " + bestMoveEnd;
                     emit bestMoveChanged();
-                    qDebug() << "Best move: " << bestMoveVar;
-                    qDebug() << "WE IN BEST MOVE";
+                    qDebug() << "Best move: |" << bestMoveVar;
                 }
 
                 else if (line.startsWith("BEST EVAL:")) {
-                    bestEvalVar = line.mid(10).trimmed().toDouble();
+                    bestEvalVar = "Best Eval: " + line.mid(10).trimmed();
                     emit bestEvalChanged();
-                    qDebug() << "Best eval: " << bestEvalVar;
-                    qDebug() << "WE IN BEST EVAL";
+                    qDebug() << "Best eval: |" << bestEvalVar;
                 }
                 else {
                     QString time = line;
 
                     qDebug() << "time: "<< time;
-                    qDebug() << " WE IN TIME";
                 }
             }
         }

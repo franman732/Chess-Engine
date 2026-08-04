@@ -12,7 +12,7 @@ class EngineManager : public QObject {
                READ getBestMove
                NOTIFY bestMoveChanged)
 
-    Q_PROPERTY(double bestEval
+    Q_PROPERTY(QString bestEval
                READ getBestEval
                NOTIFY bestEvalChanged)
 
@@ -26,7 +26,7 @@ public:
         return bestMoveVar;
     }
 
-    double getBestEval() const
+    QString getBestEval() const
     {
         return bestEvalVar;
     }
@@ -39,5 +39,8 @@ private:
     QProcess pythonProcess;
 
     QString bestMoveVar = "";
-    double bestEvalVar = 0;
+    QString bestEvalVar = "0";
+
+    QHash<int, QString> columnDictionary {{0, "a"}, {1, "b"}, {2, "c"}, {3, "d"}, {4, "e"}, {5, "f"}, {6, "g"}, {7, "h"}};
+    QHash<int, QString> rowDictionary {{0, "8"}, {1, "7"}, {2, "6"}, {3, "5"}, {4, "4"}, {5, "3"}, {6, "2"}, {7, "1"}};
 };

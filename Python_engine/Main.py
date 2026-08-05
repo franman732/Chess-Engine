@@ -1668,6 +1668,28 @@ def searchEntry(position):
         print("BEST MOVE:", previous_best_move, flush=True)
         print("BEST EVAL:", bestEval, flush=True)
 
+def compute_castle_rights(whiteKing, blackKing, board):
+    global BQ, BK, WK, WQ
+    startingCastleRights = BQ | BK | WK | WQ
+
+    if (whiteKing != 60):
+        startingCastleRights &= ~(WK | WQ)
+    else:
+        if (PIECES[board[56]] != 2):
+            startingCastleRights &= ~WQ
+        if (PIECES[board[63]] != 2):
+            startingCastleRights &= ~WK
+
+    if (blackKing != 4):
+        startingCastleRights &= ~(BK | BQ)
+    else:
+        if (PIECES[board[0]] != 2):
+            startingCastleRights &= ~BQ
+        if (PIECES[board[7]] != 2):
+            startingCastleRights &= ~BK
+
+    return startingCastleRights
+
 def main():
     global reSearch
 
@@ -1686,13 +1708,18 @@ def main():
 
         opening_eval, closing_eval, phase, white_bishops, black_bishops, white_pawns, black_pawns, pawn_hash = evaluate_board(board)
 
+        whiteKing = find_king(board, 1)
+        blackKing = find_king(board, 0)
+
+        castleRights = compute_castle_rights(whiteKing, blackKing, board)
+
         position = Position(
             board,
             1,
-            initial_castle_rights,
+            castleRights,
             compute_hash(board, 1, initial_castle_rights),
-            find_king(board, 0),
-            find_king(board, 1),
+            blackKing,
+            whiteKing,
             count_non_pawn_or_king(board),
             
             opening_eval,

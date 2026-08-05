@@ -27,6 +27,7 @@ Image {
             var p = placedPiece.mapToItem(window.contentItem, mouse.x - 46, mouse.y - 46)
             placedPiece.x = p.x
             placedPiece.y = p.y
+            placedPiece.z = 1000
         }
 
         onPositionChanged: function(mouse) {
@@ -41,6 +42,8 @@ Image {
         onReleased: {
             var coordinates = board.getCoordinates(placedPiece.x, placedPiece.y, placedPiece)
             var capturedPieceIndex = board.piecePositions[coordinates.i]?.pieceIndex ?? -1;
+
+            placedPiece.z = 100
 
             if ((board.piecePositions[coordinates.i] !== placedPiece) && ((capturedPieceIndex !== 13) && (capturedPieceIndex !== 29)) && (coordinates.x !== -1 && coordinates.y !== -1)) {
                 if (coordinates.i in board.piecePositions) {

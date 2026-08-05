@@ -22,8 +22,6 @@ GridLayout {
         model: 64
 
         Rectangle {
-            required property int index
-
             width: 120
             height: 120
 

@@ -86,6 +86,9 @@ ApplicationWindow {
         border.width: 60
         border.color: "gray"
 
+        property var textLabels: ["a", "b", "c", "d", "e", "f", "g", "h"]
+        property var numLabels: ["8", "7", "6", "5", "4", "3", "2", "1"]
+
         Component {
             id: placedPieceComponent
 
@@ -109,6 +112,36 @@ ApplicationWindow {
             anchors.centerIn: parent
             placedPieceComponent: placedPieceComponent
             window: window
+        }
+
+        Repeater {
+            model: 8
+
+            Text {
+                    text: boardBoarder.textLabels[index]
+
+                    font.pixelSize: 30
+                    x: 60 + (120 * index) + 45 - (width / 2)
+                    y: 960 + 8 + 45 - (height / 4)
+                    z: 75
+
+                    color: "white"
+            }
+        }
+
+        Repeater {
+            model: 8
+
+            Text {
+                    text: boardBoarder.numLabels[index]
+
+                    font.pixelSize: 30
+                    x: 23 - (width / 2)
+                    y: 45 + 60 + (120 * index) - (height / 2)
+                    z: 75
+
+                    color: "white"
+            }
         }
     }
 

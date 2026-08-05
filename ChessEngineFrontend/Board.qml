@@ -112,7 +112,11 @@ GridLayout {
     }
 
     function resetPiecePositions() {
-        piecePositions = ({})
+        for (var square in piecePositions) {
+            piecePositions[square].destroy();
+        }
+
+        board.piecePositions = ({})
         var boardPos = board.mapToItem(window.contentItem, 0, 0)
 
 

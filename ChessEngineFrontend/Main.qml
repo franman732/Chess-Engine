@@ -32,7 +32,7 @@ ApplicationWindow {
            width: 300
 
            x: boardBoarder.x + boardBoarder.width + 50
-           y: boardBoarder.y + boardBoarder.height - height
+           y: boardBoarder.y + boardBoarder.height - height - 100
 
            // Handle the click event
            onClicked: {
@@ -51,7 +51,7 @@ ApplicationWindow {
         text: engineManager.bestMove
 
         x: boardBoarder.x + boardBoarder.width + 50
-        y: boardBoarder.y + boardBoarder.height - height - 100 // 50 is just there for the gap
+        y: boardBoarder.y + boardBoarder.height - height - 200 // 50 is just there for the gap
 
        // Text: "Best Move: "
     }
@@ -67,9 +67,30 @@ ApplicationWindow {
         text: engineManager.bestEval
 
         x: boardBoarder.x + boardBoarder.width + 50
-        y: boardBoarder.y + boardBoarder.height - height - 50 // 50 is just there for the gap
+        y: boardBoarder.y + boardBoarder.height - height - 150 // 50 is just there for the gap
 
         //Text: "Best Eval: "
+    }
+
+    Button {
+        id: resetBoardbutton
+
+        font.pointSize: 15
+
+        palette.button: "white"
+
+        text: "Reset board state"
+
+        height: 50
+        width: 300
+
+        x: boardBoarder.x + boardBoarder.width + 50
+        y: boardBoarder.y + boardBoarder.height - height
+
+        // Handle the click event
+        onClicked: {
+            board.resetPiecePositions()
+        }
     }
 
     Rectangle {

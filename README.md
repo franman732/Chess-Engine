@@ -18,10 +18,11 @@ Search Engine (Python or C++)
 - First prototyped in Python to get the search logic functioning properly, and then ported to C++ for speed and memory efficiency.
 
 ## Files
-This repo contains three folders:
-    - A python chess search engine
-    - A C++ chess search engine
-    - A frontent that includes the engine manager as a c++ file
+This repo contains three folders and 1 file:
+- A python chess search engine
+- A C++ chess search engine
+- A frontend that includes the engine manager as a c++ file
+- A README.md file you are currently reading
 
 ## Current Engine Features
 - Move generation

@@ -10,7 +10,7 @@ ApplicationWindow {
     minimumWidth: 200
     minimumHeight: 250
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("Chess Engine")
     property bool lightMode: Application.styleHints.colorScheme === Qt.Light
     color: "lightgray"
 
